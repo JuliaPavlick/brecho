@@ -62,7 +62,7 @@
 
         <nav class="menu">
 
-            <<a href="#">
+            <a href="#">
 
                 <span class="icone">
                     <img src="grafico-preditivo.png" alt="Dashboard">
@@ -70,34 +70,42 @@
 
                 <span class="texto">Dashboard</span>
 
-                </a>
+            </a>
 
-                <a href="#">
-                    <span class="icone">
-                        <img src="vestido-de-casamento.png" alt="Dashboard">
-                    </span>
-                    <span class="texto">Produtos</span>
-                </a>
+            <a href="#">
+                <span class="icone">
+                    <img src="vestido-de-casamento.png" alt="Dashboard">
+                </span>
+                <span class="texto">Produtos</span>
+            </a>
 
-                <a href="#">
-                    <span class="icone">📦</span>
-                    <span class="texto">Pedidos</span>
-                </a>
+            <a href="#">
+                <span class="icone">
+                    <img src="caixa.png" alt="Dashboard">
+                </span>
+                <span class="texto">Pedidos</span>
+            </a>
 
-                <a href="calendario.php">
-                    <span class="icone">📅</span>
-                    <span class="texto">Calendário</span>
-                </a>
+            <a href="calendario.php">
+                <span class="icone">
+                    <img src="calendario.png" alt="Dashboard">
+                </span>
+                <span class="texto">Calendário</span>
+            </a>
 
-                <a href="#">
-                    <span class="icone">💰</span>
-                    <span class="texto">Financeiro</span>
-                </a>
+            <a href="#">
+                <span class="icone">
+                    <img src="grafico-de-crescimento.png" alt="Dashboard">
+                </span>
+                <span class="texto">Financeiro</span>
+            </a>
 
-                <a href="#">
-                    <span class="icone">👥</span>
-                    <span class="texto">Clientes</span>
-                </a>
+            <a href="#">
+                <span class="icone">
+                    <img src="pessoas.png" alt="Dashboard">
+                </span>
+                <span class="texto">Clientes</span>
+            </a>
 
         </nav>
 
@@ -135,7 +143,9 @@
 
                 <div class="card-topo">
                     <span class="card-titulo">Peças vendidas</span>
-                    <span class="card-icone">🛍️</span>
+                    <span class="card-icone">
+                        <img src="sacolas-de-compras.png" alt="Dashboard">
+                    </span>
                 </div>
 
                 <h3 class="card-valor">142</h3>
@@ -150,7 +160,9 @@
 
                 <div class="card-topo">
                     <span class="card-titulo">Lucro bruto</span>
-                    <span class="card-icone">💰</span>
+                    <span class="card-icone">
+                        <img src="sacola-dinheiro.png" alt="Dashboard">
+                    </span>
                 </div>
 
                 <h3 class="card-valor">R$ 12k</h3>
@@ -165,7 +177,9 @@
 
                 <div class="card-topo">
                     <span class="card-titulo">Produtos ativos</span>
-                    <span class="card-icone">👗</span>
+                    <span class="card-icone">
+                        <img src="camiseta.png" alt="Dashboard">
+                    </span>
                 </div>
 
                 <h3 class="card-valor">87</h3>
@@ -180,21 +194,9 @@
 
                 <div class="card-topo">
                     <span class="card-titulo">Novas vendedoras</span>
-                    <span class="card-icone"><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
-                            height="40px" viewBox="0 0 24 24" width="40px" fill="#1f1f1f">
-                            <g>
-                                <rect fill="none" height="24" width="24" x="0" />
-                            </g>
-                            <g>
-                                <g>
-                                    <polygon points="19,9 20.25,6.25 23,5 20.25,3.75 19,1 17.75,3.75 15,5 17.75,6.25" />
-                                    <polygon
-                                        points="19,15 17.75,17.75 15,19 17.75,20.25 19,23 20.25,20.25 23,19 20.25,17.75" />
-                                    <path
-                                        d="M11.5,9.5L9,4L6.5,9.5L1,12l5.5,2.5L9,20l2.5-5.5L17,12L11.5,9.5z M9.99,12.99L9,15.17l-0.99-2.18L5.83,12l2.18-0.99 L9,8.83l0.99,2.18L12.17,12L9.99,12.99z" />
-                                </g>
-                            </g>
-                        </svg></span>
+                    <span class="card-icone">
+                        <img src="espumante.png" alt="Dashboard">
+                    </span>
                 </div>
 
                 <h3 class="card-valor">24</h3>

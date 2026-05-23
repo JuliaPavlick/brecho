@@ -56,14 +56,7 @@
             <a href="dashboard_cliente.php" class="perfil">
 
                 <div class="icone">
-                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="30px"
-                        viewBox="0 0 24 24" width="30px" fill="#000000">
-                        <g>
-                            <rect fill="none" height="24" width="24" />
-                            <path
-                                d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" />
-                        </g>
-                    </svg>
+                    <img src="sacolas-de-comprass.png" alt="Cliente">
                 </div>
 
                 <div class="info">
@@ -82,12 +75,7 @@
             <a href="dashboard_funcionario.php" class="perfil">
 
                 <div class="icone">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 0 24 24" width="30px"
-                        fill="#1f1f1f">
-                        <path d="M0 0h24v24H0V0z" fill="none" />
-                        <path
-                            d="M7 15h7v2H7zm0-4h10v2H7zm0-4h10v2H7zm12-4h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-.14 0-.27.01-.4.04-.39.08-.74.28-1.01.55-.18.18-.33.4-.43.64-.1.23-.16.49-.16.77v14c0 .27.06.54.16.78s.25.45.43.64c.27.27.62.47 1.01.55.13.02.26.03.4.03h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7-.25c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75zM19 19H5V5h14v14z" />
-                    </svg>
+                    <img src="pranchetas.png" alt="Funcionária">
                 </div>
 
                 <div class="info">

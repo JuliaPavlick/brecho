@@ -207,16 +207,18 @@ body {
     flex-shrink: 0;
 }
 
-.menu .icone img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-    filter: brightness(0) saturate(100%) invert(27%) sepia(12%) saturate(1228%) hue-rotate(61deg) brightness(95%) contrast(88%);
-    transition: 0.2s;
+/* ICONES DA SIDEBAR */
+
+.menu .icone img{
+width:30px;
+height:30px;
+object-fit:contain;
+filter:brightness(0) saturate(0);
+transition:0.2s;
 }
 
-.menu a:hover .icone img {
-    transform: scale(1.08);
+.menu a:hover .icone img{
+transform:scale(1.08);
 }
 
 .menu .texto {
@@ -311,8 +313,23 @@ body {
     letter-spacing: 1px;
 }
 
-.card-icone {
-    font-size: 22px;
+/* ICONES DOS CARDS*/
+.card-icone{
+width:52px;
+height:52px;
+border-radius:50%;
+background:#f3ecdc;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-shrink:0;
+}
+
+.card-icone img{
+width:35px;
+height:35px;
+object-fit:contain;
+filter:brightness(0);
 }
 
 .card-valor {
