@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Cliente • Garimpo Chic</title>
 
-    <link rel="stylesheet" href="dashboard_cliente.css">
+    <title>Dashboard Cliente — Garimpo Chic</title>
+
+    <link rel="stylesheet" href="./src/css/dashboard_cliente.css">
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap"
         rel="stylesheet">
 </head>
 
@@ -43,15 +44,19 @@
 
         <div>
 
+            <!-- LOGO -->
+
             <div class="logo">
 
                 <div class="logo-circulo">
 
                     <div class="logo-interno">
+
                         <span class="logo-o">O</span>
                         <span class="logo-garimpo">Garimpo</span>
                         <span class="logo-chic">Chic</span>
                         <span class="logo-brecho">Brechó</span>
+
                     </div>
 
                 </div>
@@ -68,53 +73,28 @@
             <nav class="menu">
 
                 <a href="#" class="ativo">
-
                     <span class="icone">🏠</span>
-
-                    <span class="texto">
-                        Início
-                    </span>
-
+                    <span class="texto-menu">Início</span>
                 </a>
 
                 <a href="#">
-
-                    <span class="icone">🔍</span>
-
-                    <span class="texto">
-                        Explorar
-                    </span>
-
+                    <span class="icone">🔎</span>
+                    <span class="texto-menu">Explorar</span>
                 </a>
 
                 <a href="#">
-
-                    <span class="icone">❤</span>
-
-                    <span class="texto">
-                        Favoritos
-                    </span>
-
+                    <span class="icone">🖤</span>
+                    <span class="texto-menu">Favoritos</span>
                 </a>
 
                 <a href="#">
-
-                    <span class="icone">🛍</span>
-
-                    <span class="texto">
-                        Compras
-                    </span>
-
+                    <span class="icone">🛍️</span>
+                    <span class="texto-menu">Compras</span>
                 </a>
 
                 <a href="#">
-
                     <span class="icone">👤</span>
-
-                    <span class="texto">
-                        Perfil
-                    </span>
-
+                    <span class="texto-menu">Perfil</span>
                 </a>
 
             </nav>
@@ -125,13 +105,10 @@
 
         <div class="logout">
 
-            <a href="#">
+            <a href="login.php">
 
                 <span class="icone">↩</span>
-
-                <span class="texto">
-                    Logout
-                </span>
+                <span class="texto-menu">Logout</span>
 
             </a>
 
@@ -145,28 +122,22 @@
 
         <!-- TOPO -->
 
-        <header class="topo">
+        <div class="topo">
 
             <div>
 
-                <span class="subtitulo">
-                    Área do Cliente
-                </span>
-
-                <h2>
-                    Olá, Julia ✦
-                </h2>
+                <h2>Olá, Julia ✨</h2>
 
                 <p>
-                    Descubra peças escolhidas especialmente para você.
+                    Bem-vinda ao Garimpo Chic
                 </p>
 
             </div>
 
             <div class="acoes-topo">
 
-                <button>
-                    Trocar perfil
+                <button class="botao-topo">
+                    Novidades
                 </button>
 
                 <div class="foto">
@@ -175,7 +146,7 @@
 
             </div>
 
-        </header>
+        </div>
 
         <!-- HERO -->
 
@@ -183,59 +154,24 @@
 
             <div class="hero-texto">
 
-                <span>
-                    COLEÇÃO DA SEMANA
-                </span>
+                <span>NOVA COLEÇÃO</span>
 
                 <h1>
-                    Peças únicas, estilos inesquecíveis.
+                    Peças únicas escolhidas com carinho
                 </h1>
 
                 <p>
-                    Explore roupas selecionadas com carinho para combinar
-                    com o seu estilo e tamanho.
+                    Descubra novas peças vintage, elegantes e exclusivas disponíveis no brechó.
                 </p>
 
                 <button>
-                    Explorar coleção
+                    Explorar agora
                 </button>
 
             </div>
 
             <div class="hero-imagem">
-
                 👗
-
-            </div>
-
-        </section>
-
-        <!-- CATEGORIAS -->
-
-        <section class="secao">
-
-            <div class="secao-topo">
-
-                <h3>
-                    Categorias
-                </h3>
-
-            </div>
-
-            <div class="categorias">
-
-                <div class="categoria">Vestidos</div>
-
-                <div class="categoria">Vintage</div>
-
-                <div class="categoria">Oversized</div>
-
-                <div class="categoria">Tops</div>
-
-                <div class="categoria">Streetwear</div>
-
-                <div class="categoria">Casacos</div>
-
             </div>
 
         </section>
@@ -246,9 +182,7 @@
 
             <div class="secao-topo">
 
-                <h3>
-                    Novidades para você
-                </h3>
+                <h3>Peças para você</h3>
 
                 <a href="#">
                     Ver tudo
@@ -270,24 +204,20 @@
 
                         <div>
 
-                            <h4>
-                                Top Vintage
-                            </h4>
+                            <h4>Blusa Vintage</h4>
 
-                            <p>
-                                Tam. P
-                            </p>
+                            <p>Peça exclusiva</p>
 
                         </div>
 
                         <button class="favorito">
-                            ❤
+                            ♡
                         </button>
 
                     </div>
 
                     <span class="preco">
-                        R$ 69,90
+                        R$ 79,90
                     </span>
 
                 </div>
@@ -297,31 +227,27 @@
                 <div class="produto">
 
                     <div class="produto-img">
-                        👖
+                        👜
                     </div>
 
                     <div class="produto-info">
 
                         <div>
 
-                            <h4>
-                                Calça Wide Leg
-                            </h4>
+                            <h4>Bolsa Retrô</h4>
 
-                            <p>
-                                Tam. 36
-                            </p>
+                            <p>Nova coleção</p>
 
                         </div>
 
                         <button class="favorito">
-                            ❤
+                            ♡
                         </button>
 
                     </div>
 
                     <span class="preco">
-                        R$ 119,90
+                        R$ 129,90
                     </span>
 
                 </div>
@@ -331,90 +257,28 @@
                 <div class="produto">
 
                     <div class="produto-img">
-                        👟
+                        👠
                     </div>
 
                     <div class="produto-info">
 
                         <div>
 
-                            <h4>
-                                Tênis Casual
-                            </h4>
+                            <h4>Salto Clássico</h4>
 
-                            <p>
-                                Tam. 37
-                            </p>
+                            <p>Última unidade</p>
 
                         </div>
 
                         <button class="favorito">
-                            ❤
+                            ♡
                         </button>
 
                     </div>
 
                     <span class="preco">
-                        R$ 149,90
+                        R$ 159,90
                     </span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- FAVORITOS -->
-
-        <section class="secao">
-
-            <div class="secao-topo">
-
-                <h3>
-                    Favoritos recentes
-                </h3>
-
-            </div>
-
-            <div class="favoritos-box">
-
-                <div class="favorito-item">
-
-                    <span>
-                        ❤
-                    </span>
-
-                    <div>
-
-                        <h4>
-                            Jaqueta Vintage
-                        </h4>
-
-                        <p>
-                            Adicionada aos favoritos
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="favorito-item vendido">
-
-                    <span>
-                        ✦
-                    </span>
-
-                    <div>
-
-                        <h4>
-                            Vestido Floral
-                        </h4>
-
-                        <p>
-                            Produto vendido
-                        </p>
-
-                    </div>
 
                 </div>
 
