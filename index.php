@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — O Garimpo Chic</title>
   <link rel="stylesheet" href="./src/css/logincli.css">
+  <link rel="stylesheet" href="./src/css/dashboard_cliente.css">
+  <link rel="stylesheet" href="./src/css/dashfunc.css">
+  <link rel="stylesheet" href="./src/css/selecao_perfil.css">
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap"
     rel="stylesheet">
