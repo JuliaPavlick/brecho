@@ -1,0 +1,134 @@
+/* BUSCA + ORDENAR */
+
+.explorar-barra {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.busca {
+    flex: 1;
+    position: relative;
+}
+
+.busca-icone {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.busca input {
+    width: 100%;
+    padding: 13px 16px 13px 44px;
+    border: 1px solid #e6dcc3;
+    border-radius: 12px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    outline: none;
+    transition: 0.2s;
+}
+
+.busca input:focus {
+    border-color: var(--dourado);
+}
+
+.busca input::placeholder {
+    color: #bfab82;
+}
+
+.ordenar {
+    padding: 0 16px;
+    border: 1px solid #e6dcc3;
+    border-radius: 12px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    cursor: pointer;
+    outline: none;
+}
+
+.ordenar:focus {
+    border-color: var(--dourado);
+}
+
+/* CATEGORIAS */
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.chip {
+    padding: 9px 18px;
+    border: 1px solid #e6dcc3;
+    border-radius: 999px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--texto);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chip:hover {
+    background: #f7f0e3;
+}
+
+.chip.ativo {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+
+/* CONTADOR / VAZIO */
+
+.contador {
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 18px;
+}
+
+.vazio {
+    display: none;
+    text-align: center;
+    padding: 60px 0;
+    color: var(--texto-suave);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 20px;
+}
+
+/* FAVORITO ATIVO */
+
+.favorito {
+    transition: 0.2s;
+}
+
+.favorito:hover {
+    background: #efe4cd;
+}
+
+.favorito.ativo {
+    background: var(--verde);
+    color: #fff;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 700px) {
+    .explorar-barra {
+        flex-direction: column;
+    }
+
+    .ordenar {
+        height: 46px;
+    }
+}

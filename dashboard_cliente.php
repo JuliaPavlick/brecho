@@ -72,27 +72,27 @@
 
             <nav class="menu">
 
-                <a href="#" class="ativo">
+                <a href="dashboard_cliente.php" class="ativo">
                     <span class="icone">🏠</span>
                     <span class="texto-menu">Início</span>
                 </a>
 
-                <a href="#">
+                <a href="explorar.php">
                     <span class="icone">🔎</span>
                     <span class="texto-menu">Explorar</span>
                 </a>
 
-                <a href="#">
+                <a href="favoritos.php">
                     <span class="icone">🖤</span>
                     <span class="texto-menu">Favoritos</span>
                 </a>
 
-                <a href="#">
+                <a href="compras.php">
                     <span class="icone">🛍️</span>
                     <span class="texto-menu">Compras</span>
                 </a>
 
-                <a href="#">
+                <a href="perfil.php">
                     <span class="icone">👤</span>
                     <span class="texto-menu">Perfil</span>
                 </a>

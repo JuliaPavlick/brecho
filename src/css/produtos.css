@@ -1,0 +1,369 @@
+/* ITEM ATIVO DA SIDEBAR */
+
+.menu a.ativo {
+    background: #f3ecdc;
+}
+
+/* BUSCA + NOVO */
+
+.barra-prod {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.busca {
+    flex: 1;
+}
+
+.busca input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid #e6dcc3;
+    border-radius: 12px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    outline: none;
+    transition: 0.2s;
+}
+
+.busca input:focus {
+    border-color: var(--dourado);
+}
+
+.busca input::placeholder {
+    color: #bfab82;
+}
+
+.btn-primario {
+    border: none;
+    background: var(--verde);
+    color: #fff;
+    padding: 13px 22px;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.btn-primario:hover {
+    background: var(--verde-hover);
+}
+
+.btn-secundario {
+    border: 1px solid #e6dcc3;
+    background: #fffdf7;
+    color: var(--texto);
+    padding: 13px 22px;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-secundario:hover {
+    background: #f3ecdc;
+}
+
+/* FILTROS */
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.chip {
+    padding: 9px 18px;
+    border: 1px solid #e6dcc3;
+    border-radius: 999px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--texto);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chip:hover {
+    background: #f3ecdc;
+}
+
+.chip.ativo {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+
+.contador {
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 16px;
+}
+
+/* TABELA */
+
+.painel {
+    padding: 8px 24px;
+}
+
+.tabela-wrap {
+    overflow-x: auto;
+}
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.tabela th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    padding: 16px 10px;
+    border-bottom: 1px solid #efe5cd;
+}
+
+.tabela td {
+    padding: 14px 10px;
+    border-bottom: 1px solid #efe5cd;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela tbody tr:hover {
+    background: #faf6ec;
+}
+
+.produto-cel {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.produto-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f4ede1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.produto-cel strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.produto-cel p {
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.preco-cel {
+    color: var(--verde);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* STATUS */
+
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge.disponivel {
+    background: #e2ecdf;
+    color: var(--verde);
+}
+
+.badge.reservado {
+    background: #e3ecf5;
+    color: #3d5f80;
+}
+
+.badge.avaliacao {
+    background: #f6ecd0;
+    color: var(--dourado);
+}
+
+.badge.vendido {
+    background: #ece7dd;
+    color: #7a7263;
+}
+
+/* AÇÕES */
+
+.col-acoes {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.btn-acao {
+    border: 1px solid #e6dcc3;
+    background: #fffdf7;
+    color: var(--texto);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-acao:hover {
+    background: #f3ecdc;
+}
+
+.btn-acao.perigo {
+    color: #c0392b;
+}
+
+.btn-acao.perigo:hover {
+    background: #fbeceb;
+    border-color: #e8b9b4;
+}
+
+.vazio {
+    display: none;
+    text-align: center;
+    padding: 50px 0;
+    color: var(--texto-suave);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 20px;
+}
+
+/* MODAL */
+
+.modal-fundo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(58, 46, 26, 0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-fundo.aberto {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+    max-width: 520px;
+    background: #fffdf7;
+    border: 1px solid #d4c49a;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 10px 40px rgba(58, 46, 26, 0.2);
+}
+
+.modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.linha-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.campo {
+    margin-bottom: 16px;
+}
+
+.campo label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #7a6540;
+    margin-bottom: 6px;
+}
+
+.campo input[type="text"],
+.campo input[type="number"],
+.campo textarea,
+.campo select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #d4c49a;
+    border-radius: 10px;
+    background: #faf8f2;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    outline: none;
+    transition: 0.2s;
+}
+
+.campo textarea {
+    resize: vertical;
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus {
+    border-color: var(--dourado);
+    background: #fffdf7;
+}
+
+.campo input[type="file"] {
+    font-size: 13px;
+    color: var(--texto-suave);
+}
+
+.erro-campo {
+    display: none;
+    font-size: 11px;
+    color: #c0392b;
+    margin-top: 4px;
+}
+
+.acoes-modal {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 700px) {
+    .barra-prod {
+        flex-direction: column;
+    }
+
+    .linha-campos {
+        grid-template-columns: 1fr;
+    }
+}

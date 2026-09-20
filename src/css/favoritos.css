@@ -1,0 +1,55 @@
+/* SAÍDA DO CARD AO REMOVER */
+
+.produto {
+    transition: 0.25s;
+}
+
+.produto.saindo {
+    opacity: 0;
+    transform: scale(0.94);
+}
+
+/* ESTADO VAZIO */
+
+.vazio-favoritos {
+    display: none;
+    text-align: center;
+    padding: 70px 20px;
+    background: #fffdf7;
+    border: 1px dashed #d4c49a;
+    border-radius: 22px;
+}
+
+.vazio-icone {
+    font-size: 46px;
+    margin-bottom: 14px;
+}
+
+.vazio-favoritos h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.vazio-favoritos p {
+    color: var(--texto-suave);
+    font-size: 14px;
+    max-width: 340px;
+    margin: 0 auto 22px;
+    line-height: 1.6;
+}
+
+.vazio-favoritos a {
+    display: inline-block;
+    background: var(--verde);
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.vazio-favoritos a:hover {
+    background: var(--verde-hover);
+}

@@ -1,0 +1,244 @@
+/* MENU ATIVO */
+
+.menu a.ativo {
+    background: #f3ecdc;
+}
+
+/* O produtos.css reduz o padding do painel; aqui volta ao normal */
+
+.painel {
+    padding: 24px;
+}
+
+/* LAYOUT */
+
+.cal-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+/* CABEÇALHO DO CALENDÁRIO */
+
+.cal-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.cal-cab h3 {
+    margin-bottom: 0;
+    text-transform: capitalize;
+}
+
+.cal-nav {
+    display: flex;
+    gap: 8px;
+}
+
+/* GRADE */
+
+.cal-semana,
+.cal-dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.cal-semana {
+    margin-bottom: 8px;
+}
+
+.cal-semana span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+.dia {
+    height: 76px;
+    padding: 8px;
+    border: 1px solid #efe5cd;
+    border-radius: 10px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    color: var(--texto);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: 0.2s;
+}
+
+.dia:hover {
+    background: #f7f0e3;
+}
+
+.dia .num {
+    font-size: 14px;
+}
+
+.dia.hoje {
+    border-color: var(--dourado);
+}
+
+.dia.hoje .num {
+    color: var(--verde);
+    font-weight: 700;
+}
+
+.dia.selecionado {
+    background: #f3ecdc;
+    border: 2px solid var(--verde);
+}
+
+/* MARCADORES */
+
+.dots {
+    display: flex;
+    gap: 4px;
+}
+
+.dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.dot.recebimento {
+    background: var(--verde);
+}
+
+.dot.avaliacao {
+    background: #c4a96a;
+}
+
+.dot.colecao {
+    background: #3d5f80;
+}
+
+.dot.outro {
+    background: #9a8860;
+}
+
+/* LEGENDA */
+
+.legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #efe5cd;
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.legenda span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* EVENTOS DO DIA */
+
+#dia-titulo {
+    text-transform: capitalize;
+}
+
+.ev-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: #faf8f2;
+    border: 1px solid #efe5cd;
+    border-left: 4px solid #9a8860;
+    border-radius: 10px;
+}
+
+.ev-item.recebimento {
+    border-left-color: var(--verde);
+}
+
+.ev-item.avaliacao {
+    border-left-color: #c4a96a;
+}
+
+.ev-item.colecao {
+    border-left-color: #3d5f80;
+}
+
+.ev-info strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.ev-info p {
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.sem-eventos {
+    padding: 24px 0;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--texto-suave);
+}
+
+.btn-novo-evento {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* CAMPOS DE DATA E HORA NO MODAL */
+
+.campo input[type="date"],
+.campo input[type="time"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #d4c49a;
+    border-radius: 10px;
+    background: #faf8f2;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    outline: none;
+}
+
+.campo input[type="date"]:focus,
+.campo input[type="time"]:focus {
+    border-color: var(--dourado);
+    background: #fffdf7;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 900px) {
+    .cal-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .dia {
+        height: 56px;
+        padding: 6px;
+    }
+
+    .cal-semana span {
+        font-size: 10px;
+        letter-spacing: 0;
+    }
+}

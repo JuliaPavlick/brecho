@@ -1,0 +1,86 @@
+/* MENU ATIVO */
+
+.menu a.ativo {
+    background: #f3ecdc;
+}
+
+/* AVATAR */
+
+.avatar-mini {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--verde);
+    border: 2px solid #c4a96a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.avatar-mini.grande {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+}
+
+/* PAPÉIS */
+
+.papel {
+    display: inline-block;
+    margin: 2px 6px 2px 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.papel.cliente {
+    background: #e2ecdf;
+    color: var(--verde);
+}
+
+.papel.vendedora {
+    background: #f6ecd0;
+    color: var(--dourado);
+}
+
+.papel.funcionaria {
+    background: #e3ecf5;
+    color: #3d5f80;
+}
+
+/* DETALHES */
+
+.det-cab {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.det-cab h3 {
+    margin-bottom: 6px;
+}
+
+.det-linha {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #efe5cd;
+    font-size: 14px;
+}
+
+.det-linha span {
+    color: var(--texto-suave);
+}
+
+.det-linha strong {
+    text-align: right;
+}

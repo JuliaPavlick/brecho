@@ -1,0 +1,29 @@
+.titulo-pagina {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #3a2e1a;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.texto-pagina {
+  font-size: 13px;
+  color: #9a8860;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.mensagem-sucesso {
+  display: none;
+  margin-top: 1rem;
+  padding: 12px 14px;
+  background: #e2ecdf;
+  border: 1px solid #b9cfb3;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #4c6b44;
+  text-align: center;
+}

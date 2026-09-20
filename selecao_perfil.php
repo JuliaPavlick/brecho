@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selecionar Perfil — O Garimpo Chic</title>
-    <link rel="stylesheet" href="selecao_perfil.css">
+    <link rel="stylesheet" href="./src/css/selecao_perfil.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap"
         rel="stylesheet">
@@ -56,7 +56,7 @@
             <a href="dashboard_cliente.php" class="perfil">
 
                 <div class="icone">
-                    <img src="sacolas-de-comprass.png" alt="Cliente">
+                    <img src="./src/img/sacolas-de-comprass.png" alt="Cliente">
                 </div>
 
                 <div class="info">
@@ -75,7 +75,7 @@
             <a href="dashboard_funcionario.php" class="perfil">
 
                 <div class="icone">
-                    <img src="pranchetas.png" alt="Funcionária">
+                    <img src="./src/img/pranchetas.png" alt="Funcionária">
                 </div>
 
                 <div class="info">

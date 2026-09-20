@@ -201,20 +201,22 @@ body {
 }
 
 .menu .icone {
-    font-size: 20px;
-    width: 24px;
-    text-align: center;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
 /* ICONES DA SIDEBAR */
 
-.menu .icone img{
-width:30px;
-height:30px;
-object-fit:contain;
-filter:brightness(0) saturate(0);
-transition:0.2s;
+.menu .icone img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: brightness(0) saturate(0);
+    transition: 0.2s;
 }
 
 .menu a:hover .icone img{
@@ -480,4 +482,50 @@ filter:brightness(0);
 .calendario-item p {
     font-size: 12px;
     color: var(--texto-suave);
+}
+
+.sidebar:hover ~ .conteudo {
+    margin-left: 260px;
+}
+
+@media (max-width: 900px) {
+    .inferior {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .conteudo {
+        padding: 40px 20px;
+    }
+
+    .topo-dashboard {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
+/* Botões de Filtro do Gráfico */
+.btn-filtro {
+    background: transparent;
+    border: none;
+    color: #8C7A80;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-filtro:hover {
+    color: #D87D9A;
+    background: rgba(216, 125, 154, 0.08);
+}
+
+.btn-filtro.ativo {
+    background: #D87D9A;
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(216, 125, 154, 0.35);
 }

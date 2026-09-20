@@ -1,0 +1,94 @@
+/* MENU ATIVO */
+
+.menu a.ativo {
+    background: #f3ecdc;
+}
+
+/* O produtos.css reduz o padding do painel; aqui volta ao normal */
+
+.painel {
+    padding: 24px;
+    margin-bottom: 22px;
+}
+
+.painel.painel-tabela {
+    padding: 8px 24px;
+}
+
+/* FILTRO ATIVO DO GRÁFICO */
+
+.filtro.ativo {
+    background: var(--verde);
+    color: #fff;
+}
+
+/* espaço para os rótulos abaixo das barras */
+
+.grafico {
+    margin-bottom: 36px;
+}
+
+/* CABEÇALHO DA TABELA */
+
+.cab-tabela {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px 0 6px;
+}
+
+.cab-tabela h3 {
+    margin-bottom: 0;
+}
+
+.cab-tabela .chips {
+    margin-bottom: 0;
+}
+
+/* VALORES */
+
+.tabela {
+    min-width: 560px;
+}
+
+.col-valor {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.valor-entrada {
+    color: var(--verde);
+    font-weight: 700;
+}
+
+.valor-saida {
+    color: #c0392b;
+    font-weight: 700;
+}
+
+/* Botões de Filtro do Gráfico */
+.btn-filtro {
+    background: transparent;
+    border: none;
+    color: #8C7A80;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-filtro:hover {
+    color: #D87D9A;
+    background: rgba(216, 125, 154, 0.08);
+}
+
+.btn-filtro.ativo {
+    background: #D87D9A;
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(216, 125, 154, 0.35);
+}
