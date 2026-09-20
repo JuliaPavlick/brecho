@@ -67,27 +67,37 @@
             <nav class="menu">
 
                 <a href="dashboard_cliente.php">
-                    <span class="icone">🏠</span>
+                    <span class="icone">
+                        <img src="./src/img/casa.png" alt="Dashboard">
+                    </span>
                     <span class="texto-menu">Início</span>
                 </a>
 
                 <a href="explorar.php">
-                    <span class="icone">🔎</span>
+                    <span class="icone">
+                        <img src="./src/img/lupa.png" alt="Dashboard">
+                    </span>
                     <span class="texto-menu">Explorar</span>
                 </a>
 
                 <a href="favoritos.php" class="ativo">
-                    <span class="icone">🖤</span>
+                    <span class="icone">
+                        <img src="./src/img/coração.png" alt="Dashboard">
+                    </span>
                     <span class="texto-menu">Favoritos</span>
                 </a>
 
                 <a href="compras.php">
-                    <span class="icone">🛍️</span>
+                    <span class="icone">
+                        <img src="./src/img/bolsa.png" alt="Dashboard">
+                    </span>
                     <span class="texto-menu">Compras</span>
                 </a>
 
                 <a href="perfil.php">
-                    <span class="icone">👤</span>
+                    <span class="icone">
+                        <img src="./src/img/pessoa.png" alt="Dashboard">
+                    </span>
                     <span class="texto-menu">Perfil</span>
                 </a>
 
