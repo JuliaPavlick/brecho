@@ -242,6 +242,68 @@ public class FuncionariaController(BrechoContext db) : Controller
         return View(movimentacoes);
     }
 
+    // ---------- Backup ----------
+
+    [HttpGet("backup")]
+    public async Task<IActionResult> Backup()
+    {
+        ViewData["PodeRestaurar"] = await Util.Backup.PodeRestaurarAsync(db);
+        ViewData["Totais"] = new (string, int)[]
+        {
+            ("Pessoas", await db.Usuarios.CountAsync()),
+            ("Produtos", await db.Produtos.CountAsync()),
+            ("Fotos", await db.ProdutoFotos.CountAsync()),
+            ("Pedidos", await db.Pedidos.CountAsync()),
+            ("Eventos", await db.Eventos.CountAsync()),
+        };
+        return View();
+    }
+
+    // Gera o .zip num arquivo temporário (apagado assim que o download termina) e envia
+    [HttpGet("backup/baixar")]
+    public async Task<IActionResult> BaixarBackup()
+    {
+        var caminho = Path.GetTempFileName();
+        await using (var arquivo = System.IO.File.Create(caminho))
+            await Util.Backup.ExportarAsync(db, arquivo);
+
+        var leitura = new FileStream(caminho, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, FileOptions.DeleteOnClose);
+        return File(leitura, "application/zip", $"garimpo-backup-{Formato.Agora:yyyy-MM-dd-HHmm}.zip");
+    }
+
+    [HttpPost("backup/restaurar")]
+    [RequestSizeLimit(1_000_000_000)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 1_000_000_000)]
+    public async Task<IActionResult> RestaurarBackup(IFormFile? arquivo)
+    {
+        if (!await Util.Backup.PodeRestaurarAsync(db))
+        {
+            TempData["Erro"] = "Este banco já tem produtos ou pedidos. A restauração só funciona num banco novo.";
+            return Redirect("/painel/backup");
+        }
+        if (arquivo == null || arquivo.Length == 0)
+        {
+            TempData["Erro"] = "Escolha o arquivo .zip do backup.";
+            return Redirect("/painel/backup");
+        }
+
+        try
+        {
+            await using var s = arquivo.OpenReadStream();
+            await Util.Backup.RestaurarAsync(db, s);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or System.Text.Json.JsonException)
+        {
+            TempData["Erro"] = "Não foi possível ler este arquivo de backup: " + ex.Message;
+            return Redirect("/painel/backup");
+        }
+
+        // As contas foram trocadas pelas do backup: todos (inclusive quem restaurou) entram de novo
+        await Sessao.SairAsync(HttpContext);
+        TempData["Ok"] = "Backup restaurado! Entre com uma conta que existia no backup.";
+        return Redirect("/");
+    }
+
     // ---------- Clientes ----------
 
     [HttpGet("clientes")]

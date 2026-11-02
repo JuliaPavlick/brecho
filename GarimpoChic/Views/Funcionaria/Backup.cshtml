@@ -1,0 +1,70 @@
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Backup";
+    ViewData["Menu"] = "backup";
+
+    var podeRestaurar = ViewData["PodeRestaurar"] as bool? == true;
+    var totais = ((string Nome, int Total)[])ViewData["Totais"]!;
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Backup ✦", "Guarde uma cópia de todos os dados da loja")' />
+
+    @if (TempData["Erro"] is string erro)
+    {
+        <div class="alerta-erro">@erro</div>
+    }
+
+    <div class="painel">
+
+        <h3>Baixar backup</h3>
+
+        <p class="texto-backup">
+            Gera um arquivo .zip com pessoas, produtos, fotos, pedidos, eventos e repasses.
+            Guarde em um lugar seguro: ele contém CPFs, e-mails e telefones das clientes.
+        </p>
+
+        <div class="chips">
+            @foreach (var t in totais)
+            {
+                <span class="chip">@t.Nome: @t.Total</span>
+            }
+        </div>
+
+        <a href="/painel/backup/baixar" class="btn-primario" style="display:inline-block;text-decoration:none">Baixar backup agora</a>
+
+    </div>
+
+    <div class="painel" style="margin-top:24px">
+
+        <h3>Restaurar backup</h3>
+
+        @if (podeRestaurar)
+        {
+            <p class="texto-backup">
+                Este banco está vazio (sem produtos e sem pedidos), então dá para restaurar um backup aqui.
+                As contas atuais são substituídas pelas do arquivo, e você vai precisar entrar de novo.
+            </p>
+
+            <form action="/painel/backup/restaurar" method="post" asp-antiforgery="true" enctype="multipart/form-data"
+                onsubmit="return confirm('Restaurar este backup? As contas atuais serão substituídas pelas do arquivo.')">
+                <input type="file" name="arquivo" accept=".zip,application/zip" required>
+                <button type="submit" class="btn-primario">Restaurar</button>
+            </form>
+        }
+        else
+        {
+            <p class="texto-backup">
+                A restauração só fica disponível num banco novo, sem produtos e sem pedidos.
+                Isso evita apagar os dados atuais por engano.
+            </p>
+        }
+
+    </div>
+
+</main>

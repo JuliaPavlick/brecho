@@ -74,6 +74,12 @@ O link "Esqueci minha senha" manda um e-mail com um link que vale por 1 hora e s
 
 Sem `SMTP_HOST`, o e-mail não é enviado: o conteúdo (com o link) aparece no log do servidor. Isso é útil para testar no computador.
 
+## Backup
+
+No painel da funcionária, em **Backup**, o botão **Baixar backup agora** gera um `.zip` com todos os dados (pessoas, produtos, fotos, pedidos, eventos e repasses). Guarde o arquivo em lugar seguro: ele tem CPFs, e-mails e telefones.
+
+Para restaurar (por exemplo, depois de recriar o banco grátis da Render): entre com a funcionária definida em `ADMIN_CPF`/`ADMIN_SENHA` no banco novo, abra **Backup** e envie o `.zip`. A restauração só é permitida num banco sem produtos e sem pedidos, para não apagar dados por engano. Depois dela, todos precisam entrar de novo com as contas do backup.
+
 ## Banco de dados e migrations
 
 Em produção (Postgres), o site aplica as migrations sozinho ao iniciar. Para mudar o modelo:
