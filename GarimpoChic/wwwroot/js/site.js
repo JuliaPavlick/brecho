@@ -95,3 +95,15 @@ function alternarFavorito(btn) {
         return r.favorito;
     });
 }
+
+// Comportamentos que antes ficavam em onclick/onsubmit no HTML (a CSP bloqueia esse tipo de código)
+// <button data-href="/explorar"> navega; <form data-confirmar="Tem certeza?"> pergunta antes de enviar
+document.addEventListener('click', e => {
+    const alvo = e.target.closest('[data-href]');
+    if (alvo) location.href = alvo.dataset.href;
+});
+
+document.addEventListener('submit', e => {
+    const form = e.target.closest('form[data-confirmar]');
+    if (form && !confirm(form.dataset.confirmar)) e.preventDefault();
+});

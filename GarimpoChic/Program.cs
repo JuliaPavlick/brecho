@@ -29,11 +29,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         o.ExpireTimeSpan = TimeSpan.FromDays(7);
         o.SlidingExpiration = true;
         o.Cookie.Name = "garimpo.login";
+        o.Events.OnValidatePrincipal = Sessao.ValidarAsync;
     });
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddRateLimiter(Limites.Configurar);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHsts(o => o.MaxAge = TimeSpan.FromDays(365));
 
 builder.Services.AddSingleton<Email>();
 builder.Services.AddSingleton<RedefinicaoSenha>();
@@ -66,7 +70,13 @@ using (var scope = app.Services.CreateScope())
 app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
+{
     app.UseExceptionHandler("/erro");
+    // Diz ao navegador para usar sempre HTTPS neste endereço
+    app.UseHsts();
+}
+
+app.UseCabecalhosDeSeguranca();
 
 app.UseStaticFiles();
 app.UseRouting();

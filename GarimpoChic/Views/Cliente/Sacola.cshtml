@@ -77,7 +77,7 @@
         @if (disponiveis.Count > 0)
         {
             <form action="/sacola/finalizar" method="post" asp-antiforgery="true" class="finalizar"
-                onsubmit="return confirm('Finalizar a compra de @disponiveis.Count @(disponiveis.Count == 1 ? "peça" : "peças") por @Formato.Moeda(total)?')">
+                data-confirmar="Finalizar a compra de @disponiveis.Count @(disponiveis.Count == 1 ? "peça" : "peças") por @Formato.Moeda(total)?">
                 <p>Ao finalizar, a loja recebe o seu pedido e entra em contato para combinar o pagamento e a entrega.</p>
                 <button type="submit" class="btn-sacola ativo">Finalizar compra</button>
             </form>

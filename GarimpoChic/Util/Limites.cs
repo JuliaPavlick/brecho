@@ -9,6 +9,23 @@ public static class Limites
 {
     public const string Autenticacao = "autenticacao";
 
+    // O cadastro precisa avisar quando o CPF já tem conta, e isso permite testar CPFs para descobrir quem é cliente.
+    // Para frear isso sem atrapalhar uma turma inteira se cadastrando na mesma rede, contamos só os CPFs repetidos:
+    // depois de 5 numa hora, o endereço fica sem poder usar o cadastro (para qualquer CPF) até a hora passar.
+    static readonly PartitionedRateLimiter<string> CpfRepetido = PartitionedRateLimiter.Create<string, string>(ip =>
+        RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromHours(1),
+            QueueLimit = 0,
+        }));
+
+    public static bool CadastroBloqueado(HttpContext http) =>
+        CpfRepetido.GetStatistics(EnderecoDoVisitante(http))?.CurrentAvailablePermits == 0;
+
+    public static void RegistrarCpfRepetido(HttpContext http) =>
+        CpfRepetido.AttemptAcquire(EnderecoDoVisitante(http)).Dispose();
+
     public static void Configurar(RateLimiterOptions o)
     {
         o.AddPolicy(Autenticacao, http => RateLimitPartition.GetSlidingWindowLimiter(
@@ -35,7 +52,7 @@ public static class Limites
 
     // Na Render o site fica atrás da Cloudflare, que informa o IP real do visitante neste cabeçalho
     // (e o sobrescreve, então o visitante não consegue forjá-lo). Fora da Render, usa o IP da conexão.
-    static string EnderecoDoVisitante(HttpContext http) =>
+    public static string EnderecoDoVisitante(HttpContext http) =>
         http.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
         ?? http.Connection.RemoteIpAddress?.ToString()
         ?? "desconhecido";

@@ -1,6 +1,6 @@
 @model Dictionary<string, Relatorios.Serie>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="~/lib/chartjs/chart.umd.js" asp-append-version="true"></script>
 
 <!-- Bloco do Painel com o Gráfico -->
 <div class="painel" style="background: #FFFDFB; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(216, 125, 154, 0.08); border: 1px solid #F5EAE6;">
@@ -12,9 +12,9 @@
 
         <!-- Filtros de Período -->
         <div class="filtros" style="display: flex; gap: 8px; background: #FDF7F5; padding: 4px; border-radius: 24px; border: 1px solid #F3E5E1;">
-            <button type="button" class="btn-filtro ativo" onclick="atualizarGrafico('semana', this)">Semana</button>
-            <button type="button" class="btn-filtro" onclick="atualizarGrafico('mes', this)">Mês</button>
-            <button type="button" class="btn-filtro" onclick="atualizarGrafico('ano', this)">Ano</button>
+            <button type="button" class="btn-filtro ativo" data-periodo="semana">Semana</button>
+            <button type="button" class="btn-filtro" data-periodo="mes">Mês</button>
+            <button type="button" class="btn-filtro" data-periodo="ano">Ano</button>
         </div>
     </div>
 
@@ -92,6 +92,9 @@
             }
         }
     });
+
+    document.querySelectorAll('.btn-filtro').forEach(btn =>
+        btn.addEventListener('click', () => atualizarGrafico(btn.dataset.periodo, btn)));
 
     function atualizarGrafico(periodo, el) {
         document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('ativo'));

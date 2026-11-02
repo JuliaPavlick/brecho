@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using GarimpoChic.Models;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -15,10 +13,7 @@ public class RedefinicaoSenha(IDataProtectionProvider provider)
     readonly ITimeLimitedDataProtector protetor =
         provider.CreateProtector("GarimpoChic.RedefinirSenha").ToTimeLimitedDataProtector();
 
-    static string Carimbo(Usuario u) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(u.SenhaHash)))[..16];
-
-    public string GerarCodigo(Usuario u) => protetor.Protect($"{u.Id}:{Carimbo(u)}", Validade);
+    public string GerarCodigo(Usuario u) => protetor.Protect($"{u.Id}:{Sessao.CarimboSenha(u)}", Validade);
 
     // Devolve o id da pessoa se o código for válido e ainda não tiver vencido
     public int? LerUsuarioId(string? codigo)
@@ -36,7 +31,7 @@ public class RedefinicaoSenha(IDataProtectionProvider provider)
 
     public bool CodigoConfere(string? codigo, Usuario u)
     {
-        try { return protetor.Unprotect(codigo ?? "") == $"{u.Id}:{Carimbo(u)}"; }
+        try { return protetor.Unprotect(codigo ?? "") == $"{u.Id}:{Sessao.CarimboSenha(u)}"; }
         catch { return false; }
     }
 }

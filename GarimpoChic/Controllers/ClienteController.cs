@@ -199,6 +199,8 @@ public class ClienteController(BrechoContext db) : Controller
         {
             Eu.SenhaHash = DadosIniciais.HashSenha(Eu, nova!);
             await db.SaveChangesAsync();
+            // Os outros aparelhos saem sozinhos (o cookie deles tem o carimbo da senha antiga); este continua logado
+            await Sessao.EntrarAsync(HttpContext, Eu);
             TempData["OkSenha"] = true;
         }
 

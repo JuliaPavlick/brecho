@@ -71,6 +71,12 @@ public class ContaController(BrechoContext db) : Controller
     [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> Cadastro(CadastroForm form)
     {
+        if (Limites.CadastroBloqueado(HttpContext))
+        {
+            ModelState.AddModelError("cpf", "Muitas tentativas com CPFs já cadastrados. Aguarde uma hora e tente de novo.");
+            return View(form);
+        }
+
         var cpf = Formato.SoDigitos(form.Cpf);
         var nome = (form.Nome ?? "").Trim();
 
@@ -79,7 +85,10 @@ public class ContaController(BrechoContext db) : Controller
         if (!Formato.CpfValido(cpf))
             ModelState.AddModelError("cpf", "Informe um CPF válido.");
         else if (await db.Usuarios.AnyAsync(u => u.Cpf == cpf))
-            ModelState.AddModelError("cpf", "Já existe uma conta com este CPF.");
+        {
+            Limites.RegistrarCpfRepetido(HttpContext);
+            ModelState.AddModelError("cpf", "Já existe uma conta com este CPF. Entre ou use \"Esqueci minha senha\".");
+        }
         if (!Formato.EmailValido(form.Email))
             ModelState.AddModelError("email", "Informe um e-mail válido.");
         if (Formato.SoDigitos(form.Telefone).Length < 10)

@@ -52,7 +52,7 @@
             </p>
 
             <form action="/painel/backup/restaurar" method="post" asp-antiforgery="true" enctype="multipart/form-data"
-                onsubmit="return confirm('Restaurar este backup? As contas atuais serão substituídas pelas do arquivo.')">
+                data-confirmar="Restaurar este backup? As contas atuais serão substituídas pelas do arquivo.">
                 <input type="file" name="arquivo" accept=".zip,application/zip" required>
                 <button type="submit" class="btn-primario">Restaurar</button>
             </form>
