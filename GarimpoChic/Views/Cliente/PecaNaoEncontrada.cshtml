@@ -1,0 +1,19 @@
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Peça não encontrada";
+    ViewData["Menu"] = "explorar";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoCliente" model='("Peça não encontrada", "Ela pode ter sido retirada da loja")' />
+
+    <p class="vazio" style="display:block">
+        Não achamos esta peça ✦ <a href="/explorar">Ver outras peças</a>
+    </p>
+
+</main>

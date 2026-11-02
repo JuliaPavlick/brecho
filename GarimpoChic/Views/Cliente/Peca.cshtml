@@ -1,0 +1,161 @@
+@model PecaDetalhe
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = Model.Peca.Nome;
+    ViewData["Menu"] = "explorar";
+
+    var p = Model.Peca;
+    var categoria = Categorias.Todas.FirstOrDefault(c => c.Nome == p.Categoria);
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/peca.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <nav class="trilha" aria-label="Você está em">
+        <a href="/explorar">Explorar</a>
+        <span aria-hidden="true">›</span>
+        <a href="/explorar?categoria=@categoria.Slug">@p.Categoria</a>
+        <span aria-hidden="true">›</span>
+        <span>@p.Nome</span>
+    </nav>
+
+    <article class="peca">
+
+        <!-- FOTOS -->
+
+        <div class="peca-galeria">
+            <div class="peca-foto-principal">
+                @if (Model.Fotos.Count > 0)
+                {
+                    <img id="foto-principal" src="/fotos/@Model.Fotos[0]" alt="@p.Nome">
+                }
+                else
+                {
+                    <span class="peca-emoji" aria-hidden="true">@p.Emoji</span>
+                }
+            </div>
+
+            @if (Model.Fotos.Count > 1)
+            {
+                <div class="peca-miniaturas" role="list">
+                    @for (var i = 0; i < Model.Fotos.Count; i++)
+                    {
+                        <button type="button" class="miniatura @(i == 0 ? "ativa" : "")" data-foto="/fotos/@Model.Fotos[i]"
+                            aria-label="Ver foto @(i + 1) de @Model.Fotos.Count" role="listitem">
+                            <img src="/fotos/@Model.Fotos[i]" alt="" loading="lazy">
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- INFORMAÇÕES -->
+
+        <div class="peca-info">
+
+            <span class="peca-categoria">@categoria.Emoji @p.Categoria</span>
+
+            <h1>@p.Nome</h1>
+
+            <p class="peca-preco">@Formato.Moeda(p.Preco)</p>
+
+            @if (!p.Disponivel)
+            {
+                <span class="badge @p.Status">@(p.Status == StatusProduto.Vendido ? "Vendida" : StatusProduto.Nomes.GetValueOrDefault(p.Status))</span>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(p.Descricao))
+            {
+                <div class="peca-descricao">
+                    <h2>Sobre a peça</h2>
+                    <p>@p.Descricao</p>
+                </div>
+            }
+
+            <ul class="peca-detalhes">
+                <li><span aria-hidden="true">✦</span> Peça única: só existe esta</li>
+                <li><span aria-hidden="true">✦</span> Na loja desde @Formato.Data(Model.CriadoEm)</li>
+                <li><span aria-hidden="true">✦</span> Pagamento e entrega combinados com a loja depois da compra</li>
+            </ul>
+
+            <div class="peca-acoes">
+                @if (p.Disponivel)
+                {
+                    <button type="button" class="btn-sacola @(p.NaSacola ? "ativo" : "")" data-id="@p.Id">
+                        @(p.NaSacola ? "Na sacola ✓" : "Adicionar à sacola")
+                    </button>
+                }
+                else
+                {
+                    <p class="peca-indisponivel">Esta peça não está mais disponível.</p>
+                }
+
+                <div class="peca-acoes-secundarias">
+                    <button type="button" class="favorito @(p.Favorito ? "ativo" : "")" data-id="@p.Id"
+                        title="@(p.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
+                        aria-label="Favoritar @p.Nome" aria-pressed="@(p.Favorito ? "true" : "false")">@(p.Favorito ? "♥" : "♡")</button>
+
+                    <button type="button" class="btn-compartilhar" id="btn-compartilhar">Compartilhar</button>
+
+                    @if (p.NaSacola)
+                    {
+                        <a href="/sacola" class="link-sacola">Ir para a sacola →</a>
+                    }
+                </div>
+                <p class="peca-aviso" id="aviso-compartilhar" role="status"></p>
+            </div>
+
+        </div>
+
+    </article>
+
+    @if (Model.Semelhantes.Count > 0)
+    {
+        <section class="peca-semelhantes">
+            <h2>Mais @p.Categoria.ToLower() para você</h2>
+            <div class="produtos">
+                @foreach (var s in Model.Semelhantes)
+                {
+                    <partial name="_ProdutoCard" model="s" />
+                }
+            </div>
+        </section>
+    }
+
+</main>
+
+@section Scripts {
+    <script>
+        // Trocar a foto grande pelas miniaturas
+        document.querySelectorAll('.miniatura').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('foto-principal').src = btn.dataset.foto;
+                document.querySelectorAll('.miniatura').forEach(b => b.classList.toggle('ativa', b === btn));
+            });
+        });
+
+        document.querySelectorAll('.favorito').forEach(btn => {
+            btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
+        });
+
+        // No celular abre o menu de compartilhar (WhatsApp, Instagram...); no computador copia o link
+        document.getElementById('btn-compartilhar').addEventListener('click', async () => {
+            const aviso = document.getElementById('aviso-compartilhar');
+            const dados = { title: document.title, text: @Json.Serialize(p.Nome + " — " + Formato.Moeda(p.Preco)), url: location.href };
+            try {
+                if (navigator.share) {
+                    await navigator.share(dados);
+                } else {
+                    await navigator.clipboard.writeText(location.href);
+                    aviso.textContent = 'Link copiado ✓';
+                }
+            } catch {
+                // A pessoa fechou o menu de compartilhar: nada a fazer
+            }
+        });
+    </script>
+}

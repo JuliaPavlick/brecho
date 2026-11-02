@@ -1,3 +1,39 @@
+// "Carregando…": enquanto uma ação está em andamento, uma camada cobre a tela e segura os cliques,
+// para ninguém disparar o mesmo comando duas vezes (ex.: finalizar a compra, publicar uma peça).
+// Conta as ações em andamento: a camada só some quando todas terminam.
+const Carregando = (() => {
+    let pendentes = 0;
+    let camada = null;
+
+    function criar() {
+        camada = document.createElement('div');
+        camada.className = 'carregando';
+        camada.setAttribute('role', 'status');
+        camada.setAttribute('aria-live', 'polite');
+        camada.innerHTML = '<span class="carregando-aviso"><span class="carregando-roda" aria-hidden="true"></span>Carregando…</span>';
+        document.body.appendChild(camada);
+    }
+
+    return {
+        inicio() {
+            pendentes++;
+            if (!camada) criar();
+            camada.classList.add('ativo');
+            document.body.setAttribute('aria-busy', 'true');
+        },
+        fim() {
+            pendentes = Math.max(0, pendentes - 1);
+            if (pendentes > 0 || !camada) return;
+            camada.classList.remove('ativo');
+            document.body.removeAttribute('aria-busy');
+        },
+        zerar() {
+            pendentes = 1;
+            this.fim();
+        },
+    };
+})();
+
 // Envia um POST para o servidor com o token anti-falsificação.
 // corpo pode ser um FormData (formulário com arquivos) ou um objeto (vira JSON).
 function postar(url, corpo) {
@@ -13,6 +49,7 @@ function postar(url, corpo) {
         opcoes.body = JSON.stringify(corpo);
     }
 
+    Carregando.inicio();
     return fetch(url, opcoes).then(async r => {
         if (!r.ok) {
             // Quando o servidor explica o motivo ({ erro: "..." }), a mensagem vai junto no erro
@@ -22,7 +59,7 @@ function postar(url, corpo) {
             throw erro;
         }
         return (r.headers.get('content-type') || '').includes('json') ? r.json() : null;
-    });
+    }).finally(() => Carregando.fim());
 }
 
 function falhou(erro) {
@@ -182,4 +219,24 @@ document.addEventListener('change', async e => {
     } finally {
         botoes.forEach(b => b.disabled = false);
     }
+});
+
+// Formulário enviado do jeito normal (a página vai recarregar): mostra "Carregando…" e ignora novos envios.
+// Fica por último: as validações e o data-confirmar acima já rodaram e podem ter cancelado o envio.
+document.addEventListener('submit', e => {
+    const form = e.target;
+    if (e.defaultPrevented) return;
+
+    if (form.dataset.enviando) {
+        e.preventDefault();
+        return;
+    }
+    form.dataset.enviando = '1';
+    Carregando.inicio();
+});
+
+// Voltar pelo navegador pode trazer a página "congelada" com o aviso ainda na tela
+window.addEventListener('pageshow', () => {
+    Carregando.zerar();
+    document.querySelectorAll('form[data-enviando]').forEach(f => delete f.dataset.enviando);
 });

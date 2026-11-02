@@ -2,19 +2,21 @@
 
 <div class="produto" data-nome="@Model.Nome" data-categoria="@Model.CategoriaSlug"
     data-preco="@Model.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-    <div class="produto-img">
-        @if (Model.FotoId != null)
-        {
-            <img src="/fotos/@Model.FotoId" alt="@Model.Nome" loading="lazy">
-        }
-        else
-        {
-            @Model.Emoji
-        }
-    </div>
+    <a href="/peca/@Model.Id" class="link-peca" tabindex="-1" aria-hidden="true">
+        <div class="produto-img">
+            @if (Model.FotoId != null)
+            {
+                <img src="/fotos/@Model.FotoId" alt="" loading="lazy">
+            }
+            else
+            {
+                @Model.Emoji
+            }
+        </div>
+    </a>
     <div class="produto-info">
         <div>
-            <h4>@Model.Nome</h4>
+            <h4><a href="/peca/@Model.Id" class="link-peca">@Model.Nome</a></h4>
             <p>@Model.Descricao</p>
         </div>
         <button type="button" class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"

@@ -46,6 +46,25 @@ public class ClienteController(BrechoContext db) : Controller
     public async Task<IActionResult> Inicio() =>
         View(await Cards(Disponiveis.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)).Take(3).ToListAsync());
 
+    // Página da peça. Só peças publicadas: as "Em avaliação" respondem como se não existissem.
+    [HttpGet("/peca/{id:int}")]
+    public async Task<IActionResult> Peca(int id)
+    {
+        var peca = await Cards(Publicadas.Where(p => p.Id == id)).FirstOrDefaultAsync();
+        if (peca == null)
+        {
+            Response.StatusCode = StatusCodes.Status404NotFound;
+            return View("PecaNaoEncontrada");
+        }
+
+        var fotos = await db.ProdutoFotos.Where(f => f.ProdutoId == id).OrderBy(f => f.Id).Select(f => f.Id).ToListAsync();
+        var criadoEm = await db.Produtos.Where(p => p.Id == id).Select(p => p.CriadoEm).FirstAsync();
+        var semelhantes = await Cards(Disponiveis.Where(p => p.Categoria == peca.Categoria && p.Id != id)
+            .OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id).Take(4)).ToListAsync();
+
+        return View(new PecaDetalhe(peca, fotos, criadoEm, semelhantes));
+    }
+
     [HttpGet("/explorar")]
     public async Task<IActionResult> Explorar(string? q, string? categoria, string? ordem, int pagina = 1)
     {

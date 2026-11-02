@@ -146,6 +146,16 @@
 
         // Quando o limite grátis do Gemini acaba, espera e tenta de novo (até 3 vezes)
         async function tentarIaDeNovo(el, tentativas = 3) {
+            // A tela continua bloqueada durante as esperas, para nada ser enviado no meio
+            Carregando.inicio();
+            try {
+                await esperarETentar(el, tentativas);
+            } finally {
+                Carregando.fim();
+            }
+        }
+
+        async function esperarETentar(el, tentativas) {
             for (let i = 1; i <= tentativas; i++) {
                 for (let s = 30; s > 0; s--) {
                     progresso.textContent = `Limite gratuito do Gemini atingido. Tentando de novo em ${s}s…`;
@@ -197,10 +207,12 @@
             if (!confirm(`Publicar as ${cartoes.length} peças na loja? As que estiverem sem nome ou sem preço ficam para revisar.`)) return;
 
             btn.disabled = true;
+            Carregando.inicio();
             let publicadas = 0;
             for (const el of cartoes) {
                 if (await salvar(el, 'disponivel')) { el.remove(); publicadas++; }
             }
+            Carregando.fim();
             atualizarContagem();
             progresso.textContent = `${publicadas} ${publicadas === 1 ? 'peça publicada' : 'peças publicadas'}.`;
             btn.disabled = false;
@@ -222,6 +234,7 @@
             const categoria = document.getElementById('categoria-lote').value;
             btnEnviar.disabled = true;
             campoFotos.disabled = true;
+            Carregando.inicio(); // o lote inteiro conta como uma ação só
             let falhas = 0;
 
             for (let i = 0; i < arquivos.length; i++) {
@@ -244,6 +257,7 @@
 
             progresso.textContent = `Pronto: ${arquivos.length - falhas} de ${arquivos.length} fotos viraram peças.` +
                 (falhas ? ` ${falhas} não foram aceitas (confira se são fotos JPG, PNG ou WebP).` : ' Revise abaixo e publique.');
+            Carregando.fim();
             campoFotos.value = '';
             campoFotos.disabled = false;
             document.getElementById('texto-fotos').textContent = 'Escolher fotos';

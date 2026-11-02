@@ -54,7 +54,7 @@
                                 }
                             </div>
                             <div class="item-info">
-                                <h5>@p.Nome</h5>
+                                <h5><a href="/peca/@p.Id" class="link-peca">@p.Nome</a></h5>
                                 <p>@(p.Disponivel ? p.Descricao : "Esta peça não está mais disponível")</p>
                             </div>
                             <span class="item-preco">@Formato.Moeda(p.Preco)</span>

@@ -1,0 +1,229 @@
+/* PÁGINA DA PEÇA */
+
+.trilha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--texto-suave);
+}
+
+.trilha a {
+    color: var(--dourado);
+    text-decoration: none;
+}
+
+.trilha a:hover {
+    text-decoration: underline;
+}
+
+.peca {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+}
+
+/* FOTOS */
+
+.peca-foto-principal {
+    aspect-ratio: 4 / 5;
+    border-radius: 22px;
+    background: #f4ede1;
+    border: 1px solid #eadfc8;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.peca-foto-principal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.peca-emoji {
+    font-size: 96px;
+}
+
+.peca-miniaturas {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.miniatura {
+    flex: 0 0 72px;
+    height: 90px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: #f4ede1;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.miniatura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.miniatura.ativa {
+    border-color: var(--verde);
+}
+
+/* INFORMAÇÕES */
+
+.peca-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.peca-categoria {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border: 1px solid #e6dcc3;
+    border-radius: 999px;
+    background: #fffdf7;
+    font-size: 13px;
+}
+
+.peca-info h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    line-height: 1.2;
+}
+
+.peca-preco {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--verde);
+}
+
+.peca-info .badge {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #ece7dd;
+    color: #665e50;
+}
+
+.peca-info .badge.reservado {
+    background: #e3ecf5;
+    color: #3d5f80;
+}
+
+.peca-descricao h2 {
+    margin-bottom: 6px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+.peca-descricao p {
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.peca-detalhes {
+    list-style: none;
+    padding: 14px 16px;
+    border: 1px dashed #e0d3b4;
+    border-radius: 16px;
+    background: #fffdf7;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.peca-detalhes span {
+    color: var(--dourado);
+    margin-right: 6px;
+}
+
+.peca-acoes .btn-sacola {
+    margin-top: 0;
+    padding: 14px;
+    font-size: 15px;
+}
+
+.peca-acoes-secundarias {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.peca-acoes .favorito {
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
+}
+
+.btn-compartilhar {
+    padding: 12px 18px;
+    border: 1px solid #e6dcc3;
+    border-radius: 12px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    cursor: pointer;
+}
+
+.btn-compartilhar:hover {
+    background: #f7f0e3;
+}
+
+.link-sacola {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--dourado);
+}
+
+.peca-aviso {
+    min-height: 1.2em;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--verde);
+}
+
+.peca-indisponivel {
+    padding: 14px;
+    border-radius: 12px;
+    background: #f1ece2;
+    font-size: 14px;
+    color: #665e50;
+    text-align: center;
+}
+
+/* SEMELHANTES */
+
+.peca-semelhantes {
+    margin-top: 48px;
+}
+
+.peca-semelhantes h2 {
+    margin-bottom: 18px;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+}
+
+@media (max-width: 900px) {
+    .peca {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .peca-info h1 {
+        font-size: 28px;
+    }
+}
