@@ -55,6 +55,19 @@ Opcional: para ter os dados de demonstração também na Render, adicione as var
 - **Meu perfil → Baixar meus dados:** a pessoa baixa um `.json` com tudo o que a loja guarda sobre ela.
 - **Meu perfil → Excluir minha conta:** apaga nome, CPF, e-mail, telefone e cidade. Os pedidos continuam no financeiro, sem identificação. A exclusão fica bloqueada enquanto houver pedido não entregue, peça da pessoa ainda na loja ou se ela for a única funcionária.
 
+## Cadastro em lote com o Gemini
+
+Em **Produtos → Cadastro em lote** (`/painel/lote`), a funcionária escolhe várias fotos de uma vez. Cada foto vira uma peça "Em avaliação"; depois é só revisar e publicar.
+
+Para o nome, a categoria, a descrição e o preço virem preenchidos, crie uma chave grátis em [Google AI Studio](https://aistudio.google.com) e coloque na Render:
+
+| Variável | Para quê |
+|---|---|
+| `GEMINI_API_KEY` | a chave do Google AI Studio |
+| `GEMINI_MODELO` | opcional; padrão `gemini-3.5-flash-lite` |
+
+No plano gratuito não há cobrança enquanto o faturamento não for ativado na conta do Google: quando o limite acaba, o Google só recusa os pedidos, e a tela espera e tenta de novo. No plano gratuito o Google pode usar as fotos enviadas para melhorar os produtos dele (só fotos das peças são enviadas).
+
 ## Rotas
 
 | Página | Endereço |
@@ -67,7 +80,7 @@ Opcional: para ter os dados de demonstração também na Render, adicione as var
 | Redefinir senha (link do e-mail) | `/redefinir-senha` |
 | Cliente | `/inicio`, `/explorar`, `/favoritos`, `/sacola`, `/compras`, `/perfil` |
 | Vender para a loja | `/vender` |
-| Funcionária | `/painel`, `/painel/produtos`, `/painel/pedidos`, `/painel/calendario`, `/painel/financeiro`, `/painel/clientes` |
+| Funcionária | `/painel`, `/painel/produtos`, `/painel/lote`, `/painel/pedidos`, `/painel/calendario`, `/painel/financeiro`, `/painel/clientes` |
 
 ## E-mail (recuperação de senha)
 

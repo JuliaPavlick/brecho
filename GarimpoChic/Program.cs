@@ -43,6 +43,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHsts(o => o.MaxAge = TimeSpan.FromDays(365));
 
 builder.Services.AddSingleton<Email>();
+builder.Services.AddHttpClient<Gemini>(c => c.Timeout = TimeSpan.FromSeconds(60));
 builder.Services.AddSingleton<RedefinicaoSenha>();
 
 // As telas que usam fetch() mandam o token neste cabeçalho

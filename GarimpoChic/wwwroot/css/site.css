@@ -391,3 +391,243 @@ a.botao-topo {
         text-align: left;
     }
 }
+
+/* CADASTRO EM LOTE */
+
+.aviso-lote {
+    margin: 24px 0 0;
+    padding: 14px 18px;
+    border: 1px solid #e3cf9c;
+    border-radius: 14px;
+    background: #fbf3df;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #5a4f3c;
+}
+
+.lote-envio {
+    margin-top: 24px;
+    padding: 24px;
+}
+
+.area-fotos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 32px 16px;
+    border: 2px dashed #d4c49a;
+    border-radius: 18px;
+    background: #fbf7ee;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.area-fotos:hover {
+    background: #f5eddc;
+}
+
+.area-fotos-icone {
+    font-size: 34px;
+}
+
+.area-fotos strong {
+    font-size: 16px;
+    color: var(--texto, #3a2e1a);
+}
+
+.area-fotos span:last-child {
+    font-size: 13px;
+    color: #776843;
+}
+
+#fotos-lote {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.lote-opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    font-size: 14px;
+}
+
+.lote-opcoes select,
+.lote-campos input,
+.lote-campos select,
+.lote-campos textarea {
+    padding: 10px 12px;
+    border: 1px solid #e6dcc3;
+    border-radius: 10px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto, #3a2e1a);
+}
+
+.lote-opcoes .btn-primario {
+    margin-left: auto;
+}
+
+.btn-primario:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.lote-progresso {
+    margin-top: 14px;
+    font-size: 14px;
+    color: #4c6b44;
+    min-height: 1.2em;
+}
+
+.lote-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 16px;
+}
+
+.lote-cabecalho h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+}
+
+.lote-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 18px;
+}
+
+.lote-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #eadfc8;
+    border-radius: 18px;
+    background: #fffdf7;
+}
+
+.lote-foto {
+    flex: 0 0 140px;
+    height: 180px;
+    border-radius: 12px;
+    background: #f3ecdc;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lote-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lote-campos {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.lote-campos label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #776843;
+}
+
+.lote-campos input,
+.lote-campos select,
+.lote-campos textarea {
+    width: 100%;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.lote-campos textarea {
+    resize: vertical;
+}
+
+.lote-linha {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.lote-erro {
+    min-height: 1em;
+    font-size: 13px;
+    color: #a2382b;
+}
+
+.lote-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lote-acoes .btn-primario,
+.lote-acoes .btn-secundario {
+    padding: 10px 16px;
+}
+
+.vazio-lote {
+    display: none;
+    padding: 40px 0;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: #776843;
+}
+
+.voltar-produtos {
+    margin-top: 28px;
+    font-size: 14px;
+}
+
+.voltar-produtos a {
+    color: #8b6d38;
+}
+
+@media (max-width: 700px) {
+    .lote-grade {
+        grid-template-columns: 1fr;
+    }
+
+    .lote-card {
+        flex-direction: column;
+    }
+
+    .lote-foto {
+        flex-basis: auto;
+        height: 240px;
+    }
+
+    .lote-opcoes .btn-primario {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+a.btn-lote {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    white-space: nowrap;
+}

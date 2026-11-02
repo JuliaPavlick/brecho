@@ -1,0 +1,255 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Cadastro em lote";
+    ViewData["Menu"] = "produtos";
+
+    var geminiLigado = ViewData["GeminiLigado"] as bool? == true;
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Cadastro em lote ✦", "Suba várias fotos de uma vez: cada foto vira uma peça para você revisar")' />
+
+    @if (!geminiLigado)
+    {
+        <div class="aviso-lote">
+            <strong>O preenchimento automático está desligado.</strong>
+            Para ligar, crie uma chave grátis no Google AI Studio e coloque na variável <code>GEMINI_API_KEY</code> da Render.
+            Enquanto isso, as fotos entram como "Peça nova" para você preencher aqui mesmo.
+        </div>
+    }
+
+    <!-- ENVIO -->
+
+    <form class="painel lote-envio" id="form-lote">
+
+        <label class="area-fotos" for="fotos-lote">
+            <span class="area-fotos-icone" aria-hidden="true">📷</span>
+            <strong id="texto-fotos">Escolher fotos</strong>
+            <span>Uma peça por foto · JPG, PNG ou WebP · dá para tirar na hora pelo celular</span>
+        </label>
+        <input type="file" id="fotos-lote" accept="image/jpeg,image/png,image/webp" multiple data-reduzir>
+
+        <div class="lote-opcoes">
+            <label for="categoria-lote">Categoria</label>
+            <select id="categoria-lote">
+                <option value="">@(geminiLigado ? "Deixar o Gemini escolher" : "Escolher depois")</option>
+                @foreach (var c in Categorias.Todas)
+                {
+                    <option value="@c.Nome">Todas são @c.Nome</option>
+                }
+            </select>
+
+            <button type="submit" class="btn-primario" id="btn-enviar" disabled>Enviar fotos</button>
+        </div>
+
+        <p class="lote-progresso" id="progresso" role="status"></p>
+
+    </form>
+
+    <!-- REVISÃO -->
+
+    <div class="lote-cabecalho">
+        <h3>Para revisar <span id="qtd"></span></h3>
+        <button type="button" class="btn-secundario" id="btn-publicar-todas">Publicar todas</button>
+    </div>
+
+    <div class="lote-grade" id="rascunhos"></div>
+
+    <p class="vazio-lote" id="vazio">Nenhuma peça esperando revisão ✦</p>
+
+    <p class="voltar-produtos"><a href="/painel/produtos">← Voltar para Produtos</a></p>
+
+</main>
+
+@section Scripts {
+    <script>
+        const CATEGORIAS = @Json.Serialize(Categorias.Todas.Select(c => c.Nome));
+        const GEMINI = @(geminiLigado ? "true" : "false");
+        const grade = document.getElementById('rascunhos');
+        const progresso = document.getElementById('progresso');
+        const campoFotos = document.getElementById('fotos-lote');
+        const btnEnviar = document.getElementById('btn-enviar');
+
+        const espera = ms => new Promise(ok => setTimeout(ok, ms));
+
+        function atualizarContagem() {
+            const n = grade.children.length;
+            document.getElementById('qtd').textContent = n ? `(${n})` : '';
+            document.getElementById('vazio').style.display = n ? 'none' : 'block';
+            document.getElementById('btn-publicar-todas').style.display = n ? '' : 'none';
+        }
+
+        function cartao(p, erro) {
+            const el = document.createElement('article');
+            el.className = 'lote-card';
+            el.dataset.id = p.id;
+            el.innerHTML = `
+                <div class="lote-foto">${p.foto ? `<img src="${esc(p.foto)}" alt="">` : '✦'}</div>
+                <div class="lote-campos">
+                    <label>Nome <input name="nome" maxlength="120" value="${esc(p.nome)}"></label>
+                    <div class="lote-linha">
+                        <label>Categoria
+                            <select name="categoria">${CATEGORIAS.map(c =>
+                                `<option ${c === p.categoria ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+                        </label>
+                        <label>Preço (R$) <input name="preco" type="number" min="0" step="0.01" value="${p.preco || ''}"></label>
+                    </div>
+                    <label>Descrição <textarea name="descricao" maxlength="500" rows="3">${esc(p.descricao)}</textarea></label>
+                    <p class="lote-erro" role="alert">${esc(erro || '')}</p>
+                    <div class="lote-acoes">
+                        <button type="button" class="btn-primario" data-acao="publicar">Publicar</button>
+                        <button type="button" class="btn-secundario" data-acao="salvar">Salvar</button>
+                        ${GEMINI ? '<button type="button" class="btn-acao" data-acao="ia">✨ Preencher de novo</button>' : ''}
+                        <button type="button" class="btn-acao perigo" data-acao="excluir">Excluir</button>
+                    </div>
+                </div>`;
+            return el;
+        }
+
+        function preencher(el, p) {
+            el.querySelector('[name=nome]').value = p.nome;
+            el.querySelector('[name=categoria]').value = p.categoria;
+            el.querySelector('[name=preco]').value = p.preco || '';
+            el.querySelector('[name=descricao]').value = p.descricao;
+        }
+
+        function avisar(el, texto) {
+            el.querySelector('.lote-erro').textContent = texto || '';
+        }
+
+        // Salva usando o mesmo endereço da tela de Produtos; "publicar" muda o status para Disponível
+        function salvar(el, status) {
+            const preco = el.querySelector('[name=preco]').value;
+            const nome = el.querySelector('[name=nome]').value.trim();
+            if (!nome || !(Number(preco) > 0)) {
+                avisar(el, 'Preencha o nome e um preço maior que zero.');
+                return Promise.resolve(false);
+            }
+
+            const dados = new FormData();
+            dados.append('nome', nome);
+            dados.append('categoria', el.querySelector('[name=categoria]').value);
+            dados.append('preco', preco);
+            dados.append('descricao', el.querySelector('[name=descricao]').value.trim());
+            dados.append('status', status);
+
+            return postar('/painel/produtos/' + el.dataset.id, dados)
+                .then(() => { avisar(el, ''); return true; })
+                .catch(() => { avisar(el, 'Não foi possível salvar. Tente de novo.'); return false; });
+        }
+
+        // Quando o limite grátis do Gemini acaba, espera e tenta de novo (até 3 vezes)
+        async function tentarIaDeNovo(el, tentativas = 3) {
+            for (let i = 1; i <= tentativas; i++) {
+                for (let s = 30; s > 0; s--) {
+                    progresso.textContent = `Limite gratuito do Gemini atingido. Tentando de novo em ${s}s…`;
+                    await espera(1000);
+                }
+                const r = await postar(`/painel/lote/${el.dataset.id}/ia`).catch(() => null);
+                if (r && !r.limite) {
+                    preencher(el, r.peca);
+                    avisar(el, r.erro);
+                    return;
+                }
+            }
+            avisar(el, 'O limite gratuito do Gemini acabou. Use "Preencher de novo" mais tarde.');
+        }
+
+        grade.addEventListener('click', async e => {
+            const btn = e.target.closest('button[data-acao]');
+            if (!btn) return;
+            const el = btn.closest('.lote-card');
+
+            btn.disabled = true;
+            try {
+                if (btn.dataset.acao === 'publicar') {
+                    if (await salvar(el, 'disponivel')) { el.remove(); atualizarContagem(); }
+                } else if (btn.dataset.acao === 'salvar') {
+                    if (await salvar(el, 'avaliacao')) avisar(el, 'Salvo ✓');
+                } else if (btn.dataset.acao === 'ia') {
+                    avisar(el, 'Consultando o Gemini…');
+                    const r = await postar(`/painel/lote/${el.dataset.id}/ia`);
+                    if (r.limite) await tentarIaDeNovo(el);
+                    else { preencher(el, r.peca); avisar(el, r.erro); }
+                } else if (btn.dataset.acao === 'excluir') {
+                    if (confirm('Excluir esta peça?')) {
+                        await postar(`/painel/produtos/${el.dataset.id}/excluir`);
+                        el.remove();
+                        atualizarContagem();
+                    }
+                }
+            } catch {
+                avisar(el, 'Não foi possível concluir. Tente de novo.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-publicar-todas').addEventListener('click', async e => {
+            const btn = e.currentTarget;
+            const cartoes = [...grade.children];
+            if (!confirm(`Publicar as ${cartoes.length} peças na loja? As que estiverem sem nome ou sem preço ficam para revisar.`)) return;
+
+            btn.disabled = true;
+            let publicadas = 0;
+            for (const el of cartoes) {
+                if (await salvar(el, 'disponivel')) { el.remove(); publicadas++; }
+            }
+            atualizarContagem();
+            progresso.textContent = `${publicadas} ${publicadas === 1 ? 'peça publicada' : 'peças publicadas'}.`;
+            btn.disabled = false;
+        });
+
+        campoFotos.addEventListener('change', () => {
+            const n = campoFotos.files.length;
+            document.getElementById('texto-fotos').textContent =
+                n ? `${n} ${n === 1 ? 'foto escolhida' : 'fotos escolhidas'}` : 'Escolher fotos';
+            btnEnviar.disabled = n === 0;
+        });
+
+        // Envia uma foto por vez: o servidor cria a peça e pede o preenchimento ao Gemini
+        document.getElementById('form-lote').addEventListener('submit', async e => {
+            e.preventDefault();
+            const arquivos = [...campoFotos.files];
+            if (!arquivos.length) return;
+
+            const categoria = document.getElementById('categoria-lote').value;
+            btnEnviar.disabled = true;
+            campoFotos.disabled = true;
+            let falhas = 0;
+
+            for (let i = 0; i < arquivos.length; i++) {
+                progresso.textContent = `Enviando foto ${i + 1} de ${arquivos.length}${GEMINI ? ' e preenchendo com o Gemini' : ''}…`;
+
+                const dados = new FormData();
+                dados.append('foto', arquivos[i]);
+                dados.append('categoria', categoria);
+
+                try {
+                    const r = await postar('/painel/lote/foto', dados);
+                    const el = cartao(r.peca, r.erro);
+                    grade.prepend(el);
+                    atualizarContagem();
+                    if (r.limite) await tentarIaDeNovo(el);
+                } catch {
+                    falhas++;
+                }
+            }
+
+            progresso.textContent = `Pronto: ${arquivos.length - falhas} de ${arquivos.length} fotos viraram peças.` +
+                (falhas ? ` ${falhas} não foram aceitas (confira se são fotos JPG, PNG ou WebP).` : ' Revise abaixo e publique.');
+            campoFotos.value = '';
+            campoFotos.disabled = false;
+            document.getElementById('texto-fotos').textContent = 'Escolher fotos';
+        });
+
+        (@Json.Serialize(Model)).forEach(p => grade.appendChild(cartao(p)));
+        atualizarContagem();
+    </script>
+}

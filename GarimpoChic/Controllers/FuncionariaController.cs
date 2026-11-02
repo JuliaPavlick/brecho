@@ -144,6 +144,81 @@ public class FuncionariaController(BrechoContext db) : Controller
         return Ok();
     }
 
+    // ---------- Cadastro em lote ----------
+    // Cada foto vira uma peça "Em avaliação" da própria loja. Se o Gemini estiver ligado, ele preenche
+    // nome, categoria, descrição e preço; a funcionária revisa e publica.
+
+    [HttpGet("lote")]
+    public async Task<IActionResult> Lote([FromServices] Gemini gemini)
+    {
+        var rascunhos = await db.Produtos
+            .Where(p => p.Status == StatusProduto.Avaliacao && p.VendedoraId == null)
+            .OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)
+            .Select(p => new Produto
+            {
+                Id = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
+                Status = p.Status, CriadoEm = p.CriadoEm,
+                Fotos = p.Fotos.Select(f => new ProdutoFoto { Id = f.Id }).ToList(),
+            })
+            .ToListAsync();
+
+        ViewData["GeminiLigado"] = gemini.Configurado;
+        return View(rascunhos.Select(ProdutoJson).ToList());
+    }
+
+    [HttpPost("lote/foto")]
+    [RequestSizeLimit(12_000_000)]
+    public async Task<IActionResult> LoteFoto(IFormFile? foto, string? categoria, [FromServices] Gemini gemini)
+    {
+        var fotos = await Fotos.LerAsync(foto == null ? null : [foto]);
+        if (fotos.Count == 0) return BadRequest(new { erro = "Arquivo não é uma foto JPG, PNG ou WebP de até 5 MB." });
+
+        var p = new Produto
+        {
+            Nome = "Peça nova",
+            Categoria = Categorias.Existe(categoria ?? "") ? categoria! : Categorias.Roupas,
+            Status = StatusProduto.Avaliacao,
+            Fotos = fotos,
+        };
+
+        var (erro, limite) = await PreencherAsync(p, fotos[0], gemini, manterCategoria: Categorias.Existe(categoria ?? ""));
+
+        db.Produtos.Add(p);
+        await db.SaveChangesAsync();
+        return Json(new { peca = ProdutoJson((await BuscarProduto(p.Id))!), erro, limite });
+    }
+
+    // Tenta o preenchimento automático de novo (ex.: o limite gratuito tinha acabado)
+    [HttpPost("lote/{id:int}/ia")]
+    public async Task<IActionResult> LoteIa(int id, [FromServices] Gemini gemini)
+    {
+        var p = await db.Produtos.FindAsync(id);
+        if (p == null) return NotFound();
+
+        var foto = await db.ProdutoFotos.Where(f => f.ProdutoId == id).OrderBy(f => f.Id).FirstOrDefaultAsync();
+        if (foto == null) return BadRequest(new { erro = "Esta peça não tem foto." });
+
+        var (erro, limite) = await PreencherAsync(p, foto, gemini, manterCategoria: false);
+        await db.SaveChangesAsync();
+        return Json(new { peca = ProdutoJson((await BuscarProduto(p.Id))!), erro, limite });
+    }
+
+    // Devolve o motivo quando o Gemini não preencheu (a peça fica como está, para preencher à mão)
+    static async Task<(string? Erro, bool Limite)> PreencherAsync(Produto p, ProdutoFoto foto, Gemini gemini, bool manterCategoria)
+    {
+        // Sem chave, a tela já avisa no topo; a peça entra para ser preenchida à mão
+        if (!gemini.Configurado) return (null, false);
+
+        var (sugestao, erro, limite) = await gemini.SugerirAsync(foto.Dados, foto.ContentType);
+        if (sugestao == null) return (erro, limite);
+
+        p.Nome = sugestao.Nome;
+        p.Descricao = sugestao.Descricao;
+        if (!manterCategoria) p.Categoria = sugestao.Categoria;
+        if (sugestao.Preco > 0) p.Preco = sugestao.Preco;
+        return (null, false);
+    }
+
     // ---------- Pedidos ----------
 
     [HttpGet("pedidos")]
