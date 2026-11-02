@@ -1,0 +1,106 @@
+@{
+    var menu = ViewData["Menu"] as string;
+    string Ativo(string item) => item == menu ? "ativo" : "";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <partial name="_Head" />
+    <link rel="stylesheet" href="~/css/dashboard_cliente.css" asp-append-version="true">
+    @RenderSection("Estilos", required: false)
+</head>
+
+<body>
+
+    <partial name="_Decoracao" />
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div>
+
+            <!-- LOGO -->
+
+            <div class="logo">
+
+                <div class="logo-circulo">
+                    <div class="logo-interno">
+                        <span class="logo-o">O</span>
+                        <span class="logo-garimpo">Garimpo</span>
+                        <span class="logo-chic">Chic</span>
+                        <span class="logo-brecho">Brechó</span>
+                    </div>
+                </div>
+
+                <div class="logo-texto">
+                    <h1>Garimpo Chic</h1>
+                    <p>Curado com carinho</p>
+                </div>
+
+            </div>
+
+            <!-- MENU -->
+
+            <nav class="menu">
+
+                <a href="/inicio" class="@Ativo("inicio")">
+                    <span class="icone">
+                        <img src="~/img/casa.png" alt="Início">
+                    </span>
+                    <span class="texto-menu">Início</span>
+                </a>
+
+                <a href="/explorar" class="@Ativo("explorar")">
+                    <span class="icone">
+                        <img src="~/img/lupa.png" alt="Explorar">
+                    </span>
+                    <span class="texto-menu">Explorar</span>
+                </a>
+
+                <a href="/favoritos" class="@Ativo("favoritos")">
+                    <span class="icone">
+                        <img src="~/img/coracao.png" alt="Favoritos">
+                    </span>
+                    <span class="texto-menu">Favoritos</span>
+                </a>
+
+                <a href="/compras" class="@Ativo("compras")">
+                    <span class="icone">
+                        <img src="~/img/bolsa.png" alt="Compras">
+                    </span>
+                    <span class="texto-menu">Compras</span>
+                </a>
+
+                <a href="/perfil" class="@Ativo("perfil")">
+                    <span class="icone">
+                        <img src="~/img/pessoa.png" alt="Perfil">
+                    </span>
+                    <span class="texto-menu">Perfil</span>
+                </a>
+
+            </nav>
+
+        </div>
+
+        <!-- LOGOUT -->
+
+        <div class="logout">
+
+            <a href="/sair">
+                <span class="icone">↩</span>
+                <span class="texto-menu">Logout</span>
+            </a>
+
+        </div>
+
+    </aside>
+
+    @RenderBody()
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+
+</html>

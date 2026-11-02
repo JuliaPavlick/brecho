@@ -1,0 +1,13 @@
+@model (string Titulo, string Subtitulo)
+@{
+    var eu = (Usuario)ViewData["Usuario"]!;
+}
+
+<div class="topo">
+    <div>
+        <h2>@Model.Titulo</h2>
+        <p>@Model.Subtitulo</p>
+    </div>
+
+    <div class="foto">@eu.Inicial</div>
+</div>

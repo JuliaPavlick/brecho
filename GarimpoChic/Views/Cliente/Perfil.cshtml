@@ -1,0 +1,176 @@
+@model Usuario
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Perfil";
+    ViewData["Menu"] = "perfil";
+
+    var papel = Model.EhFuncionaria ? "Funcionária Garimpo Chic"
+        : Model.EhVendedora ? "Vendedora Garimpo Chic"
+        : "Cliente Garimpo Chic";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/perfil.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoCliente" model='("Meu perfil", "Mantenha seus dados sempre atualizados")' />
+
+    <div class="perfil-grid">
+
+        <!-- RESUMO -->
+
+        <aside class="perfil-resumo">
+
+            <div class="avatar">@Model.Inicial</div>
+
+            <h3>@Model.PrimeiroNome</h3>
+            <p class="resumo-sub">@papel</p>
+
+            <div class="resumo-numeros">
+                <div>
+                    <strong>@ViewData["TotalPedidos"]</strong>
+                    <span>Pedidos</span>
+                </div>
+                <div>
+                    <strong>@ViewData["TotalFavoritos"]</strong>
+                    <span>Favoritos</span>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- FORMULÁRIOS -->
+
+        <div class="perfil-forms">
+
+            <form class="painel-form" id="form-dados" action="/perfil/dados" method="post" asp-antiforgery="true" novalidate>
+
+                <h3>Dados pessoais</h3>
+
+                @if (TempData["ErroDados"] is string erroDados)
+                {
+                    <div class="alerta-erro">@erroDados</div>
+                }
+
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" name="nome" value="@Model.Nome">
+                        <span class="erro-campo" id="erro-nome">Informe seu nome.</span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" value="@Formato.Cpf(Model.Cpf)" disabled>
+                    </div>
+                </div>
+
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" value="@Model.Email">
+                        <span class="erro-campo" id="erro-email">Informe um e-mail válido.</span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="telefone">Telefone</label>
+                        <input type="text" id="telefone" name="telefone" value="@Model.Telefone" maxlength="15">
+                        <span class="erro-campo" id="erro-telefone">Informe um telefone válido.</span>
+                    </div>
+                </div>
+
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="cidade">Cidade</label>
+                        <input type="text" id="cidade" name="cidade" value="@Model.Cidade">
+                    </div>
+
+                    <div class="campo">
+                        <label for="estado">Estado</label>
+                        <input type="text" id="estado" name="estado" value="@Model.Estado" maxlength="2">
+                    </div>
+                </div>
+
+                <div class="acoes-form">
+                    <span class="msg-sucesso" id="msg-dados" style="@(TempData["OkDados"] != null ? "display:inline" : "")">Dados salvos ✦</span>
+                    <button type="submit" class="btn-salvar">Salvar alterações</button>
+                </div>
+
+            </form>
+
+            <form class="painel-form" id="form-senha" action="/perfil/senha" method="post" asp-antiforgery="true" novalidate>
+
+                <h3>Alterar senha</h3>
+
+                @if (TempData["ErroSenha"] is string erroSenha)
+                {
+                    <div class="alerta-erro">@erroSenha</div>
+                }
+
+                <div class="campo">
+                    <label for="senha-atual">Senha atual</label>
+                    <input type="password" id="senha-atual" name="atual" autocomplete="current-password">
+                    <span class="erro-campo" id="erro-senha-atual">Informe sua senha atual.</span>
+                </div>
+
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="senha-nova">Nova senha</label>
+                        <input type="password" id="senha-nova" name="nova" autocomplete="new-password">
+                        <span class="erro-campo" id="erro-senha-nova">Use pelo menos 8 caracteres.</span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="senha-confirma">Confirmar nova senha</label>
+                        <input type="password" id="senha-confirma" autocomplete="new-password">
+                        <span class="erro-campo" id="erro-senha-confirma">As senhas não coincidem.</span>
+                    </div>
+                </div>
+
+                <div class="acoes-form">
+                    <span class="msg-sucesso" id="msg-senha" style="@(TempData["OkSenha"] != null ? "display:inline" : "")">Senha alterada ✦</span>
+                    <button type="submit" class="btn-salvar">Alterar senha</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+
+@section Scripts {
+    <script>
+        const telefone = document.getElementById('telefone');
+
+        mascaraTelefone(telefone);
+
+        // Esconde a confirmação "salvo" depois de alguns segundos
+        document.querySelectorAll('.msg-sucesso').forEach(msg => {
+            if (msg.style.display) setTimeout(() => msg.style.display = 'none', 3000);
+        });
+
+        document.getElementById('form-dados').addEventListener('submit', e => {
+            const okNome = mostrarErro('erro-nome', document.getElementById('nome').value.trim() !== '');
+            const okEmail = mostrarErro('erro-email', /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(document.getElementById('email').value));
+            const okTel = mostrarErro('erro-telefone', telefone.value.replace(/\D/g, '').length >= 10);
+
+            if (!okNome || !okEmail || !okTel) e.preventDefault();
+        });
+
+        document.getElementById('form-senha').addEventListener('submit', e => {
+            const atual = document.getElementById('senha-atual').value;
+            const nova = document.getElementById('senha-nova').value;
+            const confirma = document.getElementById('senha-confirma').value;
+
+            const okAtual = mostrarErro('erro-senha-atual', atual !== '');
+            const okNova = mostrarErro('erro-senha-nova', nova.length >= 8);
+            const okConfirma = mostrarErro('erro-senha-confirma', nova === confirma && confirma !== '');
+
+            if (!okAtual || !okNova || !okConfirma) e.preventDefault();
+        });
+    </script>
+}

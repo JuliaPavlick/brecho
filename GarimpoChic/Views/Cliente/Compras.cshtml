@@ -1,0 +1,101 @@
+@model List<Pedido>
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Compras";
+    ViewData["Menu"] = "compras";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/compras.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoCliente" model='("Minhas compras", "Acompanhe seus pedidos no Garimpo Chic")' />
+
+    <!-- FILTROS DE STATUS -->
+
+    <div class="chips">
+        <button class="chip ativo" data-status="todos">Todos</button>
+        @foreach (var s in StatusPedido.Nomes)
+        {
+            <button class="chip" data-status="@s.Key">@s.Value</button>
+        }
+    </div>
+
+    <p class="contador" id="contador"></p>
+
+    <!-- PEDIDOS -->
+
+    <div class="pedidos" id="lista">
+
+        @foreach (var pedido in Model)
+        {
+            <div class="pedido" data-status="@pedido.Status">
+                <div class="pedido-topo">
+                    <div>
+                        <h4>Pedido @pedido.Numero</h4>
+                        <p>@Formato.DataExtenso(pedido.Data)</p>
+                    </div>
+                    <span class="status @pedido.Status">@StatusPedido.Nomes.GetValueOrDefault(pedido.Status)</span>
+                </div>
+
+                <div class="pedido-itens">
+                    @foreach (var item in pedido.Itens)
+                    {
+                        <div class="item">
+                            <div class="item-img">@item.Emoji</div>
+                            <div class="item-info">
+                                <h5>@item.Nome</h5>
+                                <p>@item.Descricao</p>
+                            </div>
+                            <span class="item-preco">@Formato.Moeda(item.Preco)</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="pedido-rodape">
+                    <span>Total</span>
+                    <strong>@Formato.Moeda(pedido.Total)</strong>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <p class="vazio" id="vazio">Nenhum pedido nesta categoria ✦</p>
+
+</main>
+
+@section Scripts {
+    <script>
+        const pedidos = document.querySelectorAll('.pedido');
+        const chips = document.querySelectorAll('.chip');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+
+        function filtrar(status) {
+            let total = 0;
+
+            pedidos.forEach(p => {
+                const mostrar = status === 'todos' || p.dataset.status === status;
+                p.style.display = mostrar ? '' : 'none';
+                if (mostrar) total++;
+            });
+
+            contador.textContent = total + (total === 1 ? ' pedido' : ' pedidos');
+            vazio.style.display = total === 0 ? 'block' : 'none';
+        }
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                filtrar(chip.dataset.status);
+            });
+        });
+
+        filtrar('todos');
+    </script>
+}

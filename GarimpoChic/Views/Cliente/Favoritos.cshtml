@@ -1,0 +1,75 @@
+@model List<ProdutoCard>
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Favoritos";
+    ViewData["Menu"] = "favoritos";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/favoritos.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoCliente" model='("Favoritos", "As peças que conquistaram você")' />
+
+    <p class="contador" id="contador"></p>
+
+    <!-- PRODUTOS -->
+
+    <div class="produtos" id="lista">
+
+        @foreach (var p in Model)
+        {
+            <partial name="_ProdutoCard" model="p" />
+        }
+
+    </div>
+
+    <!-- ESTADO VAZIO -->
+
+    <div class="vazio-favoritos" id="vazio">
+        <div class="vazio-icone">🖤</div>
+        <h3>Nenhum favorito por aqui</h3>
+        <p>Toque no coração das peças que você ama para guardá-las nesta lista.</p>
+        <a href="/explorar">Explorar peças</a>
+    </div>
+
+</main>
+
+@section Scripts {
+    <script>
+        const lista = document.getElementById('lista');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+
+        function atualizar() {
+            const total = lista.querySelectorAll('.produto').length;
+
+            contador.textContent = total + (total === 1 ? ' peça favorita' : ' peças favoritas');
+            contador.style.display = total === 0 ? 'none' : 'block';
+            lista.style.display = total === 0 ? 'none' : '';
+            vazio.style.display = total === 0 ? 'block' : 'none';
+        }
+
+        lista.addEventListener('click', e => {
+            const btn = e.target.closest('.favorito');
+            if (!btn) return;
+
+            alternarFavorito(btn).then(favorito => {
+                if (favorito) return;
+
+                const card = btn.closest('.produto');
+                card.classList.add('saindo');
+
+                setTimeout(() => {
+                    card.remove();
+                    atualizar();
+                }, 250);
+            }).catch(falhou);
+        });
+
+        atualizar();
+    </script>
+}

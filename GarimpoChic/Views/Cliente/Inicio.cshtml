@@ -1,0 +1,107 @@
+@model List<ProdutoCard>
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Início";
+    ViewData["Menu"] = "inicio";
+    var eu = (Usuario)ViewData["Usuario"]!;
+}
+
+<!-- CONTEÚDO -->
+
+<main class="conteudo">
+
+    <!-- TOPO -->
+
+    <div class="topo">
+
+        <div>
+
+            <h2>Olá, @eu.PrimeiroNome ✨</h2>
+
+            <p>
+                Bem-vinda ao Garimpo Chic
+            </p>
+
+        </div>
+
+        <div class="acoes-topo">
+
+            <a href="/explorar" class="botao-topo">
+                Novidades
+            </a>
+
+            <div class="foto">
+                @eu.Inicial
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-texto">
+
+            <span>NOVA COLEÇÃO</span>
+
+            <h1>
+                Peças únicas escolhidas com carinho
+            </h1>
+
+            <p>
+                Descubra novas peças vintage, elegantes e exclusivas disponíveis no brechó.
+            </p>
+
+            <button type="button" onclick="location.href='/explorar'">
+                Explorar agora
+            </button>
+
+        </div>
+
+        <div class="hero-imagem">
+            👗
+        </div>
+
+    </section>
+
+    <!-- PRODUTOS -->
+
+    <section class="secao">
+
+        <div class="secao-topo">
+
+            <h3>Peças para você</h3>
+
+            <a href="/explorar">
+                Ver tudo
+            </a>
+
+        </div>
+
+        <div class="produtos">
+
+            @foreach (var p in Model)
+            {
+                <partial name="_ProdutoCard" model="p" />
+            }
+
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <p>Nenhuma peça disponível no momento ✦</p>
+        }
+
+    </section>
+
+</main>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.favorito').forEach(btn => {
+            btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
+        });
+    </script>
+}

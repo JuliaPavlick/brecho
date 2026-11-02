@@ -1,0 +1,94 @@
+@{
+    var menu = ViewData["Menu"] as string;
+    string Ativo(string item) => item == menu ? "ativo" : "";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <partial name="_Head" />
+    <link rel="stylesheet" href="~/css/dashfunc.css" asp-append-version="true">
+    @RenderSection("Estilos", required: false)
+</head>
+
+<body>
+
+    <partial name="_Decoracao" />
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-circulo">
+                <div class="logo-interno">
+                    <span class="logo-o">O</span>
+                    <span class="logo-garimpo">Garimpo</span>
+                    <span class="logo-chic">Chic</span>
+                    <span class="logo-brecho">Brechó</span>
+                </div>
+            </div>
+
+            <div class="logo-texto">
+                <h1>Garimpo Chic</h1>
+                <p>Curado com carinho</p>
+            </div>
+
+        </div>
+
+        <nav class="menu">
+
+            <a href="/painel" class="@Ativo("dashboard")">
+                <span class="icone">
+                    <img src="~/img/grafico-preditivo.png" alt="Dashboard">
+                </span>
+                <span class="texto">Dashboard</span>
+            </a>
+
+            <a href="/painel/produtos" class="@Ativo("produtos")">
+                <span class="icone">
+                    <img src="~/img/vestido-de-casamento.png" alt="Produtos">
+                </span>
+                <span class="texto">Produtos</span>
+            </a>
+
+            <a href="/painel/pedidos" class="@Ativo("pedidos")">
+                <span class="icone">
+                    <img src="~/img/caixa.png" alt="Pedidos">
+                </span>
+                <span class="texto">Pedidos</span>
+            </a>
+
+            <a href="/painel/calendario" class="@Ativo("calendario")">
+                <span class="icone">
+                    <img src="~/img/calendario.png" alt="Calendário">
+                </span>
+                <span class="texto">Calendário</span>
+            </a>
+
+            <a href="/painel/financeiro" class="@Ativo("financeiro")">
+                <span class="icone">
+                    <img src="~/img/grafico-de-crescimento.png" alt="Financeiro">
+                </span>
+                <span class="texto">Financeiro</span>
+            </a>
+
+            <a href="/painel/clientes" class="@Ativo("clientes")">
+                <span class="icone">
+                    <img src="~/img/pessoas.png" alt="Clientes">
+                </span>
+                <span class="texto">Clientes</span>
+            </a>
+
+        </nav>
+
+    </aside>
+
+    @RenderBody()
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+@model Dictionary<string, Relatorios.Serie>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- Bloco do Painel com o Gráfico -->
+<div class="painel" style="background: #FFFDFB; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(216, 125, 154, 0.08); border: 1px solid #F5EAE6;">
+    <div class="painel-cabecalho" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h3 style="font-family: 'Playfair Display', serif; color: #4A3A3E; margin: 0; font-size: 1.25rem;">Movimento de Vendas ✦</h3>
+            <p style="font-family: 'Lato', sans-serif; color: #8C7A80; font-size: 0.85rem; margin: 4px 0 0 0;">Acompanhamento do desempenho financeiro</p>
+        </div>
+
+        <!-- Filtros de Período -->
+        <div class="filtros" style="display: flex; gap: 8px; background: #FDF7F5; padding: 4px; border-radius: 24px; border: 1px solid #F3E5E1;">
+            <button type="button" class="btn-filtro ativo" onclick="atualizarGrafico('semana', this)">Semana</button>
+            <button type="button" class="btn-filtro" onclick="atualizarGrafico('mes', this)">Mês</button>
+            <button type="button" class="btn-filtro" onclick="atualizarGrafico('ano', this)">Ano</button>
+        </div>
+    </div>
+
+    <!-- Contêiner do Gráfico Canvas -->
+    <div style="position: relative; height: 320px; width: 100%;">
+        <canvas id="graficoRosaChampanhe"></canvas>
+    </div>
+</div>
+
+<script>
+    // Vendas reais por período, calculadas no servidor
+    const DADOS_GRAFICO = @Json.Serialize(Model.ToDictionary(s => s.Key, s => new { labels = s.Value.Labels, valores = s.Value.Valores }));
+
+    const ctxGrafico = document.getElementById('graficoRosaChampanhe').getContext('2d');
+
+    // Gradiente suave no tom Rosa / Champanhe
+    const gradiente = ctxGrafico.createLinearGradient(0, 0, 0, 300);
+    gradiente.addColorStop(0, 'rgba(216, 125, 154, 0.35)'); // Rosa translúcido no topo
+    gradiente.addColorStop(1, 'rgba(247, 235, 228, 0.05)'); // Champanhe suave na base
+
+    let chartInstancia = new Chart(ctxGrafico, {
+        type: 'line',
+        data: {
+            labels: DADOS_GRAFICO.semana.labels,
+            datasets: [{
+                label: 'Vendas (R$)',
+                data: DADOS_GRAFICO.semana.valores,
+                borderColor: '#D87D9A',             // Rosa Principal
+                borderWidth: 3,
+                backgroundColor: gradiente,         // Gradiente Rosa & Champanhe
+                fill: true,
+                tension: 0.4,                       // Curvatura elegante na linha
+                pointBackgroundColor: '#D87D9A',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: '#B85D7A',
+                pointHoverBorderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#4A3A3E',       // Tom escuro de vinho/marrom para contraste
+                    titleFont: { family: 'Lato', size: 12 },
+                    bodyFont: { family: 'Lato', size: 14, weight: 'bold' },
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Lato', size: 12 }, color: '#8C7A80' }
+                },
+                y: {
+                    border: { dash: [4, 4] },
+                    grid: { color: '#F5EAE6' },      // Linhas de grade sutis tom Champanhe
+                    ticks: {
+                        font: { family: 'Lato', size: 12 },
+                        color: '#8C7A80',
+                        callback: function(value) { return 'R$ ' + value; }
+                    }
+                }
+            }
+        }
+    });
+
+    function atualizarGrafico(periodo, el) {
+        document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('ativo'));
+        el.classList.add('ativo');
+
+        chartInstancia.data.labels = DADOS_GRAFICO[periodo].labels;
+        chartInstancia.data.datasets[0].data = DADOS_GRAFICO[periodo].valores;
+        chartInstancia.update();
+    }
+</script>

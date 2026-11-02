@@ -1,0 +1,147 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Financeiro";
+    ViewData["Menu"] = "financeiro";
+
+    var rel = (Relatorios)ViewData["Relatorios"]!;
+    var mesAtual = Formato.Agora.ToString("MMMM", Formato.PtBr);
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/financeiro.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Financeiro ✦", "Vendas, repasses e resultado da loja")' />
+
+    <!-- CARDS -->
+
+    <section class="cards">
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-titulo">Receita do mês</span>
+                <span class="card-icone">
+                    <img src="~/img/sacola-dinheiro.png" alt="Receita">
+                </span>
+            </div>
+            <h3 class="card-valor">@Formato.Moeda(rel.ReceitaMes())</h3>
+            <p class="card-info">Total de vendas em @mesAtual</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-titulo">Repasses</span>
+                <span class="card-icone">
+                    <img src="~/img/pessoas.png" alt="Repasses">
+                </span>
+            </div>
+            <h3 class="card-valor">@Formato.Moeda(rel.RepassesMes())</h3>
+            <p class="card-info">Pago às vendedoras externas</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-titulo">Lucro bruto</span>
+                <span class="card-icone">
+                    <img src="~/img/grafico-de-crescimento.png" alt="Lucro">
+                </span>
+            </div>
+            <h3 class="card-valor">@Formato.Moeda(rel.LucroMes)</h3>
+            <p class="card-info">Receita menos repasses</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-titulo">Ticket médio</span>
+                <span class="card-icone">
+                    <img src="~/img/sacolas-de-compras.png" alt="Ticket médio">
+                </span>
+            </div>
+            <h3 class="card-valor">@Formato.Moeda(rel.TicketMedio)</h3>
+            <p class="card-info">Valor médio por peça vendida</p>
+        </div>
+
+    </section>
+
+    <!-- GRAFICO -->
+
+    <partial name="_GraficoVendas" model="rel.Grafico()" />
+
+    <!-- MOVIMENTACOES -->
+
+    <div class="painel painel-tabela">
+
+        <div class="cab-tabela">
+            <h3>Últimas movimentações</h3>
+
+            <div class="chips">
+                <button class="chip ativo" data-tipo="todos">Todas</button>
+                <button class="chip" data-tipo="venda">Vendas</button>
+                <button class="chip" data-tipo="repasse">Repasses</button>
+            </div>
+        </div>
+
+        <div class="tabela-wrap">
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th class="col-valor">Valor</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo"></tbody>
+            </table>
+        </div>
+
+        <p class="vazio" id="vazio">Nenhuma movimentação encontrada ✦</p>
+
+    </div>
+
+</main>
+
+@section Scripts {
+    <script>
+        const movimentacoes = @Json.Serialize(Model);
+
+        const TIPOS = {
+            venda: 'Venda',
+            repasse: 'Repasse'
+        };
+
+        const corpo = document.getElementById('corpo');
+        const vazio = document.getElementById('vazio');
+
+        function renderTabela(tipo) {
+            const lista = movimentacoes.filter(m => tipo === 'todos' || m.tipo === tipo);
+
+            corpo.innerHTML = lista.map(m => `
+                <tr>
+                    <td>${m.data}</td>
+                    <td>${esc(m.descricao)}</td>
+                    <td><span class="badge ${m.tipo === 'venda' ? 'disponivel' : 'avaliacao'}">${TIPOS[m.tipo]}</span></td>
+                    <td class="col-valor ${m.valor > 0 ? 'valor-entrada' : 'valor-saida'}">
+                        ${m.valor > 0 ? '+ ' : '− '}${moeda(Math.abs(m.valor))}
+                    </td>
+                </tr>
+            `).join('');
+
+            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                renderTabela(chip.dataset.tipo);
+            });
+        });
+
+        renderTabela('todos');
+    </script>
+}

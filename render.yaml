@@ -1,0 +1,26 @@
+# Blueprint da Render: cria o banco Postgres e o site de uma vez.
+# No painel da Render: New > Blueprint > escolha este repositório.
+databases:
+  - name: garimpo-db
+    plan: free
+    databaseName: garimpo
+    user: garimpo
+
+services:
+  - type: web
+    name: garimpo-chic
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: garimpo-db
+          property: connectionString
+      # Conta da primeira funcionária; a Render pede estes valores ao criar o Blueprint
+      - key: ADMIN_CPF
+        sync: false
+      - key: ADMIN_SENHA
+        sync: false
+      - key: ADMIN_NOME
+        sync: false

@@ -1,0 +1,118 @@
+@model List<ProdutoCard>
+@{
+    Layout = "_LayoutCliente";
+    ViewData["Title"] = "Explorar";
+    ViewData["Menu"] = "explorar";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
+}
+
+<!-- CONTEÚDO -->
+
+<main class="conteudo">
+
+    <partial name="_TopoCliente" model='("Explorar", "Encontre sua próxima peça favorita")' />
+
+    <!-- BUSCA + ORDENAR -->
+
+    <div class="explorar-barra">
+
+        <div class="busca">
+            <span class="busca-icone">🔎</span>
+            <input type="text" id="busca" placeholder="Buscar por nome da peça...">
+        </div>
+
+        <select id="ordenar" class="ordenar">
+            <option value="relevancia">Relevância</option>
+            <option value="menor">Menor preço</option>
+            <option value="maior">Maior preço</option>
+        </select>
+
+    </div>
+
+    <!-- CATEGORIAS -->
+
+    <div class="chips">
+        <button class="chip ativo" data-categoria="todos">Todos</button>
+        @foreach (var c in Categorias.Todas)
+        {
+            <button class="chip" data-categoria="@c.Slug">@c.Nome</button>
+        }
+    </div>
+
+    <p class="contador" id="contador"></p>
+
+    <!-- PRODUTOS -->
+
+    <div class="produtos" id="lista">
+
+        @foreach (var p in Model)
+        {
+            <partial name="_ProdutoCard" model="p" />
+        }
+
+    </div>
+
+    <p class="vazio" id="vazio">Nenhuma peça encontrada ✦</p>
+
+</main>
+
+@section Scripts {
+    <script>
+        const lista = document.getElementById('lista');
+        const produtos = Array.from(document.querySelectorAll('.produto'));
+        const busca = document.getElementById('busca');
+        const ordenar = document.getElementById('ordenar');
+        const chips = document.querySelectorAll('.chip');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+
+        let categoriaAtual = 'todos';
+
+        function atualizar() {
+            const texto = busca.value.trim().toLowerCase();
+
+            let visiveis = produtos.filter(p => {
+                const nome = p.dataset.nome.toLowerCase();
+                const okBusca = nome.includes(texto);
+                const okCategoria = categoriaAtual === 'todos' || p.dataset.categoria === categoriaAtual;
+                return okBusca && okCategoria;
+            });
+
+            if (ordenar.value === 'menor') {
+                visiveis.sort((a, b) => a.dataset.preco - b.dataset.preco);
+            } else if (ordenar.value === 'maior') {
+                visiveis.sort((a, b) => b.dataset.preco - a.dataset.preco);
+            }
+
+            produtos.forEach(p => p.style.display = 'none');
+            visiveis.forEach(p => {
+                p.style.display = '';
+                lista.appendChild(p);
+            });
+
+            contador.textContent = visiveis.length + (visiveis.length === 1 ? ' peça encontrada' : ' peças encontradas');
+            vazio.style.display = visiveis.length === 0 ? 'block' : 'none';
+        }
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                categoriaAtual = chip.dataset.categoria;
+                atualizar();
+            });
+        });
+
+        busca.addEventListener('input', atualizar);
+        ordenar.addEventListener('change', atualizar);
+
+        document.querySelectorAll('.favorito').forEach(btn => {
+            btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
+        });
+
+        atualizar();
+    </script>
+}

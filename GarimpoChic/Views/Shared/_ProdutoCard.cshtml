@@ -1,0 +1,24 @@
+@model ProdutoCard
+
+<div class="produto" data-nome="@Model.Nome" data-categoria="@Model.CategoriaSlug"
+    data-preco="@Model.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+    <div class="produto-img">
+        @if (Model.FotoId != null)
+        {
+            <img src="/fotos/@Model.FotoId" alt="@Model.Nome" loading="lazy">
+        }
+        else
+        {
+            @Model.Emoji
+        }
+    </div>
+    <div class="produto-info">
+        <div>
+            <h4>@Model.Nome</h4>
+            <p>@Model.Descricao</p>
+        </div>
+        <button class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"
+            title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")">@(Model.Favorito ? "♥" : "♡")</button>
+    </div>
+    <span class="preco">@Formato.Moeda(Model.Preco)</span>
+</div>

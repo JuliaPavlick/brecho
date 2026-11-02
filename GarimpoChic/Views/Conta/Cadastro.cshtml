@@ -1,0 +1,103 @@
+@model CadastroForm
+@{
+    ViewData["Title"] = "Criar conta";
+
+    // Mensagem de erro que veio do servidor para um campo (ex.: CPF já cadastrado)
+    string? Msg(string campo) => ViewData.ModelState[campo]?.Errors.FirstOrDefault()?.ErrorMessage;
+    string Mostrar(string campo) => Msg(campo) != null ? "display:block" : "";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/cadastro.css" asp-append-version="true">
+}
+
+<div class="card">
+
+    <partial name="_LogoCartao" />
+
+    <div class="divisor">
+        <div class="divisor-linha"></div>
+        <span class="divisor-flor">✿</span>
+        <div class="divisor-linha"></div>
+    </div>
+
+    <h1 class="titulo-cadastro">Criar minha conta</h1>
+
+    <form action="/cadastro" method="post" asp-antiforgery="true" id="form-cadastro" novalidate>
+
+        <div class="campo">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" name="nome" placeholder="Seu nome" autocomplete="name" value="@Model.Nome">
+            <span class="erro-campo" id="erro-nome" style="@Mostrar("nome")">@(Msg("nome") ?? "Informe seu nome completo.")</span>
+        </div>
+
+        <div class="campo">
+            <label for="cpf">CPF</label>
+            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" value="@Model.Cpf">
+            <span class="erro-campo" id="erro-cpf" style="@Mostrar("cpf")">@(Msg("cpf") ?? "Informe um CPF válido.")</span>
+        </div>
+
+        <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="voce@email.com" autocomplete="email" value="@Model.Email">
+            <span class="erro-campo" id="erro-email" style="@Mostrar("email")">@(Msg("email") ?? "Informe um e-mail válido.")</span>
+        </div>
+
+        <div class="campo">
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
+                autocomplete="tel" value="@Model.Telefone">
+            <span class="erro-campo" id="erro-telefone" style="@Mostrar("telefone")">@(Msg("telefone") ?? "Informe um telefone válido.")</span>
+        </div>
+
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="new-password">
+            <span class="erro-campo" id="erro-senha" style="@Mostrar("senha")">@(Msg("senha") ?? "Use pelo menos 8 caracteres.")</span>
+        </div>
+
+        <div class="campo">
+            <label for="confirma">Confirmar senha</label>
+            <input type="password" id="confirma" placeholder="••••••••" autocomplete="new-password">
+            <span class="erro-campo" id="erro-confirma">As senhas não coincidem.</span>
+        </div>
+
+        <button type="submit" class="btn-entrar">Criar conta</button>
+
+    </form>
+
+    <div class="area-link">
+        <p>Já tem uma conta?</p>
+        <a href="/">Entrar →</a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const cpf = document.getElementById('cpf');
+        const telefone = document.getElementById('telefone');
+
+        mascaraCpf(cpf);
+        mascaraTelefone(telefone);
+
+        document.getElementById('form-cadastro').addEventListener('submit', e => {
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const confirma = document.getElementById('confirma').value;
+
+            const ok = [
+                mostrarErro('erro-nome', nome.split(/\s+/).length >= 2),
+                mostrarErro('erro-cpf', cpfValido(cpf.value)),
+                mostrarErro('erro-email', /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)),
+                mostrarErro('erro-telefone', telefone.value.replace(/\D/g, '').length >= 10),
+                mostrarErro('erro-senha', senha.length >= 8),
+                mostrarErro('erro-confirma', senha === confirma && confirma !== '')
+            ];
+
+            if (ok.includes(false)) e.preventDefault();
+        });
+    </script>
+}

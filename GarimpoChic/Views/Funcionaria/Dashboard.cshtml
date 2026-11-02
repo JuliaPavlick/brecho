@@ -1,0 +1,148 @@
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Dashboard Funcionária";
+    ViewData["Menu"] = "dashboard";
+
+    var eu = (Usuario)ViewData["Usuario"]!;
+    var rel = (Relatorios)ViewData["Relatorios"]!;
+    var eventos = (List<Evento>)ViewData["Eventos"]!;
+    var hoje = Formato.Hoje;
+
+    string Quando(Evento e)
+    {
+        var dias = e.Data.DayNumber - hoje.DayNumber;
+        var dia = dias switch
+        {
+            0 => "Hoje",
+            1 => "Amanhã",
+            < 7 => Formato.PtBr.TextInfo.ToTitleCase(e.Data.ToString("dddd", Formato.PtBr)),
+            _ => e.Data.ToString("dd/MM", Formato.PtBr),
+        };
+        return $"{dia} • {e.Hora:HH:mm}";
+    }
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/financeiro.css" asp-append-version="true">
+}
+
+<!-- CONTEUDO -->
+
+<main class="conteudo">
+
+    <!-- TOPO -->
+
+    <partial name="_TopoPainel" model='($"Olá, {eu.PrimeiroNome} ✦", "Você está acessando a área de funcionária da loja.")' />
+
+    <!-- CARDS -->
+
+    <section class="cards">
+
+        <div class="card">
+
+            <div class="card-topo">
+                <span class="card-titulo">Peças vendidas</span>
+                <span class="card-icone">
+                    <img src="~/img/sacolas-de-compras.png" alt="Peças vendidas">
+                </span>
+            </div>
+
+            <h3 class="card-valor">@rel.PecasMes()</h3>
+
+            <p class="card-info">
+                @rel.VariacaoPecas()
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-topo">
+                <span class="card-titulo">Lucro bruto</span>
+                <span class="card-icone">
+                    <img src="~/img/sacola-dinheiro.png" alt="Lucro bruto">
+                </span>
+            </div>
+
+            <h3 class="card-valor">@Relatorios.MoedaCurta(rel.LucroMes)</h3>
+
+            <p class="card-info">
+                Resultado mensal da loja
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-topo">
+                <span class="card-titulo">Produtos ativos</span>
+                <span class="card-icone">
+                    <img src="~/img/camiseta.png" alt="Produtos ativos">
+                </span>
+            </div>
+
+            <h3 class="card-valor">@ViewData["ProdutosAtivos"]</h3>
+
+            <p class="card-info">
+                Itens disponíveis atualmente
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-topo">
+                <span class="card-titulo">Novas vendedoras</span>
+                <span class="card-icone">
+                    <img src="~/img/espumante.png" alt="Novas vendedoras">
+                </span>
+            </div>
+
+            <h3 class="card-valor">@ViewData["NovasVendedoras"]</h3>
+
+            <p class="card-info">
+                Cadastros novos este mês
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- AREA INFERIOR -->
+
+    <section class="inferior">
+
+        <!-- GRAFICO -->
+
+        <partial name="_GraficoVendas" model="rel.Grafico()" />
+
+        <!-- EVENTOS -->
+
+        <a href="/painel/calendario" class="painel-link">
+
+            <div class="painel">
+
+                <h3>Próximos Eventos</h3>
+
+                @foreach (var e in eventos)
+                {
+                    <div class="calendario-item">
+                        <strong>@Quando(e)</strong>
+                        <p>@e.Titulo</p>
+                    </div>
+                }
+
+                @if (eventos.Count == 0)
+                {
+                    <div class="calendario-item">
+                        <p>Nenhum evento agendado ✦</p>
+                    </div>
+                }
+
+            </div>
+
+        </a>
+
+    </section>
+
+</main>

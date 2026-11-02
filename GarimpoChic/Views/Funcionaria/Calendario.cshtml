@@ -1,0 +1,321 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Calendário";
+    ViewData["Menu"] = "calendario";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/calendario.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Calendário ✦", "Organize recebimentos, avaliações e datas da loja")' />
+
+    <div class="cal-layout">
+
+        <!-- CALENDÁRIO -->
+
+        <div class="painel">
+
+            <div class="cal-cab">
+
+                <h3 id="cal-titulo"></h3>
+
+                <div class="cal-nav">
+                    <button type="button" class="btn-acao" id="btn-anterior">←</button>
+                    <button type="button" class="btn-acao" id="btn-hoje">Hoje</button>
+                    <button type="button" class="btn-acao" id="btn-proximo">→</button>
+                </div>
+
+            </div>
+
+            <div class="cal-semana">
+                <span>Dom</span>
+                <span>Seg</span>
+                <span>Ter</span>
+                <span>Qua</span>
+                <span>Qui</span>
+                <span>Sex</span>
+                <span>Sáb</span>
+            </div>
+
+            <div class="cal-dias" id="cal-dias"></div>
+
+            <div class="legenda">
+                <span><i class="dot recebimento"></i> Recebimento</span>
+                <span><i class="dot avaliacao"></i> Avaliação</span>
+                <span><i class="dot colecao"></i> Coleção</span>
+                <span><i class="dot outro"></i> Outro</span>
+            </div>
+
+        </div>
+
+        <!-- EVENTOS DO DIA -->
+
+        <div class="painel">
+
+            <h3 id="dia-titulo"></h3>
+
+            <div id="dia-eventos"></div>
+
+            <button type="button" class="btn-primario btn-novo-evento" id="btn-novo">+ Novo evento</button>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- MODAL -->
+
+<div class="modal-fundo" id="modal">
+
+    <div class="modal">
+
+        <h3>Novo evento</h3>
+
+        <form id="form-evento" novalidate>
+
+            <div class="campo">
+                <label for="titulo">Título</label>
+                <input type="text" id="titulo" placeholder="Ex.: Recebimento de peças">
+                <span class="erro-campo" id="erro-titulo">Informe o título do evento.</span>
+            </div>
+
+            <div class="linha-campos">
+
+                <div class="campo">
+                    <label for="data">Data</label>
+                    <input type="date" id="data">
+                    <span class="erro-campo" id="erro-data">Informe a data.</span>
+                </div>
+
+                <div class="campo">
+                    <label for="hora">Horário</label>
+                    <input type="time" id="hora" value="10:00">
+                </div>
+
+            </div>
+
+            <div class="campo">
+                <label for="tipo">Tipo</label>
+                <select id="tipo">
+                    <option value="recebimento">Recebimento de peças</option>
+                    <option value="avaliacao">Avaliação de peças</option>
+                    <option value="colecao">Coleção / destaque</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="acoes-modal">
+                <button type="button" class="btn-secundario" id="btn-cancelar">Cancelar</button>
+                <button type="submit" class="btn-primario">Salvar</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+            'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+        const TIPOS = {
+            recebimento: 'Recebimento',
+            avaliacao: 'Avaliação',
+            colecao: 'Coleção',
+            outro: 'Outro'
+        };
+
+        function chave(d) {
+            return d.getFullYear() + '-' +
+                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                String(d.getDate()).padStart(2, '0');
+        }
+
+        const hoje = new Date();
+        const chaveHoje = chave(hoje);
+
+        let eventos = @Json.Serialize(Model);
+
+        let ano = hoje.getFullYear();
+        let mes = hoje.getMonth();
+        let selecionada = chaveHoje;
+
+        const calDias = document.getElementById('cal-dias');
+        const modal = document.getElementById('modal');
+
+        function eventosDoDia(dia) {
+            return eventos
+                .filter(e => e.data === dia)
+                .sort((a, b) => a.hora.localeCompare(b.hora));
+        }
+
+        function renderCalendario() {
+            document.getElementById('cal-titulo').textContent = MESES[mes] + ' de ' + ano;
+
+            const primeiro = new Date(ano, mes, 1).getDay();
+            const total = new Date(ano, mes + 1, 0).getDate();
+
+            let html = '';
+
+            for (let i = 0; i < primeiro; i++) {
+                html += '<div class="cel-vazia"></div>';
+            }
+
+            for (let d = 1; d <= total; d++) {
+                const dia = chave(new Date(ano, mes, d));
+                const tipos = [...new Set(eventosDoDia(dia).map(e => e.tipo))].slice(0, 4);
+
+                const classes = ['dia'];
+                if (dia === chaveHoje) classes.push('hoje');
+                if (dia === selecionada) classes.push('selecionado');
+
+                html += `
+                    <button type="button" class="${classes.join(' ')}" data-dia="${dia}">
+                        <span class="num">${d}</span>
+                        <span class="dots">${tipos.map(t => `<i class="dot ${t}"></i>`).join('')}</span>
+                    </button>
+                `;
+            }
+
+            calDias.innerHTML = html;
+        }
+
+        function renderDia() {
+            const [a, m, d] = selecionada.split('-').map(Number);
+            const data = new Date(a, m - 1, d);
+
+            document.getElementById('dia-titulo').textContent =
+                data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+            const lista = eventosDoDia(selecionada);
+            const area = document.getElementById('dia-eventos');
+
+            if (lista.length === 0) {
+                area.innerHTML = '<p class="sem-eventos">Nenhum evento neste dia ✦</p>';
+                return;
+            }
+
+            area.innerHTML = lista.map(e => `
+                <div class="ev-item ${e.tipo}">
+                    <div class="ev-info">
+                        <strong>${e.hora} • ${esc(e.titulo)}</strong>
+                        <p>${TIPOS[e.tipo]}</p>
+                    </div>
+                    <button type="button" class="btn-acao perigo" data-id="${e.id}">Excluir</button>
+                </div>
+            `).join('');
+        }
+
+        function render() {
+            renderCalendario();
+            renderDia();
+        }
+
+        function abrirModal() {
+            document.getElementById('titulo').value = '';
+            document.getElementById('data').value = selecionada;
+            document.getElementById('hora').value = '10:00';
+            document.getElementById('tipo').value = 'recebimento';
+            document.getElementById('erro-titulo').style.display = 'none';
+            document.getElementById('erro-data').style.display = 'none';
+            modal.classList.add('aberto');
+        }
+
+        function fecharModal() {
+            modal.classList.remove('aberto');
+        }
+
+        document.getElementById('btn-anterior').addEventListener('click', () => {
+            mes--;
+            if (mes < 0) { mes = 11; ano--; }
+            renderCalendario();
+        });
+
+        document.getElementById('btn-proximo').addEventListener('click', () => {
+            mes++;
+            if (mes > 11) { mes = 0; ano++; }
+            renderCalendario();
+        });
+
+        document.getElementById('btn-hoje').addEventListener('click', () => {
+            ano = hoje.getFullYear();
+            mes = hoje.getMonth();
+            selecionada = chaveHoje;
+            render();
+        });
+
+        calDias.addEventListener('click', e => {
+            const btn = e.target.closest('.dia');
+            if (!btn) return;
+
+            selecionada = btn.dataset.dia;
+            render();
+        });
+
+        document.getElementById('dia-eventos').addEventListener('click', e => {
+            const btn = e.target.closest('.btn-acao');
+            if (!btn) return;
+
+            const evento = eventos.find(ev => ev.id === Number(btn.dataset.id));
+
+            if (confirm('Excluir "' + evento.titulo + '"?')) {
+                postar('/painel/calendario/' + evento.id + '/excluir')
+                    .then(() => {
+                        eventos = eventos.filter(ev => ev.id !== evento.id);
+                        render();
+                    })
+                    .catch(falhou);
+            }
+        });
+
+        document.getElementById('btn-novo').addEventListener('click', abrirModal);
+        document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
+
+        modal.addEventListener('click', e => {
+            if (e.target === modal) fecharModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') fecharModal();
+        });
+
+        document.getElementById('form-evento').addEventListener('submit', e => {
+            e.preventDefault();
+
+            const titulo = document.getElementById('titulo').value.trim();
+            const data = document.getElementById('data').value;
+
+            mostrarErro('erro-titulo', titulo !== '');
+            mostrarErro('erro-data', data !== '');
+
+            if (!titulo || !data) return;
+
+            postar('/painel/calendario', {
+                titulo: titulo,
+                data: data,
+                hora: document.getElementById('hora').value || '00:00',
+                tipo: document.getElementById('tipo').value
+            }).then(evento => {
+                eventos.push(evento);
+
+                const [a, m] = evento.data.split('-').map(Number);
+                ano = a;
+                mes = m - 1;
+                selecionada = evento.data;
+
+                fecharModal();
+                render();
+            }).catch(falhou);
+        });
+
+        render();
+    </script>
+}

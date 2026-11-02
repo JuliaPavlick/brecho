@@ -1,0 +1,203 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Pedidos";
+    ViewData["Menu"] = "pedidos";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/pedidos.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Pedidos ✦", "Acompanhe e atualize os pedidos da loja")' />
+
+    <!-- BUSCA -->
+
+    <div class="barra-prod">
+        <div class="busca">
+            <input type="text" id="busca" placeholder="Buscar por cliente ou número do pedido...">
+        </div>
+    </div>
+
+    <!-- FILTROS DE STATUS -->
+
+    <div class="chips">
+        <button class="chip ativo" data-status="todos">Todos</button>
+        <button class="chip" data-status="preparo">Em preparo</button>
+        <button class="chip" data-status="caminho">A caminho</button>
+        <button class="chip" data-status="entregue">Entregue</button>
+    </div>
+
+    <p class="contador" id="contador"></p>
+
+    <!-- TABELA -->
+
+    <div class="painel">
+
+        <div class="tabela-wrap">
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>Pedido</th>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Itens</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th class="col-acoes">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo"></tbody>
+            </table>
+        </div>
+
+        <p class="vazio" id="vazio">Nenhum pedido encontrado ✦</p>
+
+    </div>
+
+</main>
+
+<!-- MODAL DE DETALHES -->
+
+<div class="modal-fundo" id="modal">
+
+    <div class="modal">
+
+        <h3 id="det-titulo"></h3>
+        <p class="det-sub" id="det-sub"></p>
+
+        <div id="det-itens"></div>
+
+        <div class="det-total">
+            <span>Total</span>
+            <strong id="det-total"></strong>
+        </div>
+
+        <div class="acoes-modal">
+            <button type="button" class="btn-secundario" id="btn-fechar">Fechar</button>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const STATUS = @Json.Serialize(StatusPedido.Nomes);
+
+        let pedidos = @Json.Serialize(Model);
+
+        let filtroStatus = 'todos';
+
+        const corpo = document.getElementById('corpo');
+        const busca = document.getElementById('busca');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+        const modal = document.getElementById('modal');
+
+        function numero(id) {
+            return '#' + String(id).padStart(4, '0');
+        }
+
+        function total(pedido) {
+            return pedido.itens.reduce((soma, i) => soma + i.preco, 0);
+        }
+
+        function render() {
+            const texto = busca.value.trim().toLowerCase();
+
+            const lista = pedidos.filter(p =>
+                (filtroStatus === 'todos' || p.status === filtroStatus) &&
+                (p.cliente.toLowerCase().includes(texto) || numero(p.id).includes(texto))
+            );
+
+            corpo.innerHTML = lista.map(p => `
+                <tr>
+                    <td><strong>${numero(p.id)}</strong></td>
+                    <td>${esc(p.cliente)}</td>
+                    <td>${p.data}</td>
+                    <td>${p.itens.length} ${p.itens.length === 1 ? 'peça' : 'peças'}</td>
+                    <td class="preco-cel">${moeda(total(p))}</td>
+                    <td>
+                        <select class="status-select ${p.status}" data-id="${p.id}">
+                            ${Object.keys(STATUS).map(s =>
+                                `<option value="${s}" ${s === p.status ? 'selected' : ''}>${STATUS[s]}</option>`
+                            ).join('')}
+                        </select>
+                    </td>
+                    <td class="col-acoes">
+                        <button class="btn-acao" data-id="${p.id}">Ver detalhes</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            contador.textContent = lista.length + (lista.length === 1 ? ' pedido' : ' pedidos');
+            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        }
+
+        function abrirDetalhes(pedido) {
+            document.getElementById('det-titulo').textContent = 'Pedido ' + numero(pedido.id);
+            document.getElementById('det-sub').textContent = pedido.cliente + ' • ' + pedido.data;
+
+            document.getElementById('det-itens').innerHTML = pedido.itens.map(i => `
+                <div class="det-item">
+                    <span>${esc(i.nome)}</span>
+                    <span>${moeda(i.preco)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('det-total').textContent = moeda(total(pedido));
+
+            modal.classList.add('aberto');
+        }
+
+        function fecharModal() {
+            modal.classList.remove('aberto');
+        }
+
+        corpo.addEventListener('change', e => {
+            const select = e.target.closest('.status-select');
+            if (!select) return;
+
+            const pedido = pedidos.find(p => p.id === Number(select.dataset.id));
+
+            postar('/painel/pedidos/' + pedido.id + '/status', { status: select.value })
+                .then(() => pedido.status = select.value)
+                .catch(falhou)
+                .finally(render);
+        });
+
+        corpo.addEventListener('click', e => {
+            const btn = e.target.closest('.btn-acao');
+            if (!btn) return;
+
+            abrirDetalhes(pedidos.find(p => p.id === Number(btn.dataset.id)));
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                filtroStatus = chip.dataset.status;
+                render();
+            });
+        });
+
+        document.getElementById('btn-fechar').addEventListener('click', fecharModal);
+
+        modal.addEventListener('click', e => {
+            if (e.target === modal) fecharModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') fecharModal();
+        });
+
+        busca.addEventListener('input', render);
+
+        render();
+    </script>
+}

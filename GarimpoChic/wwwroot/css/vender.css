@@ -1,0 +1,68 @@
+/* Página "Quero vender para a loja" (usa também perfil.css e compras.css) */
+
+.vender-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .vender-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.campo select,
+.campo textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #d4c49a;
+    border-radius: 10px;
+    background: #faf8f2;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    outline: none;
+    resize: vertical;
+}
+
+.campo select:focus,
+.campo textarea:focus {
+    border-color: var(--dourado);
+    background: #fffdf7;
+}
+
+.sem-pecas {
+    font-size: 14px;
+    color: var(--texto-suave);
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge.disponivel {
+    background: #e2ecdf;
+    color: var(--verde);
+}
+
+.badge.reservado {
+    background: #e3ecf5;
+    color: #3d5f80;
+}
+
+.badge.avaliacao {
+    background: #f6ecd0;
+    color: var(--dourado);
+}
+
+.badge.vendido {
+    background: #ece7dd;
+    color: #7a7263;
+}

@@ -1,0 +1,282 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Produtos";
+    ViewData["Menu"] = "produtos";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+}
+
+<!-- CONTEUDO -->
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Produtos ✦", "Gerencie as peças da loja")' />
+
+    <!-- BUSCA + NOVO -->
+
+    <div class="barra-prod">
+
+        <div class="busca">
+            <input type="text" id="busca" placeholder="Buscar peça pelo nome...">
+        </div>
+
+        <button type="button" class="btn-primario" id="btn-novo">+ Novo produto</button>
+
+    </div>
+
+    <!-- FILTROS DE STATUS -->
+
+    <div class="chips">
+        <button class="chip ativo" data-status="todos">Todos</button>
+        <button class="chip" data-status="disponivel">Disponível</button>
+        <button class="chip" data-status="reservado">Reservado</button>
+        <button class="chip" data-status="avaliacao">Em avaliação</button>
+        <button class="chip" data-status="vendido">Vendido</button>
+    </div>
+
+    <p class="contador" id="contador"></p>
+
+    <!-- TABELA -->
+
+    <div class="painel">
+
+        <div class="tabela-wrap">
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>Peça</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Status</th>
+                        <th class="col-acoes">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo"></tbody>
+            </table>
+        </div>
+
+        <p class="vazio" id="vazio">Nenhuma peça encontrada ✦</p>
+
+    </div>
+
+</main>
+
+<!-- MODAL -->
+
+<div class="modal-fundo" id="modal">
+
+    <div class="modal">
+
+        <h3 id="modal-titulo">Novo produto</h3>
+
+        <form id="form-produto" novalidate>
+
+            <div class="campo">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" placeholder="Ex.: Blusa Vintage">
+                <span class="erro-campo" id="erro-nome">Informe o nome da peça.</span>
+            </div>
+
+            <div class="campo">
+                <label for="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" rows="3" placeholder="Tamanho, estado de conservação, detalhes..."></textarea>
+            </div>
+
+            <div class="linha-campos">
+
+                <div class="campo">
+                    <label for="categoria">Categoria</label>
+                    <select id="categoria" name="categoria">
+                        @foreach (var c in Categorias.Todas)
+                        {
+                            <option>@c.Nome</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="preco">Preço (R$)</label>
+                    <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="0,00">
+                    <span class="erro-campo" id="erro-preco">Informe um preço maior que zero.</span>
+                </div>
+
+            </div>
+
+            <div class="campo">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="avaliacao">Em avaliação</option>
+                    <option value="disponivel">Disponível</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="vendido">Vendido</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="fotos">Fotos</label>
+                <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
+            </div>
+
+            <div class="acoes-modal">
+                <button type="button" class="btn-secundario" id="btn-cancelar">Cancelar</button>
+                <button type="submit" class="btn-primario" id="btn-salvar">Salvar</button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const EMOJIS = @Json.Serialize(Categorias.Todas.ToDictionary(c => c.Nome, c => c.Emoji));
+
+        const STATUS = @Json.Serialize(StatusProduto.Nomes);
+
+        let produtos = @Json.Serialize(Model);
+
+        let editandoId = null;
+        let filtroStatus = 'todos';
+
+        const corpo = document.getElementById('corpo');
+        const busca = document.getElementById('busca');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+        const modal = document.getElementById('modal');
+        const form = document.getElementById('form-produto');
+
+        function miniatura(p) {
+            return p.foto ? `<img src="${esc(p.foto)}" alt="">` : (EMOJIS[p.categoria] || '✦');
+        }
+
+        function render() {
+            const texto = busca.value.trim().toLowerCase();
+
+            const lista = produtos.filter(p =>
+                (filtroStatus === 'todos' || p.status === filtroStatus) &&
+                p.nome.toLowerCase().includes(texto)
+            );
+
+            corpo.innerHTML = lista.map(p => `
+                <tr>
+                    <td>
+                        <div class="produto-cel">
+                            <div class="produto-thumb">${miniatura(p)}</div>
+                            <div>
+                                <strong>${esc(p.nome)}</strong>
+                                <p>${esc(p.descricao)}${p.vendedora ? ' • enviada por ' + esc(p.vendedora) : ''}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${esc(p.categoria)}</td>
+                    <td class="preco-cel">${moeda(p.preco)}</td>
+                    <td><span class="badge ${p.status}">${STATUS[p.status]}</span></td>
+                    <td class="col-acoes">
+                        <button class="btn-acao" data-acao="editar" data-id="${p.id}">Editar</button>
+                        <button class="btn-acao perigo" data-acao="excluir" data-id="${p.id}">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            contador.textContent = lista.length + (lista.length === 1 ? ' peça' : ' peças');
+            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        }
+
+        function abrirModal(produto) {
+            editandoId = produto ? produto.id : null;
+
+            document.getElementById('modal-titulo').textContent = produto ? 'Editar produto' : 'Novo produto';
+            document.getElementById('nome').value = produto ? produto.nome : '';
+            document.getElementById('descricao').value = produto ? produto.descricao : '';
+            document.getElementById('categoria').value = produto ? produto.categoria : 'Roupas';
+            document.getElementById('preco').value = produto ? produto.preco : '';
+            document.getElementById('status').value = produto ? produto.status : 'avaliacao';
+            document.getElementById('fotos').value = '';
+
+            document.getElementById('erro-nome').style.display = 'none';
+            document.getElementById('erro-preco').style.display = 'none';
+
+            modal.classList.add('aberto');
+        }
+
+        function fecharModal() {
+            modal.classList.remove('aberto');
+        }
+
+        document.getElementById('btn-novo').addEventListener('click', () => abrirModal(null));
+        document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
+
+        modal.addEventListener('click', e => {
+            if (e.target === modal) fecharModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') fecharModal();
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value.trim();
+            const preco = parseFloat(document.getElementById('preco').value);
+
+            const okNome = mostrarErro('erro-nome', nome !== '');
+            const okPreco = mostrarErro('erro-preco', preco > 0);
+
+            if (!okNome || !okPreco) return;
+
+            const botao = document.getElementById('btn-salvar');
+            botao.disabled = true;
+
+            // FormData leva também as fotos escolhidas
+            postar(editandoId ? '/painel/produtos/' + editandoId : '/painel/produtos', new FormData(form))
+                .then(salvo => {
+                    if (editandoId) {
+                        produtos = produtos.map(p => p.id === salvo.id ? salvo : p);
+                    } else {
+                        produtos.unshift(salvo);
+                    }
+                    fecharModal();
+                    render();
+                })
+                .catch(falhou)
+                .finally(() => botao.disabled = false);
+        });
+
+        corpo.addEventListener('click', e => {
+            const btn = e.target.closest('.btn-acao');
+            if (!btn) return;
+
+            const id = Number(btn.dataset.id);
+            const produto = produtos.find(p => p.id === id);
+
+            if (btn.dataset.acao === 'editar') {
+                abrirModal(produto);
+            } else if (confirm('Excluir "' + produto.nome + '"?')) {
+                postar('/painel/produtos/' + id + '/excluir')
+                    .then(() => {
+                        produtos = produtos.filter(p => p.id !== id);
+                        render();
+                    })
+                    .catch(falhou);
+            }
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                filtroStatus = chip.dataset.status;
+                render();
+            });
+        });
+
+        busca.addEventListener('input', render);
+
+        render();
+    </script>
+}

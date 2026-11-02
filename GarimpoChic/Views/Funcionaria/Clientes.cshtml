@@ -1,0 +1,204 @@
+@model IEnumerable<object>
+@{
+    Layout = "_LayoutFuncionaria";
+    ViewData["Title"] = "Clientes";
+    ViewData["Menu"] = "clientes";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/clientes.css" asp-append-version="true">
+}
+
+<main class="conteudo">
+
+    <partial name="_TopoPainel" model='("Clientes ✦", "Pessoas cadastradas na loja e seus papéis")' />
+
+    <!-- BUSCA -->
+
+    <div class="barra-prod">
+        <div class="busca">
+            <input type="text" id="busca" placeholder="Buscar por nome ou e-mail...">
+        </div>
+    </div>
+
+    <!-- FILTROS DE PAPEL -->
+
+    <div class="chips">
+        <button class="chip ativo" data-papel="todos">Todas</button>
+        <button class="chip" data-papel="cliente">Clientes</button>
+        <button class="chip" data-papel="vendedora">Vendedoras externas</button>
+        <button class="chip" data-papel="funcionaria">Funcionárias</button>
+    </div>
+
+    <p class="contador" id="contador"></p>
+
+    <!-- TABELA -->
+
+    <div class="painel">
+
+        <div class="tabela-wrap">
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>Pessoa</th>
+                        <th>Papéis</th>
+                        <th>Cidade</th>
+                        <th>Pedidos</th>
+                        <th>Total gasto</th>
+                        <th class="col-acoes">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo"></tbody>
+            </table>
+        </div>
+
+        <p class="vazio" id="vazio">Nenhuma pessoa encontrada ✦</p>
+
+    </div>
+
+</main>
+
+<!-- MODAL DE DETALHES -->
+
+<div class="modal-fundo" id="modal">
+
+    <div class="modal">
+
+        <div class="det-cab">
+            <div class="avatar-mini grande" id="det-avatar"></div>
+            <div>
+                <h3 id="det-nome"></h3>
+                <div id="det-papeis"></div>
+            </div>
+        </div>
+
+        <div id="det-linhas"></div>
+
+        <div class="acoes-modal">
+            <button type="button" class="btn-secundario" id="btn-fechar">Fechar</button>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const PAPEIS = {
+            cliente: 'Cliente',
+            vendedora: 'Vendedora externa',
+            funcionaria: 'Funcionária'
+        };
+
+        const pessoas = @Json.Serialize(Model);
+
+        let filtroPapel = 'todos';
+
+        const corpo = document.getElementById('corpo');
+        const busca = document.getElementById('busca');
+        const contador = document.getElementById('contador');
+        const vazio = document.getElementById('vazio');
+        const modal = document.getElementById('modal');
+
+        function tagsPapeis(papeis) {
+            return papeis.map(p => `<span class="papel ${p}">${PAPEIS[p]}</span>`).join('');
+        }
+
+        function render() {
+            const texto = busca.value.trim().toLowerCase();
+
+            const lista = pessoas.filter(p =>
+                (filtroPapel === 'todos' || p.papeis.includes(filtroPapel)) &&
+                (p.nome.toLowerCase().includes(texto) || p.email.toLowerCase().includes(texto))
+            );
+
+            corpo.innerHTML = lista.map(p => `
+                <tr>
+                    <td>
+                        <div class="produto-cel">
+                            <div class="avatar-mini">${esc(p.nome.charAt(0))}</div>
+                            <div>
+                                <strong>${esc(p.nome)}</strong>
+                                <p>${esc(p.email)}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${tagsPapeis(p.papeis)}</td>
+                    <td>${esc(p.cidade)}</td>
+                    <td>${p.pedidos}</td>
+                    <td class="preco-cel">${moeda(p.gasto)}</td>
+                    <td class="col-acoes">
+                        <button class="btn-acao" data-id="${p.id}">Ver detalhes</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            contador.textContent = lista.length + (lista.length === 1 ? ' pessoa' : ' pessoas');
+            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        }
+
+        function abrirDetalhes(p) {
+            document.getElementById('det-avatar').textContent = p.nome.charAt(0);
+            document.getElementById('det-nome').textContent = p.nome;
+            document.getElementById('det-papeis').innerHTML = tagsPapeis(p.papeis);
+
+            const linhas = [
+                ['E-mail', p.email],
+                ['Telefone', p.telefone],
+                ['CPF', p.cpf],
+                ['Cidade', p.cidade],
+                ['Cadastrada em', p.desde],
+                ['Pedidos realizados', p.pedidos],
+                ['Total gasto', moeda(p.gasto)]
+            ];
+
+            if (p.papeis.includes('vendedora')) {
+                linhas.push(['Peças enviadas à loja', p.pecasEnviadas]);
+            }
+
+            document.getElementById('det-linhas').innerHTML = linhas.map(l => `
+                <div class="det-linha">
+                    <span>${l[0]}</span>
+                    <strong>${esc(String(l[1]))}</strong>
+                </div>
+            `).join('');
+
+            modal.classList.add('aberto');
+        }
+
+        function fecharModal() {
+            modal.classList.remove('aberto');
+        }
+
+        corpo.addEventListener('click', e => {
+            const btn = e.target.closest('.btn-acao');
+            if (!btn) return;
+
+            abrirDetalhes(pessoas.find(p => p.id === Number(btn.dataset.id)));
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
+                chip.classList.add('ativo');
+                filtroPapel = chip.dataset.papel;
+                render();
+            });
+        });
+
+        document.getElementById('btn-fechar').addEventListener('click', fecharModal);
+
+        modal.addEventListener('click', e => {
+            if (e.target === modal) fecharModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') fecharModal();
+        });
+
+        busca.addEventListener('input', render);
+
+        render();
+    </script>
+}

@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "Recuperar senha";
+    var enviado = ViewData["Enviado"] as bool? == true;
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/recuperar-senha.css" asp-append-version="true">
+}
+
+<div class="card">
+
+    <partial name="_LogoCartao" />
+
+    <div class="divisor">
+        <div class="divisor-linha"></div>
+        <span class="divisor-flor">✿</span>
+        <div class="divisor-linha"></div>
+    </div>
+
+    <h1 class="titulo-pagina">Recuperar senha</h1>
+    <p class="texto-pagina">
+        Informe o CPF da sua conta e enviaremos as instruções para o e-mail cadastrado.
+    </p>
+
+    <form action="/recuperar-senha" method="post" asp-antiforgery="true" id="form-recuperar" novalidate>
+
+        <div class="campo">
+            <label for="cpf">CPF</label>
+            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="username">
+            <span class="erro-campo" id="erro-cpf">Informe um CPF válido.</span>
+        </div>
+
+        <button type="submit" class="btn-entrar">Enviar instruções</button>
+
+    </form>
+
+    <div class="mensagem-sucesso" id="sucesso" style="@(enviado ? "display:block" : "")">
+        Se o CPF estiver cadastrado, você receberá as instruções por e-mail em instantes ✦
+    </div>
+
+    <div class="area-link">
+        <a href="/">← Voltar para o login</a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const cpf = document.getElementById('cpf');
+
+        mascaraCpf(cpf);
+
+        document.getElementById('form-recuperar').addEventListener('submit', e => {
+            if (!mostrarErro('erro-cpf', cpfValido(cpf.value))) e.preventDefault();
+        });
+    </script>
+}
