@@ -1,0 +1,100 @@
+@inject IConfiguration Config
+@{
+    ViewData["Title"] = "Política de Privacidade";
+
+    // E-mail de quem responde pelos dados na loja (encarregado); configurável na Render
+    var contato = Config["CONTATO_PRIVACIDADE"];
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+}
+
+<div class="card card-texto">
+
+    <partial name="_LogoCartao" />
+
+    <div class="divisor">
+        <div class="divisor-linha"></div>
+        <span class="divisor-flor">✿</span>
+        <div class="divisor-linha"></div>
+    </div>
+
+    <h1>Política de Privacidade</h1>
+    <p class="atualizada">Atualizada em 2 de novembro de 2026</p>
+
+    <p>
+        Esta política explica quais dados pessoais o Garimpo Chic guarda, para quê, com quem compartilha e como você
+        exerce os seus direitos previstos na Lei Geral de Proteção de Dados (Lei 13.709/2018, a LGPD).
+    </p>
+
+    <h2>Quais dados guardamos</h2>
+    <ul>
+        <li><strong>Cadastro:</strong> nome, CPF, e-mail, telefone, cidade e estado.</li>
+        <li><strong>Senha:</strong> guardamos só um resumo irreversível dela; ninguém na loja consegue ver a sua senha.</li>
+        <li><strong>Compras:</strong> pedidos, peças compradas, favoritos e itens da sacola.</li>
+        <li><strong>Venda de peças:</strong> as peças que você envia para a loja, com fotos, e os repasses recebidos.</li>
+        <li><strong>Segurança:</strong> o endereço de internet (IP) de quem tenta entrar ou se cadastrar, usado só na memória do
+            servidor, por até uma hora, para frear tentativas em massa. Ele não fica gravado no banco.</li>
+    </ul>
+
+    <h2>Para que usamos</h2>
+    <ul>
+        <li>Criar e manter a sua conta, registrar seus pedidos e combinar pagamento e entrega (execução de contrato, art. 7º, V).</li>
+        <li>Controlar as peças consignadas e os repasses às vendedoras (execução de contrato).</li>
+        <li>Manter o registro das vendas exigido pela legislação fiscal (obrigação legal, art. 7º, II).</li>
+        <li>Proteger as contas contra fraude e invasão (legítimo interesse, art. 7º, IX).</li>
+    </ul>
+    <p>Não usamos seus dados para publicidade e não os vendemos a ninguém.</p>
+
+    <h2>Cookies</h2>
+    <p>
+        O site usa apenas cookies necessários: um que mantém você conectado e outro que protege os formulários contra
+        falsificação. Não usamos cookies de propaganda nem de estatísticas.
+    </p>
+
+    <h2>Com quem compartilhamos</h2>
+    <ul>
+        <li><strong>Hospedagem:</strong> o site e o banco de dados ficam na Render (Render Services, Inc.), em servidores fora do
+            Brasil. Essa transferência internacional é necessária para o site funcionar (art. 33).</li>
+        <li><strong>Fontes do site:</strong> as letras são carregadas do Google Fonts, que recebe o seu endereço de internet ao abrir as páginas.</li>
+        <li><strong>E-mail:</strong> para enviar o link de troca de senha, seu e-mail passa pelo provedor de e-mail da loja.</li>
+    </ul>
+
+    <h2>Como protegemos</h2>
+    <p>
+        Toda a navegação é feita por conexão segura (HTTPS). O CPF fica criptografado no banco de dados, as senhas ficam guardadas
+        só como resumo irreversível e somente as funcionárias da loja acessam o painel com os dados das clientes.
+    </p>
+
+    <h2>Por quanto tempo</h2>
+    <p>
+        Enquanto a sua conta existir. Quando você exclui a conta, o nome, CPF, e-mail, telefone e cidade são apagados na hora.
+        Os pedidos continuam no registro de vendas da loja, sem nada que identifique você. Cópias de segurança feitas pela loja
+        podem guardar os dados antigos até serem substituídas.
+    </p>
+
+    <h2>Seus direitos</h2>
+    <p>Pela LGPD (art. 18), você pode, a qualquer momento:</p>
+    <ul>
+        <li><strong>Ver e levar seus dados:</strong> em Meu perfil, use <em>Baixar meus dados</em>.</li>
+        <li><strong>Corrigir:</strong> em Meu perfil, edite e salve seus dados.</li>
+        <li><strong>Excluir a conta:</strong> em Meu perfil, use <em>Excluir minha conta</em>.</li>
+        <li><strong>Tirar dúvidas, pedir informações sobre o compartilhamento ou reclamar:</strong>
+            @if (!string.IsNullOrWhiteSpace(contato))
+            {
+                <text>escreva para <a href="mailto:@contato">@contato</a>.</text>
+            }
+            else
+            {
+                <text>fale com a loja pelos canais de atendimento.</text>
+            }
+            Você também pode procurar a Autoridade Nacional de Proteção de Dados (ANPD).
+        </li>
+    </ul>
+
+    <div class="area-link">
+        <a href="/">← Voltar ao início</a>
+    </div>
+
+</div>

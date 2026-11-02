@@ -1,4 +1,5 @@
 using GarimpoChic.Models;
+using GarimpoChic.Util;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,9 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
-        mb.Entity<Usuario>().HasIndex(u => u.Cpf).IsUnique();
+        // O CPF vai criptografado para o banco; a busca e a regra de "um cadastro por CPF" usam o resumo
+        mb.Entity<Usuario>().Property(u => u.Cpf).HasConversion(v => Protecao.Cifrar(v), v => Protecao.Decifrar(v));
+        mb.Entity<Usuario>().HasIndex(u => u.CpfResumo).IsUnique();
 
         mb.Entity<Produto>().Property(p => p.Preco).HasPrecision(10, 2);
         mb.Entity<Produto>()

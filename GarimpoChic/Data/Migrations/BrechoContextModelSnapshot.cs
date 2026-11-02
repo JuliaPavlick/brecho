@@ -260,6 +260,9 @@ namespace GarimpoChic.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("AceitouPrivacidadeEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("BloqueadoAte")
                         .HasColumnType("timestamp with time zone");
 
@@ -269,8 +272,12 @@ namespace GarimpoChic.Data.Migrations
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("character varying(11)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CpfResumo")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("timestamp with time zone");
@@ -289,6 +296,9 @@ namespace GarimpoChic.Data.Migrations
                     b.Property<string>("Estado")
                         .HasMaxLength(2)
                         .HasColumnType("character varying(2)");
+
+                    b.Property<DateTime?>("ExcluidaEm")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -309,7 +319,7 @@ namespace GarimpoChic.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Cpf")
+                    b.HasIndex("CpfResumo")
                         .IsUnique();
 
                     b.ToTable("Usuarios");

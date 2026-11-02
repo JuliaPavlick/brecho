@@ -24,3 +24,6 @@ services:
         sync: false
       - key: ADMIN_NOME
         sync: false
+      # Protege os CPFs no banco. A Render sorteia o valor; não troque depois (os CPFs só voltariam por backup)
+      - key: CHAVE_DADOS
+        generateValue: true

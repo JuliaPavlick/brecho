@@ -25,7 +25,8 @@ public class ContaController(BrechoContext db) : Controller
     public async Task<IActionResult> Login(string? cpf, string? senha)
     {
         var digitos = Formato.SoDigitos(cpf);
-        var u = await db.Usuarios.FirstOrDefaultAsync(x => x.Cpf == digitos);
+        var resumo = Protecao.ResumoCpf(digitos);
+        var u = resumo == null ? null : await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == resumo);
         ViewData["Cpf"] = cpf;
 
         // Conta bloqueada: nem confere a senha, para não dar mais chances de adivinhar
@@ -84,7 +85,7 @@ public class ContaController(BrechoContext db) : Controller
             ModelState.AddModelError("nome", "Informe seu nome completo.");
         if (!Formato.CpfValido(cpf))
             ModelState.AddModelError("cpf", "Informe um CPF válido.");
-        else if (await db.Usuarios.AnyAsync(u => u.Cpf == cpf))
+        else if (await db.Usuarios.AnyAsync(u => u.CpfResumo == Protecao.ResumoCpf(cpf)))
         {
             Limites.RegistrarCpfRepetido(HttpContext);
             ModelState.AddModelError("cpf", "Já existe uma conta com este CPF. Entre ou use \"Esqueci minha senha\".");
@@ -95,6 +96,8 @@ public class ContaController(BrechoContext db) : Controller
             ModelState.AddModelError("telefone", "Informe um telefone válido.");
         if ((form.Senha ?? "").Length < 8)
             ModelState.AddModelError("senha", "Use pelo menos 8 caracteres.");
+        if (!form.Aceito)
+            ModelState.AddModelError("aceito", "Para criar a conta, é preciso concordar com a Política de Privacidade.");
 
         if (!ModelState.IsValid) return View(form);
 
@@ -104,6 +107,7 @@ public class ContaController(BrechoContext db) : Controller
             Cpf = cpf,
             Email = form.Email!.Trim(),
             Telefone = form.Telefone!.Trim(),
+            AceitouPrivacidadeEm = DateTime.UtcNow,
         };
         u.SenhaHash = DadosIniciais.HashSenha(u, form.Senha!);
 
@@ -113,6 +117,9 @@ public class ContaController(BrechoContext db) : Controller
         await Sessao.EntrarAsync(HttpContext, u);
         return Redirect("/perfis");
     }
+
+    [HttpGet("/privacidade")]
+    public IActionResult Privacidade() => View();
 
     [HttpGet("/recuperar-senha")]
     public IActionResult RecuperarSenha() => View();
@@ -125,7 +132,7 @@ public class ContaController(BrechoContext db) : Controller
         [FromServices] Email email, [FromServices] ILogger<ContaController> log)
     {
         var digitos = Formato.SoDigitos(cpf);
-        var u = Formato.CpfValido(digitos) ? await db.Usuarios.FirstOrDefaultAsync(x => x.Cpf == digitos) : null;
+        var u = Formato.CpfValido(digitos) ? await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == Protecao.ResumoCpf(digitos)) : null;
 
         if (u != null && Formato.EmailValido(u.Email))
         {
@@ -227,4 +234,5 @@ public class CadastroForm
     public string? Email { get; set; }
     public string? Telefone { get; set; }
     public string? Senha { get; set; }
+    public bool Aceito { get; set; }
 }

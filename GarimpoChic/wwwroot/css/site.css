@@ -142,3 +142,112 @@ a.botao-topo,
     text-decoration: none;
     display: inline-block;
 }
+
+/* PRIVACIDADE (LGPD) */
+
+.card.card-texto {
+    max-width: 720px;
+    text-align: left;
+}
+
+.card-texto h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: #4a3a2a;
+    text-align: center;
+}
+
+.card-texto .atualizada {
+    text-align: center;
+    font-size: 12px;
+    color: #9a8860;
+    margin: 4px 0 20px;
+}
+
+.card-texto h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: #4c6b44;
+    margin: 22px 0 8px;
+}
+
+.card-texto p,
+.card-texto li {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #5a4f3c;
+}
+
+.card-texto ul {
+    padding-left: 20px;
+}
+
+.card-texto li + li {
+    margin-top: 6px;
+}
+
+.aceite {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 4px 0 1.2rem;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6b5d40;
+}
+
+.aceite input {
+    margin-top: 2px;
+    accent-color: #4c6b44;
+}
+
+.aceite a,
+.link-privacidade {
+    color: #8b6d38;
+    font-weight: 700;
+}
+
+.perfil-privacidade p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #7a7263;
+    margin-bottom: 14px;
+}
+
+.perfil-privacidade .acoes-privacidade {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.btn-contorno {
+    display: inline-block;
+    padding: 12px 22px;
+    border: 1px solid var(--verde, #4c6b44);
+    border-radius: 12px;
+    color: var(--verde, #4c6b44);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.btn-contorno:hover {
+    background: var(--verde, #4c6b44);
+    color: #fff;
+}
+
+.btn-excluir {
+    border: none;
+    background: #a2382b;
+    color: #fff;
+    padding: 13px 24px;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-excluir:hover {
+    background: #85291e;
+}

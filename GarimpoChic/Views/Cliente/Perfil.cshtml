@@ -136,6 +136,37 @@
 
             </form>
 
+            <section class="painel-form perfil-privacidade" id="excluir">
+
+                <h3>Privacidade e seus dados</h3>
+
+                <p>
+                    Baixe uma cópia de tudo o que a loja guarda sobre você ou exclua a sua conta.
+                    Veja os detalhes na <a href="/privacidade" class="link-privacidade">Política de Privacidade</a>.
+                </p>
+
+                <div class="acoes-privacidade">
+                    <a href="/perfil/meus-dados" class="btn-contorno">Baixar meus dados</a>
+                </div>
+
+                @if (TempData["ErroExcluir"] is string erroExcluir)
+                {
+                    <div class="alerta-erro">@erroExcluir</div>
+                }
+
+                <form action="/perfil/excluir" method="post" asp-antiforgery="true"
+                    data-confirmar="Excluir sua conta? Seu nome, CPF, e-mail e telefone serão apagados e não dá para desfazer.">
+                    <div class="campo">
+                        <label for="senha-excluir">Para excluir a conta, confirme sua senha</label>
+                        <input type="password" id="senha-excluir" name="senha" autocomplete="current-password" required>
+                    </div>
+                    <div class="acoes-form">
+                        <button type="submit" class="btn-excluir">Excluir minha conta</button>
+                    </div>
+                </form>
+
+            </section>
+
         </div>
 
     </div>

@@ -63,6 +63,12 @@
             <span class="erro-campo" id="erro-confirma">As senhas não coincidem.</span>
         </div>
 
+        <label class="aceite">
+            <input type="checkbox" id="aceito" name="aceito" value="true" @(Model.Aceito ? "checked" : "")>
+            <span>Li e concordo com a <a href="/privacidade" target="_blank">Política de Privacidade</a>.</span>
+        </label>
+        <span class="erro-campo" id="erro-aceito" style="@Mostrar("aceito")">@(Msg("aceito") ?? "Para criar a conta, é preciso concordar com a Política de Privacidade.")</span>
+
         <button type="submit" class="btn-entrar">Criar conta</button>
 
     </form>
@@ -70,6 +76,10 @@
     <div class="area-link">
         <p>Já tem uma conta?</p>
         <a href="/">Entrar →</a>
+    </div>
+
+    <div class="rodape-login">
+        <a href="/privacidade">Política de Privacidade</a>
     </div>
 
 </div>
@@ -94,7 +104,8 @@
                 mostrarErro('erro-email', /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)),
                 mostrarErro('erro-telefone', telefone.value.replace(/\D/g, '').length >= 10),
                 mostrarErro('erro-senha', senha.length >= 8),
-                mostrarErro('erro-confirma', senha === confirma && confirma !== '')
+                mostrarErro('erro-confirma', senha === confirma && confirma !== ''),
+                mostrarErro('erro-aceito', document.getElementById('aceito').checked)
             ];
 
             if (ok.includes(false)) e.preventDefault();

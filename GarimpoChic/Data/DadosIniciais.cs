@@ -30,7 +30,8 @@ public static class DadosIniciais
         var senha = config["ADMIN_SENHA"];
         if (cpf.Length != 11 || string.IsNullOrEmpty(senha)) return;
 
-        var u = await db.Usuarios.FirstOrDefaultAsync(x => x.Cpf == cpf);
+        var resumo = Protecao.ResumoCpf(cpf);
+        var u = await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == resumo);
         if (u == null)
         {
             u = new Usuario
@@ -52,7 +53,7 @@ public static class DadosIniciais
     {
         // Se um CPF de demonstração já tem conta (ex.: a funcionária criada por ADMIN_CPF), reaproveita essa conta
         // em vez de criar outra: o CPF é único e a duplicata impediria o site de iniciar.
-        var existentes = await db.Usuarios.ToDictionaryAsync(u => u.Cpf);
+        var existentes = await db.Usuarios.Where(u => u.CpfResumo != null).ToDictionaryAsync(u => u.Cpf);
 
         // Sem SenhaDemo definida, as contas de demonstração ficam sem senha (não dá para entrar com elas)
         Usuario Pessoa(string nome, string cpf, string email, string tel, string cidade, bool vendedora, bool funcionaria, int diasAtras)

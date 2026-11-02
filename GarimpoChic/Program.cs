@@ -10,6 +10,9 @@ using System.Text.Unicode;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Chave que protege os CPFs no banco; sem ela o site não sobe (veja Util/Protecao.cs)
+Protecao.Configurar(builder.Configuration["CHAVE_DADOS"]);
+
 // A Render informa em qual porta o site deve escutar
 var porta = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrEmpty(porta))

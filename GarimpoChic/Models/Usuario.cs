@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using GarimpoChic.Util;
 
 namespace GarimpoChic.Models;
 
@@ -11,9 +13,24 @@ public class Usuario
     [MaxLength(120)]
     public string Nome { get; set; } = "";
 
-    // Só os 11 dígitos, sem pontuação
-    [MaxLength(11)]
-    public string Cpf { get; set; } = "";
+    // Só os 11 dígitos, sem pontuação. No banco fica criptografado (veja Protecao e BrechoContext);
+    // ao mudar o CPF, o resumo usado para achar a conta é recalculado junto.
+    string cpf = "";
+
+    [MaxLength(100)]
+    public string Cpf
+    {
+        get => cpf;
+        set
+        {
+            cpf = value;
+            CpfResumo = Protecao.ResumoCpf(value);
+        }
+    }
+
+    // Fica fora do backup: depende da CHAVE_DADOS, e é recalculado a partir do CPF ao restaurar
+    [MaxLength(64), JsonIgnore]
+    public string? CpfResumo { get; set; }
 
     [MaxLength(160)]
     public string Email { get; set; } = "";
@@ -39,6 +56,12 @@ public class Usuario
     public int TentativasFalhas { get; set; }
 
     public DateTime? BloqueadoAte { get; set; }
+
+    // Quando a pessoa aceitou a política de privacidade no cadastro (contas antigas ficam vazias)
+    public DateTime? AceitouPrivacidadeEm { get; set; }
+
+    // Conta excluída a pedido da pessoa: os dados pessoais são apagados e só sobram os pedidos, sem identificação
+    public DateTime? ExcluidaEm { get; set; }
 
     public List<Pedido> Pedidos { get; set; } = [];
 

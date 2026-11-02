@@ -13,6 +13,7 @@ public static class Atualizacao
         if (!db.Database.IsNpgsql())
         {
             await db.Database.EnsureCreatedAsync();
+            await CifrarCpfsAntigosAsync(db);
             return;
         }
 
@@ -30,5 +31,20 @@ public static class Atualizacao
             """);
 
         await db.Database.MigrateAsync();
+        await CifrarCpfsAntigosAsync(db);
+    }
+
+    // Contas de antes da criptografia do CPF: o valor ainda está em texto puro e sem resumo.
+    // Ler já devolve o CPF certo (Protecao.Decifrar aceita texto puro); salvar de novo grava cifrado.
+    static async Task CifrarCpfsAntigosAsync(BrechoContext db)
+    {
+        var antigas = await db.Usuarios.Where(u => u.CpfResumo == null && u.ExcluidaEm == null).ToListAsync();
+        foreach (var u in antigas)
+        {
+            u.Cpf = u.Cpf; // recalcula o resumo
+            db.Entry(u).Property(x => x.Cpf).IsModified = true;
+        }
+
+        if (antigas.Count > 0) await db.SaveChangesAsync();
     }
 }

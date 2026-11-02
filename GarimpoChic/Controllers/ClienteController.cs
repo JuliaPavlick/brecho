@@ -165,6 +165,85 @@ public class ClienteController(BrechoContext db) : Controller
         return View(Eu);
     }
 
+    // LGPD (art. 18): a pessoa pode pedir uma cópia de tudo o que a loja guarda sobre ela
+    [HttpGet("/perfil/meus-dados")]
+    public async Task<IActionResult> MeusDados()
+    {
+        var dados = new
+        {
+            geradoEm = DateTime.UtcNow,
+            conta = new
+            {
+                Eu.Nome, cpf = Formato.Cpf(Eu.Cpf), Eu.Email, Eu.Telefone, Eu.Cidade, Eu.Estado,
+                vendedora = Eu.EhVendedora, funcionaria = Eu.EhFuncionaria,
+                Eu.CriadoEm, Eu.AceitouPrivacidadeEm,
+            },
+            pedidos = await db.Pedidos.Where(p => p.ClienteId == Eu.Id).OrderBy(p => p.Data)
+                .Select(p => new { p.Id, p.Data, p.Status, itens = p.Itens.Select(i => new { i.Nome, i.Categoria, i.Preco }) })
+                .ToListAsync(),
+            favoritos = await db.Favoritos.Where(f => f.UsuarioId == Eu.Id)
+                .Select(f => new { f.Produto!.Nome, f.CriadoEm }).ToListAsync(),
+            sacola = await db.Sacola.Where(s => s.UsuarioId == Eu.Id)
+                .Select(s => new { s.Produto!.Nome, s.CriadoEm }).ToListAsync(),
+            pecasEnviadasParaVenda = await db.Produtos.Where(p => p.VendedoraId == Eu.Id)
+                .Select(p => new { p.Nome, p.Descricao, p.Categoria, p.Preco, p.Status, p.CriadoEm, fotos = p.Fotos.Count })
+                .ToListAsync(),
+            repassesRecebidos = await db.Repasses.Where(r => r.VendedoraId == Eu.Id)
+                .Select(r => new { r.Data, r.Valor }).ToListAsync(),
+        };
+
+        var json = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(dados, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        });
+        return File(json, "application/json", "meus-dados-garimpo-chic.json");
+    }
+
+    // LGPD: exclusão da conta. Os dados pessoais são apagados; os pedidos continuam no financeiro da loja,
+    // mas ligados a uma conta sem nome, CPF, e-mail ou telefone (dado anonimizado deixa de ser dado pessoal).
+    [HttpPost("/perfil/excluir")]
+    public async Task<IActionResult> ExcluirConta(string? senha)
+    {
+        string? impedimento =
+            !DadosIniciais.SenhaConfere(Eu, senha ?? "") ? "A senha não confere."
+            : await db.Pedidos.AnyAsync(p => p.ClienteId == Eu.Id && p.Status != StatusPedido.Entregue)
+                ? "Você tem pedidos que ainda não foram entregues. Depois da entrega, é só voltar aqui."
+            : await db.Produtos.AnyAsync(p => p.VendedoraId == Eu.Id && p.Status != StatusProduto.Vendido)
+                ? "Você ainda tem peças na loja. Combine com a loja a retirada delas antes de excluir a conta."
+            : Eu.EhFuncionaria && !await db.Usuarios.AnyAsync(u => u.EhFuncionaria && u.Id != Eu.Id)
+                ? "Você é a única funcionária. Dê acesso de funcionária a outra pessoa antes de excluir sua conta."
+            : null;
+
+        if (impedimento != null)
+        {
+            TempData["ErroExcluir"] = impedimento;
+            return Redirect("/perfil#excluir");
+        }
+
+        await db.Favoritos.Where(f => f.UsuarioId == Eu.Id).ExecuteDeleteAsync();
+        await db.Sacola.Where(s => s.UsuarioId == Eu.Id).ExecuteDeleteAsync();
+
+        Eu.Nome = "Conta excluída";
+        Eu.Cpf = ""; // também apaga o resumo usado no login
+        Eu.Email = "";
+        Eu.Telefone = "";
+        Eu.Cidade = null;
+        Eu.Estado = null;
+        Eu.SenhaHash = "";
+        Eu.EhVendedora = false;
+        Eu.EhFuncionaria = false;
+        Eu.TentativasFalhas = 0;
+        Eu.BloqueadoAte = null;
+        Eu.AceitouPrivacidadeEm = null;
+        Eu.ExcluidaEm = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        await Sessao.SairAsync(HttpContext);
+        TempData["Ok"] = "Sua conta foi excluída e seus dados pessoais foram apagados.";
+        return Redirect("/");
+    }
+
     [HttpPost("/perfil/dados")]
     public async Task<IActionResult> SalvarDados(string? nome, string? email, string? telefone, string? cidade, string? estado)
     {

@@ -47,11 +47,20 @@ Opcional: para ter os dados de demonstração também na Render, adicione as var
 
 > O Postgres gratuito da Render expira 30 dias depois de criado. Depois disso é preciso migrar para um plano pago ou recriar o banco.
 
+## Privacidade (LGPD)
+
+- **CPF criptografado:** no banco, o CPF fica cifrado (AES-GCM), e o login acha a conta por um resumo (HMAC) do CPF. A chave vem da variável `CHAVE_DADOS`, que a Render sorteia sozinha pelo `render.yaml`. **Não troque nem apague essa variável:** sem ela o site não sobe, e com outra chave os CPFs antigos ficam ilegíveis. Se isso acontecer, restaure um backup.
+- **Política de Privacidade** em `/privacidade`. Para mostrar o e-mail de quem responde pelos dados, defina `CONTATO_PRIVACIDADE` na Render.
+- **Aceite no cadastro:** a data fica guardada em `AceitouPrivacidadeEm`.
+- **Meu perfil → Baixar meus dados:** a pessoa baixa um `.json` com tudo o que a loja guarda sobre ela.
+- **Meu perfil → Excluir minha conta:** apaga nome, CPF, e-mail, telefone e cidade. Os pedidos continuam no financeiro, sem identificação. A exclusão fica bloqueada enquanto houver pedido não entregue, peça da pessoa ainda na loja ou se ela for a única funcionária.
+
 ## Rotas
 
 | Página | Endereço |
 |---|---|
 | Login | `/` |
+| Política de Privacidade | `/privacidade` |
 | Cadastro | `/cadastro` |
 | Recuperar senha | `/recuperar-senha` |
 | Seleção de perfil | `/perfis` |

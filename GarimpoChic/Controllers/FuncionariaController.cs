@@ -309,7 +309,7 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpGet("clientes")]
     public async Task<IActionResult> Clientes()
     {
-        var pessoas = await db.Usuarios.OrderBy(u => u.Nome).ToListAsync();
+        var pessoas = await db.Usuarios.Where(u => u.ExcluidaEm == null).OrderBy(u => u.Nome).ToListAsync();
         var pedidos = await db.Pedidos.Include(p => p.Itens).ToListAsync();
         var enviadas = await db.Produtos.Where(p => p.VendedoraId != null)
             .GroupBy(p => p.VendedoraId).Select(g => new { g.Key, Total = g.Count() })
