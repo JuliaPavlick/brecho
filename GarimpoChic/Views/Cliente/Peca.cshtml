@@ -6,11 +6,27 @@
 
     var p = Model.Peca;
     var categoria = Categorias.Todas.FirstOrDefault(c => c.Nome == p.Categoria);
+    var logado = User.Identity?.IsAuthenticated == true;
+    var entrar = "/?ReturnUrl=" + Uri.EscapeDataString("/peca/" + p.Id);
+
+    // Prévia do link no WhatsApp/Instagram (eles leem estas tags sem login)
+    var site = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var resumo = string.IsNullOrWhiteSpace(p.Descricao) ? "Peça única no Garimpo Chic" : p.Descricao;
 }
 
 @section Estilos {
     <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/peca.css" asp-append-version="true">
+    <meta name="description" content="@resumo">
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="Garimpo Chic">
+    <meta property="og:title" content="@p.Nome — @Formato.Moeda(p.Preco)">
+    <meta property="og:description" content="@resumo">
+    <meta property="og:url" content="@site/peca/@p.Id">
+    @if (Model.Fotos.Count > 0)
+    {
+        <meta property="og:image" content="@site/fotos/@Model.Fotos[0]">
+    }
 }
 
 <main class="conteudo">
@@ -83,7 +99,12 @@
             </ul>
 
             <div class="peca-acoes">
-                @if (p.Disponivel)
+                @if (p.Disponivel && !logado)
+                {
+                    <a class="btn-sacola" href="@entrar">Entrar para comprar</a>
+                    <p class="peca-aviso-visitante">Ainda não tem conta? <a href="/cadastro?ReturnUrl=@Uri.EscapeDataString("/peca/" + p.Id)">Criar conta grátis</a></p>
+                }
+                else if (p.Disponivel)
                 {
                     <button type="button" class="btn-sacola @(p.NaSacola ? "ativo" : "")" data-id="@p.Id">
                         @(p.NaSacola ? "Na sacola ✓" : "Adicionar à sacola")
@@ -95,9 +116,12 @@
                 }
 
                 <div class="peca-acoes-secundarias">
-                    <button type="button" class="favorito @(p.Favorito ? "ativo" : "")" data-id="@p.Id"
-                        title="@(p.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
-                        aria-label="Favoritar @p.Nome" aria-pressed="@(p.Favorito ? "true" : "false")">@(p.Favorito ? "♥" : "♡")</button>
+                    @if (logado)
+                    {
+                        <button type="button" class="favorito @(p.Favorito ? "ativo" : "")" data-id="@p.Id"
+                            title="@(p.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
+                            aria-label="Favoritar @p.Nome" aria-pressed="@(p.Favorito ? "true" : "false")">@(p.Favorito ? "♥" : "♡")</button>
+                    }
 
                     <button type="button" class="btn-compartilhar" id="btn-compartilhar">Compartilhar</button>
 
@@ -138,7 +162,7 @@
             });
         });
 
-        document.querySelectorAll('.favorito').forEach(btn => {
+        document.querySelectorAll('button.favorito').forEach(btn => {
             btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
         });
 

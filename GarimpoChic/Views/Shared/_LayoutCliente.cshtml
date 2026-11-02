@@ -3,6 +3,8 @@
     string Ativo(string item) => item == menu ? "ativo" : "";
     var qtdSacola = ViewData["QtdSacola"] as int? ?? 0;
     var funcionaria = User.IsInRole(Papeis.Funcionaria);
+    var logado = User.Identity?.IsAuthenticated == true;
+    var voltar = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -45,6 +47,32 @@
 
             <!-- MENU -->
 
+            @if (!logado)
+            {
+                <!-- Visitante: só o catálogo, e os caminhos para entrar ou criar conta -->
+                <nav class="menu">
+                    <a href="/explorar" class="@Ativo("explorar")">
+                        <span class="icone">
+                            <img src="~/img/lupa.png" alt="">
+                        </span>
+                        <span class="texto-menu">Explorar</span>
+                    </a>
+                    <a href="/?ReturnUrl=@voltar">
+                        <span class="icone">
+                            <img src="~/img/pessoa.png" alt="">
+                        </span>
+                        <span class="texto-menu">Entrar</span>
+                    </a>
+                    <a href="/cadastro?ReturnUrl=@voltar">
+                        <span class="icone">
+                            <img src="~/img/coracao.png" alt="">
+                        </span>
+                        <span class="texto-menu">Criar conta</span>
+                    </a>
+                </nav>
+            }
+            else
+            {
             <nav class="menu">
 
                 <a href="/inicio" class="@Ativo("inicio")">
@@ -98,11 +126,14 @@
                 </a>
 
             </nav>
+            }
 
         </div>
 
         <!-- LOGOUT -->
 
+        @if (logado)
+        {
         <div class="logout">
 
             @if (funcionaria)
@@ -121,6 +152,7 @@
             </a>
 
         </div>
+        }
 
     </aside>
 

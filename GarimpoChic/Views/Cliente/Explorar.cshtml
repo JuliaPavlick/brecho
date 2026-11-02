@@ -107,7 +107,7 @@
         document.getElementById('ordenar').addEventListener('change', () =>
             document.getElementById('form-busca').submit());
 
-        document.querySelectorAll('.favorito').forEach(btn => {
+        document.querySelectorAll('button.favorito').forEach(btn => {
             btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
         });
     </script>

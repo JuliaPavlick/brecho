@@ -25,6 +25,7 @@
     <h1 class="titulo-cadastro">Criar minha conta</h1>
 
     <form action="/cadastro" method="post" asp-antiforgery="true" id="form-cadastro" novalidate>
+        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl">
 
         <div class="campo">
             <label for="nome">Nome completo</label>
@@ -75,7 +76,7 @@
 
     <div class="area-link">
         <p>Já tem uma conta?</p>
-        <a href="/">Entrar →</a>
+        <a href="/@(string.IsNullOrEmpty(Model.ReturnUrl) ? "" : "?ReturnUrl=" + Uri.EscapeDataString(Model.ReturnUrl))">Entrar →</a>
     </div>
 
     <div class="rodape-login">

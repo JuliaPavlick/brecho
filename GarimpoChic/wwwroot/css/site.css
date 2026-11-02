@@ -759,3 +759,51 @@ h5 a.link-peca:hover {
         animation-duration: 2s;
     }
 }
+
+/* VISITANTE (catálogo aberto sem login) */
+
+.acoes-visitante {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+a.botao-entrar {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: var(--verde, #4c6b44);
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+a.botao-entrar:hover {
+    background: var(--verde-hover, #3a5234);
+}
+
+a.btn-sacola {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+}
+
+a.favorito-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.peca-aviso-visitante {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #776843;
+    text-align: center;
+}
+
+.peca-aviso-visitante a {
+    color: #8b6d38;
+    font-weight: 700;
+}

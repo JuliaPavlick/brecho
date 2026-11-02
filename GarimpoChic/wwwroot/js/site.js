@@ -111,7 +111,7 @@ function mostrarErro(id, ok) {
 
 // Botão "Adicionar à sacola" dos cards (vale para todas as páginas da área do cliente)
 document.addEventListener('click', e => {
-    const btn = e.target.closest('.btn-sacola');
+    const btn = e.target.closest('button.btn-sacola');
     if (!btn) return;
 
     btn.disabled = true;

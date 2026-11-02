@@ -11,16 +11,26 @@ namespace GarimpoChic.Controllers;
 public class ContaController(BrechoContext db) : Controller
 {
     [HttpGet("/")]
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl)
     {
-        if (User.Identity?.IsAuthenticated == true) return Redirect(User.IsInRole(Papeis.Funcionaria) ? "/perfis" : "/inicio");
+        if (User.Identity?.IsAuthenticated == true)
+            return Destino(returnUrl, User.IsInRole(Papeis.Funcionaria));
+        ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
 
+    // Para onde ir depois de entrar: a página de onde a pessoa veio (ex.: a peça que ela queria comprar),
+    // desde que seja deste site; senão, a escolha de área (funcionária) ou a loja
+    IActionResult Destino(string? returnUrl, bool funcionaria) =>
+        Url.IsLocalUrl(returnUrl) && !returnUrl.StartsWith("/sair", StringComparison.OrdinalIgnoreCase)
+            ? LocalRedirect(returnUrl)
+            : Redirect(funcionaria ? "/perfis" : "/inicio");
+
     [HttpPost("/")]
     [EnableRateLimiting(Limites.Autenticacao)]
-    public async Task<IActionResult> Login(string? cpf, string? senha)
+    public async Task<IActionResult> Login(string? cpf, string? senha, string? returnUrl)
     {
+        ViewData["ReturnUrl"] = returnUrl;
         var digitos = Formato.SoDigitos(cpf);
         ViewData["Cpf"] = cpf;
 
@@ -44,11 +54,11 @@ public class ContaController(BrechoContext db) : Controller
         Limites.LimparErrosLogin(HttpContext, digitos);
         await Sessao.EntrarAsync(HttpContext, u);
         // Só a funcionária tem mais de uma área para escolher; as demais pessoas vão direto para a loja
-        return Redirect(u.EhFuncionaria ? "/perfis" : "/inicio");
+        return Destino(returnUrl, u.EhFuncionaria);
     }
 
     [HttpGet("/cadastro")]
-    public IActionResult Cadastro() => View(new CadastroForm());
+    public IActionResult Cadastro(string? returnUrl) => View(new CadastroForm { ReturnUrl = returnUrl });
 
     [HttpPost("/cadastro")]
     [EnableRateLimiting(Limites.Autenticacao)]
@@ -97,7 +107,7 @@ public class ContaController(BrechoContext db) : Controller
         await db.SaveChangesAsync();
 
         await Sessao.EntrarAsync(HttpContext, u);
-        return Redirect("/inicio");
+        return Destino(form.ReturnUrl, false);
     }
 
     [HttpGet("/privacidade")]
@@ -217,4 +227,5 @@ public class CadastroForm
     public string? Telefone { get; set; }
     public string? Senha { get; set; }
     public bool Aceito { get; set; }
+    public string? ReturnUrl { get; set; }
 }

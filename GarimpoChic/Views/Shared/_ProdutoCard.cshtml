@@ -1,4 +1,8 @@
 @model ProdutoCard
+@{
+    var logado = User.Identity?.IsAuthenticated == true;
+    var entrar = "/?ReturnUrl=" + Uri.EscapeDataString("/peca/" + Model.Id);
+}
 
 <div class="produto" data-nome="@Model.Nome" data-categoria="@Model.CategoriaSlug"
     data-preco="@Model.Preco.ToString(System.Globalization.CultureInfo.InvariantCulture)">
@@ -19,12 +23,23 @@
             <h4><a href="/peca/@Model.Id" class="link-peca">@Model.Nome</a></h4>
             <p>@Model.Descricao</p>
         </div>
-        <button type="button" class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"
-            title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
-            aria-label="Favoritar @Model.Nome" aria-pressed="@(Model.Favorito ? "true" : "false")">@(Model.Favorito ? "♥" : "♡")</button>
+        @if (logado)
+        {
+            <button type="button" class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"
+                title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
+                aria-label="Favoritar @Model.Nome" aria-pressed="@(Model.Favorito ? "true" : "false")">@(Model.Favorito ? "♥" : "♡")</button>
+        }
+        else
+        {
+            <a class="favorito favorito-link" href="@entrar" title="Entre para favoritar" aria-label="Entre para favoritar @Model.Nome">♡</a>
+        }
     </div>
     <span class="preco">@Formato.Moeda(Model.Preco)</span>
-    @if (Model.Disponivel)
+    @if (Model.Disponivel && !logado)
+    {
+        <a class="btn-sacola" href="@entrar">Entrar para comprar</a>
+    }
+    else if (Model.Disponivel)
     {
         <button type="button" class="btn-sacola @(Model.NaSacola ? "ativo" : "")" data-id="@Model.Id">
             @(Model.NaSacola ? "Na sacola ✓" : "Adicionar à sacola")

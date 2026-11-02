@@ -1,6 +1,7 @@
 @model (string Titulo, string Subtitulo)
 @{
-    var eu = (Usuario)ViewData["Usuario"]!;
+    var eu = ViewData["Usuario"] as Usuario;
+    var voltar = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
 }
 
 <div class="topo">
@@ -9,5 +10,15 @@
         <p>@Model.Subtitulo</p>
     </div>
 
-    <div class="foto">@eu.Inicial</div>
+    @if (eu != null)
+    {
+        <div class="foto">@eu.Inicial</div>
+    }
+    else
+    {
+        <div class="acoes-visitante">
+            <a href="/cadastro?ReturnUrl=@voltar" class="botao-topo">Criar conta</a>
+            <a href="/?ReturnUrl=@voltar" class="botao-entrar">Entrar</a>
+        </div>
+    }
 </div>

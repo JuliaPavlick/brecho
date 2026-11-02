@@ -1,5 +1,7 @@
 @{
     ViewData["Title"] = "Login";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var voltar = string.IsNullOrEmpty(returnUrl) ? "" : "?ReturnUrl=" + Uri.EscapeDataString(returnUrl);
 }
 
 @section Estilos {
@@ -26,6 +28,7 @@
     }
 
     <form action="/" method="post" asp-antiforgery="true">
+        <input type="hidden" name="ReturnUrl" value="@returnUrl">
 
         <div class="campo">
             <label for="cpf">CPF</label>
@@ -46,7 +49,7 @@
 
     <div class="area-link">
         <p>Ainda não tem conta?</p>
-        <a href="/cadastro">Criar minha conta →</a>
+        <a href="/cadastro@(voltar)">Criar minha conta →</a>
     </div>
 
     <div class="rodape-login">
@@ -55,6 +58,10 @@
         </a>
         ·
         <a href="/privacidade">Privacidade</a>
+    </div>
+
+    <div class="rodape-login">
+        <a href="/explorar">Ver as peças sem entrar →</a>
     </div>
 
 </div>

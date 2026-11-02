@@ -13,12 +13,21 @@ public class ClienteController(BrechoContext db) : Controller
 {
     Usuario Eu = null!;
 
-    // Carrega a pessoa logada antes de cada ação (o layout usa o nome e a inicial dela)
+    // Carrega a pessoa logada antes de cada ação (o layout usa o nome e a inicial dela).
+    // As páginas abertas a visitantes ([AllowAnonymous]: Explorar e a página da peça) seguem sem ninguém logado.
     public override async Task OnActionExecutionAsync(ActionExecutingContext ctx, ActionExecutionDelegate next)
     {
         var u = await db.UsuarioAtualAsync(User);
         if (u == null)
         {
+            var publica = ctx.ActionDescriptor.EndpointMetadata.OfType<IAllowAnonymous>().Any();
+            if (publica && User.Identity?.IsAuthenticated != true)
+            {
+                ViewData["QtdSacola"] = 0;
+                await next();
+                return;
+            }
+
             ctx.Result = Redirect("/sair");
             return;
         }
@@ -29,12 +38,16 @@ public class ClienteController(BrechoContext db) : Controller
         await next();
     }
 
-    IQueryable<ProdutoCard> Cards(IQueryable<Produto> q) =>
-        q.Select(p => new ProdutoCard(
+    IQueryable<ProdutoCard> Cards(IQueryable<Produto> q)
+    {
+        // Visitante (sem login): id 0, que não tem favoritos nem sacola
+        var euId = Eu?.Id ?? 0;
+        return q.Select(p => new ProdutoCard(
             p.Id, p.Nome, p.Descricao, p.Categoria, p.Preco, p.Status,
             p.Fotos.OrderBy(f => f.Id).Select(f => (int?)f.Id).FirstOrDefault(),
-            db.Favoritos.Any(f => f.UsuarioId == Eu.Id && f.ProdutoId == p.Id),
-            db.Sacola.Any(s => s.UsuarioId == Eu.Id && s.ProdutoId == p.Id)));
+            db.Favoritos.Any(f => f.UsuarioId == euId && f.ProdutoId == p.Id),
+            db.Sacola.Any(s => s.UsuarioId == euId && s.ProdutoId == p.Id)));
+    }
 
     IQueryable<Produto> Disponiveis => db.Produtos.Where(p => p.Status == StatusProduto.Disponivel);
 
@@ -47,6 +60,7 @@ public class ClienteController(BrechoContext db) : Controller
         View(await Cards(Disponiveis.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)).Take(3).ToListAsync());
 
     // Página da peça. Só peças publicadas: as "Em avaliação" respondem como se não existissem.
+    [AllowAnonymous]
     [HttpGet("/peca/{id:int}")]
     public async Task<IActionResult> Peca(int id)
     {
@@ -65,6 +79,7 @@ public class ClienteController(BrechoContext db) : Controller
         return View(new PecaDetalhe(peca, fotos, criadoEm, semelhantes));
     }
 
+    [AllowAnonymous]
     [HttpGet("/explorar")]
     public async Task<IActionResult> Explorar(string? q, string? categoria, string? ordem, int pagina = 1)
     {
