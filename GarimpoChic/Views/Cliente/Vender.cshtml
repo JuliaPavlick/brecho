@@ -34,13 +34,13 @@
 
             <div class="campo">
                 <label for="nome">Nome da peça</label>
-                <input type="text" id="nome" name="nome" placeholder="Ex.: Vestido longo de linho">
+                <input type="text" id="nome" name="nome" maxlength="120" placeholder="Ex.: Vestido longo de linho">
                 <span class="erro-campo" id="erro-nome">Informe o nome da peça.</span>
             </div>
 
             <div class="campo">
                 <label for="descricao">Descrição</label>
-                <textarea id="descricao" name="descricao" rows="3" placeholder="Tamanho, estado de conservação, detalhes..."></textarea>
+                <textarea id="descricao" name="descricao" maxlength="500" rows="3" placeholder="Tamanho, estado de conservação, detalhes..."></textarea>
             </div>
 
             <div class="linha-campos">
@@ -96,6 +96,23 @@
             }
 
         </div>
+
+        @if (ViewData["Repasses"] is List<Repasse> { Count: > 0 } repasses)
+        {
+            <div class="painel-form">
+                <h3>Repasses recebidos</h3>
+                <p class="texto-backup">Total: <strong>@Formato.Moeda(repasses.Sum(r => r.Valor))</strong></p>
+                @foreach (var r in repasses)
+                {
+                    <div class="item">
+                        <div class="item-info">
+                            <h5>@Formato.Moeda(r.Valor)</h5>
+                            <p>@Formato.Data(r.Data)</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
 
     </div>
 

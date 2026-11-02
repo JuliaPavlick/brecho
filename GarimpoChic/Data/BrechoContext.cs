@@ -20,6 +20,25 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
     // Chaves que assinam o cookie de login; ficam no banco para o login sobreviver a um novo deploy
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
+    // O Postgres recusa texto maior que o limite da coluna (ex.: descrição com mais de 500 caracteres) e o envio
+    // inteiro falharia. Os formulários já limitam pelo maxlength; isto é a última garantia: corta o excesso.
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken ct = default)
+    {
+        foreach (var entrada in ChangeTracker.Entries().Where(e => e.State is EntityState.Added or EntityState.Modified))
+        {
+            foreach (var prop in entrada.Properties)
+            {
+                var max = prop.Metadata.GetMaxLength();
+                // Colunas com conversão (ex.: CPF criptografado) têm outro tamanho no banco; ficam de fora
+                if (max == null || prop.Metadata.GetValueConverter() != null) continue;
+                if (prop.CurrentValue is string texto && texto.Length > max)
+                    prop.CurrentValue = texto[..max.Value].TrimEnd();
+            }
+        }
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, ct);
+    }
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         // O CPF vai criptografado para o banco; a busca e a regra de "um cadastro por CPF" usam o resumo

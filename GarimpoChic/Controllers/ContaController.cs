@@ -17,50 +17,31 @@ public class ContaController(BrechoContext db) : Controller
         return View();
     }
 
-    const int MaxTentativas = 5;
-    static readonly TimeSpan TempoBloqueio = TimeSpan.FromMinutes(15);
-
     [HttpPost("/")]
     [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> Login(string? cpf, string? senha)
     {
         var digitos = Formato.SoDigitos(cpf);
-        var resumo = Protecao.ResumoCpf(digitos);
-        var u = resumo == null ? null : await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == resumo);
         ViewData["Cpf"] = cpf;
 
-        // Conta bloqueada: nem confere a senha, para não dar mais chances de adivinhar
-        if (u?.BloqueadoAte > DateTime.UtcNow)
+        // Muitos erros para este CPF a partir deste endereço: nem confere a senha (veja Limites)
+        if (Limites.LoginBloqueado(HttpContext, digitos))
         {
-            var minutos = (int)Math.Ceiling((u.BloqueadoAte.Value - DateTime.UtcNow).TotalMinutes);
-            ViewData["Erro"] = $"Muitas tentativas erradas. Tente de novo em {minutos} min ou use \"Esqueci minha senha\".";
+            ViewData["Erro"] = "Muitas tentativas erradas para este CPF. Aguarde 15 minutos ou use \"Esqueci minha senha\".";
             return View();
         }
 
+        var resumo = Protecao.ResumoCpf(digitos);
+        var u = resumo == null ? null : await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == resumo);
+
         if (u == null || !DadosIniciais.SenhaConfere(u, senha ?? ""))
         {
-            if (u != null)
-            {
-                u.TentativasFalhas++;
-                if (u.TentativasFalhas >= MaxTentativas)
-                {
-                    u.BloqueadoAte = DateTime.UtcNow + TempoBloqueio;
-                    u.TentativasFalhas = 0;
-                }
-                await db.SaveChangesAsync();
-            }
-
+            Limites.RegistrarErroLogin(HttpContext, digitos);
             ViewData["Erro"] = "CPF ou senha incorretos.";
             return View();
         }
 
-        if (u.TentativasFalhas > 0 || u.BloqueadoAte != null)
-        {
-            u.TentativasFalhas = 0;
-            u.BloqueadoAte = null;
-            await db.SaveChangesAsync();
-        }
-
+        Limites.LimparErrosLogin(HttpContext, digitos);
         await Sessao.EntrarAsync(HttpContext, u);
         // Só a funcionária tem mais de uma área para escolher; as demais pessoas vão direto para a loja
         return Redirect(u.EhFuncionaria ? "/perfis" : "/inicio");
@@ -135,7 +116,7 @@ public class ContaController(BrechoContext db) : Controller
         var digitos = Formato.SoDigitos(cpf);
         var u = Formato.CpfValido(digitos) ? await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == Protecao.ResumoCpf(digitos)) : null;
 
-        if (u != null && Formato.EmailValido(u.Email))
+        if (u != null && Formato.EmailValido(u.Email) && Limites.PodeEnviarRedefinicao(digitos))
         {
             var link = $"{EnderecoDoSite()}/redefinir-senha?codigo={Uri.EscapeDataString(redefinicao.GerarCodigo(u))}";
             var html = $"""

@@ -76,6 +76,7 @@
         <div id="det-linhas"></div>
 
         <div class="acoes-modal">
+            <button type="button" class="btn-secundario" id="btn-funcionaria"></button>
             <button type="button" class="btn-secundario" id="btn-fechar">Fechar</button>
         </div>
 
@@ -157,6 +158,12 @@
                 linhas.push(['Peças enviadas à loja', p.pecasEnviadas]);
             }
 
+            const btnFunc = document.getElementById('btn-funcionaria');
+            const ehFuncionaria = p.papeis.includes('funcionaria');
+            btnFunc.textContent = ehFuncionaria ? 'Tirar acesso de funcionária' : 'Dar acesso de funcionária';
+            btnFunc.dataset.id = p.id;
+            btnFunc.style.display = p.eu ? 'none' : '';
+
             document.getElementById('det-linhas').innerHTML = linhas.map(l => `
                 <div class="det-linha">
                     <span>${l[0]}</span>
@@ -185,6 +192,26 @@
                 filtroPapel = chip.dataset.papel;
                 render();
             });
+        });
+
+        document.getElementById('btn-funcionaria').addEventListener('click', e => {
+            const btn = e.currentTarget;
+            const p = pessoas.find(x => x.id === Number(btn.dataset.id));
+            const ativo = !p.papeis.includes('funcionaria');
+            const pergunta = ativo
+                ? `Dar acesso de funcionária para ${p.nome}? Ela vai ver o painel, os pedidos, os clientes e o financeiro.`
+                : `Tirar o acesso de funcionária de ${p.nome}?`;
+            if (!confirm(pergunta)) return;
+
+            btn.disabled = true;
+            postar(`/painel/clientes/${p.id}/funcionaria`, { ativo })
+                .then(() => {
+                    p.papeis = ativo ? [...p.papeis, 'funcionaria'] : p.papeis.filter(x => x !== 'funcionaria');
+                    render();
+                    abrirDetalhes(p);
+                })
+                .catch(falhou)
+                .finally(() => btn.disabled = false);
         });
 
         document.getElementById('btn-fechar').addEventListener('click', fecharModal);

@@ -117,6 +117,16 @@ public class FuncionariaController(BrechoContext db) : Controller
         {
             p = await db.Produtos.FindAsync(id);
             if (p == null) return NotFound();
+
+            // Peça que está num pedido ativo já foi vendida: só volta para a loja cancelando o pedido
+            if (form.Status != StatusProduto.Vendido)
+            {
+                var pedidoAtivo = await db.PedidoItens
+                    .Where(i => i.ProdutoId == id && i.Pedido!.Status != StatusPedido.Cancelado)
+                    .Select(i => (int?)i.PedidoId).FirstOrDefaultAsync();
+                if (pedidoAtivo != null)
+                    return BadRequest(new { erro = $"Esta peça está no pedido #{pedidoAtivo:0000}. Para devolvê-la à loja, cancele o pedido em Pedidos." });
+            }
         }
 
         p.Nome = form.Nome.Trim();
@@ -192,7 +202,8 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpPost("lote/{id:int}/ia")]
     public async Task<IActionResult> LoteIa(int id, [FromServices] Gemini gemini)
     {
-        var p = await db.Produtos.FindAsync(id);
+        // Só rascunhos da própria loja: não sobrescreve peças publicadas nem envios de vendedoras
+        var p = await db.Produtos.FirstOrDefaultAsync(x => x.Id == id && x.Status == StatusProduto.Avaliacao && x.VendedoraId == null);
         if (p == null) return NotFound();
 
         var foto = await db.ProdutoFotos.Where(f => f.ProdutoId == id).OrderBy(f => f.Id).FirstOrDefaultAsync();
@@ -237,17 +248,32 @@ public class FuncionariaController(BrechoContext db) : Controller
         }).ToList());
     }
 
-    public record StatusForm(string Status);
+    public record StatusForm(string? Status);
 
     [HttpPost("pedidos/{id:int}/status")]
-    public async Task<IActionResult> AlterarStatusPedido(int id, [FromBody] StatusForm form)
+    public async Task<IActionResult> AlterarStatusPedido(int id, [FromBody] StatusForm? form)
     {
-        if (!StatusPedido.Nomes.ContainsKey(form.Status)) return BadRequest();
+        var pedido = await db.Pedidos.Include(p => p.Itens).FirstOrDefaultAsync(p => p.Id == id);
+        if (pedido == null) return NotFound();
 
-        var linhas = await db.Pedidos.Where(p => p.Id == id)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, form.Status));
+        var novo = form?.Status ?? "";
+        if (!StatusPedido.PodeMudar(pedido.Status, novo))
+            return BadRequest(new { erro = $"Um pedido {StatusPedido.Nomes[pedido.Status].ToLower()} não muda mais de status." });
 
-        return linhas == 0 ? NotFound() : Ok();
+        await using var transacao = await db.Database.BeginTransactionAsync();
+
+        // Cancelar devolve as peças para a loja (cada peça é única e estava marcada como vendida)
+        if (novo == StatusPedido.Cancelado && pedido.Status != StatusPedido.Cancelado)
+        {
+            var ids = pedido.Itens.Where(i => i.ProdutoId != null).Select(i => i.ProdutoId!.Value).ToList();
+            await db.Produtos.Where(p => ids.Contains(p.Id) && p.Status == StatusProduto.Vendido)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, StatusProduto.Disponivel));
+        }
+
+        pedido.Status = novo;
+        await db.SaveChangesAsync();
+        await transacao.CommitAsync();
+        return Ok();
     }
 
     // ---------- Calendário ----------
@@ -268,9 +294,9 @@ public class FuncionariaController(BrechoContext db) : Controller
     public record EventoForm(string Titulo, string Data, string? Hora, string Tipo);
 
     [HttpPost("calendario")]
-    public async Task<IActionResult> CriarEvento([FromBody] EventoForm form)
+    public async Task<IActionResult> CriarEvento([FromBody] EventoForm? form)
     {
-        if (string.IsNullOrWhiteSpace(form.Titulo) || !DateOnly.TryParse(form.Data, out var data) ||
+        if (form == null || string.IsNullOrWhiteSpace(form.Titulo) || !DateOnly.TryParse(form.Data, out var data) ||
             !TipoEvento.Todos.Contains(form.Tipo))
             return BadRequest();
 
@@ -302,7 +328,8 @@ public class FuncionariaController(BrechoContext db) : Controller
         var rel = await Relatorios.CarregarAsync(db);
 
         var desde = DateTime.UtcNow.AddDays(-60);
-        var vendas = await db.Pedidos.Include(p => p.Itens).Where(p => p.Data >= desde).ToListAsync();
+        var vendas = await db.Pedidos.Include(p => p.Itens)
+            .Where(p => p.Data >= desde && p.Status != StatusPedido.Cancelado).ToListAsync();
 
         var movimentacoes = vendas
             .Select(p => (data: p.Data, descricao: "Venda — " + string.Join(" e ", p.Itens.Select(i => i.Nome)), tipo: "venda", valor: p.Total))
@@ -314,7 +341,61 @@ public class FuncionariaController(BrechoContext db) : Controller
             .ToList();
 
         ViewData["Relatorios"] = rel;
+        ViewData["Vendedoras"] = await db.Usuarios
+            .Where(u => u.EhVendedora && u.ExcluidaEm == null)
+            .OrderBy(u => u.Nome)
+            .Select(u => new { u.Id, u.Nome })
+            .ToListAsync();
         return View(movimentacoes);
+    }
+
+    public record RepasseForm(int VendedoraId, string? Valor, DateOnly? Data);
+
+    // Registra um pagamento feito a uma vendedora externa (ex.: Pix pela venda das peças dela)
+    [HttpPost("financeiro/repasses")]
+    public async Task<IActionResult> RegistrarRepasse([FromBody] RepasseForm? form)
+    {
+        var valor = Precos.Ler(form?.Valor);
+        var data = form?.Data ?? Formato.Hoje;
+
+        if (form == null || !await db.Usuarios.AnyAsync(u => u.Id == form.VendedoraId && u.EhVendedora && u.ExcluidaEm == null))
+            return BadRequest(new { erro = "Escolha a vendedora." });
+        if (valor <= 0 || valor > 100_000)
+            return BadRequest(new { erro = "Informe um valor maior que zero." });
+        if (data > Formato.Hoje)
+            return BadRequest(new { erro = "A data do repasse não pode ser no futuro." });
+
+        db.Repasses.Add(new Repasse
+        {
+            VendedoraId = form.VendedoraId,
+            Valor = valor,
+            // Meio-dia no horário de Brasília, para a data não "virar" ao converter para UTC
+            Data = Formato.ParaUtc(data.ToDateTime(new TimeOnly(12, 0))),
+        });
+        await db.SaveChangesAsync();
+        return Ok();
+    }
+
+    public record FuncionariaForm(bool Ativo);
+
+    [HttpPost("clientes/{id:int}/funcionaria")]
+    public async Task<IActionResult> AlterarFuncionaria(int id, [FromBody] FuncionariaForm? form)
+    {
+        var pessoa = await db.Usuarios.FirstOrDefaultAsync(u => u.Id == id && u.ExcluidaEm == null);
+        if (pessoa == null || form == null) return NotFound();
+
+        if (!form.Ativo)
+        {
+            if (id == User.UsuarioId())
+                return BadRequest(new { erro = "Você não pode tirar o seu próprio acesso. Peça para outra funcionária." });
+            if (!await db.Usuarios.AnyAsync(u => u.EhFuncionaria && u.Id != id && u.ExcluidaEm == null))
+                return BadRequest(new { erro = "A loja precisa de pelo menos uma funcionária." });
+        }
+
+        // A mudança vale na próxima página que a pessoa abrir (o cookie é conferido com o banco a cada acesso)
+        pessoa.EhFuncionaria = form.Ativo;
+        await db.SaveChangesAsync();
+        return Ok();
     }
 
     // ---------- Backup ----------
@@ -372,6 +453,14 @@ public class FuncionariaController(BrechoContext db) : Controller
             TempData["Erro"] = "Não foi possível ler este arquivo de backup: " + ex.Message;
             return Redirect("/painel/backup");
         }
+        catch (DbUpdateException ex)
+        {
+            // A restauração roda numa transação: se o banco recusar algo, nada foi gravado
+            HttpContext.RequestServices.GetRequiredService<ILogger<FuncionariaController>>()
+                .LogError(ex, "Falha ao restaurar backup");
+            TempData["Erro"] = "O banco recusou os dados deste backup e nada foi alterado. Confira se o arquivo é um backup do Garimpo Chic.";
+            return Redirect("/painel/backup");
+        }
 
         // As contas foram trocadas pelas do backup: todos (inclusive quem restaurou) entram de novo
         await Sessao.SairAsync(HttpContext);
@@ -400,6 +489,7 @@ public class FuncionariaController(BrechoContext db) : Controller
             return new
             {
                 id = u.Id,
+                eu = u.Id == User.UsuarioId(),
                 nome = u.Nome,
                 email = u.Email,
                 telefone = u.Telefone,
@@ -408,7 +498,7 @@ public class FuncionariaController(BrechoContext db) : Controller
                 desde = Formato.Data(u.CriadoEm),
                 papeis,
                 pedidos = meus.Count,
-                gasto = meus.Sum(p => p.Total),
+                gasto = meus.Where(p => p.Status != StatusPedido.Cancelado).Sum(p => p.Total),
                 pecasEnviadas = enviadas.GetValueOrDefault(u.Id),
             };
         }).ToList());

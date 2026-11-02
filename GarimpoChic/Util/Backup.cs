@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GarimpoChic.Data;
 using GarimpoChic.Models;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,27 @@ public static class Backup
         IgnoreReadOnlyProperties = true,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = false,
+        Converters = { new DataUtc() },
     };
+
+    // As datas são guardadas em UTC. O SQLite (desenvolvimento) devolve as datas sem fuso, e o Postgres recusa
+    // gravar data sem fuso: ao ler o backup, toda data sem fuso é tratada como UTC.
+    sealed class DataUtc : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type tipo, JsonSerializerOptions opcoes)
+        {
+            var d = reader.GetDateTime();
+            return d.Kind switch
+            {
+                DateTimeKind.Utc => d,
+                DateTimeKind.Local => d.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(d, DateTimeKind.Utc),
+            };
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime valor, JsonSerializerOptions opcoes) =>
+            writer.WriteStringValue(valor.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(valor, DateTimeKind.Utc) : valor.ToUniversalTime());
+    }
 
     record Manifesto(int Versao, DateTime CriadoEm);
 
@@ -109,7 +130,9 @@ public static class Backup
 
         foreach (var f in Ler<List<ProdutoFoto>>("fotos.json"))
         {
-            using var s = zip.GetEntry($"fotos/{f.Id}")!.Open();
+            var entrada = zip.GetEntry($"fotos/{f.Id}")
+                ?? throw new InvalidDataException($"O arquivo de backup não tem a foto {f.Id}.");
+            using var s = entrada.Open();
             using var ms = new MemoryStream();
             await s.CopyToAsync(ms);
             f.Dados = ms.ToArray();

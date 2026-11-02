@@ -6,6 +6,7 @@
 
     var rel = (Relatorios)ViewData["Relatorios"]!;
     var mesAtual = Formato.Agora.ToString("MMMM", Formato.PtBr);
+    var vendedoras = (System.Collections.IEnumerable)ViewData["Vendedoras"]!;
 }
 
 @section Estilos {
@@ -71,6 +72,31 @@
 
     <partial name="_GraficoVendas" model="rel.Grafico()" />
 
+    <!-- REGISTRAR REPASSE -->
+
+    <form class="painel form-repasse" id="form-repasse">
+        <h3>Registrar repasse</h3>
+        <p class="texto-backup">Anote aqui cada pagamento feito a uma vendedora. Ele entra nos repasses do mês e no extrato dela.</p>
+        <div class="linha-repasse">
+            <label>Vendedora
+                <select id="rep-vendedora" required>
+                    <option value="">Escolha...</option>
+                    @foreach (dynamic v in vendedoras)
+                    {
+                        <option value="@v.Id">@v.Nome</option>
+                    }
+                </select>
+            </label>
+            <label>Valor (R$)
+                <input type="number" id="rep-valor" min="0.01" step="0.01" required>
+            </label>
+            <label>Data
+                <input type="date" id="rep-data" value="@Formato.Hoje.ToString("yyyy-MM-dd")" max="@Formato.Hoje.ToString("yyyy-MM-dd")" required>
+            </label>
+            <button type="submit" class="btn-primario" id="btn-repasse">Registrar</button>
+        </div>
+    </form>
+
     <!-- MOVIMENTACOES -->
 
     <div class="painel painel-tabela">
@@ -108,6 +134,24 @@
 @section Scripts {
     <script>
         const movimentacoes = @Json.Serialize(Model);
+
+        document.getElementById('form-repasse').addEventListener('submit', e => {
+            e.preventDefault();
+            const vendedora = document.getElementById('rep-vendedora');
+            const valor = document.getElementById('rep-valor').value;
+            if (!confirm(`Registrar repasse de ${moeda(valor)} para ${vendedora.selectedOptions[0].text}?`)) return;
+
+            const botao = document.getElementById('btn-repasse');
+            botao.disabled = true;
+            postar('/painel/financeiro/repasses', {
+                vendedoraId: Number(vendedora.value),
+                valor,
+                data: document.getElementById('rep-data').value,
+            })
+                .then(() => location.reload())
+                .catch(falhou)
+                .finally(() => botao.disabled = false);
+        });
 
         const TIPOS = {
             venda: 'Venda',

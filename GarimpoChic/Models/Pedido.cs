@@ -51,11 +51,18 @@ public static class StatusPedido
     public const string Preparo = "preparo";
     public const string Caminho = "caminho";
     public const string Entregue = "entregue";
+    public const string Cancelado = "cancelado";
 
     public static readonly Dictionary<string, string> Nomes = new()
     {
         [Preparo] = "Em preparo",
         [Caminho] = "A caminho",
         [Entregue] = "Entregue",
+        [Cancelado] = "Cancelado",
     };
+
+    // Entregue e cancelado são finais: depois deles o status não muda mais
+    public static bool Final(string status) => status is Entregue or Cancelado;
+
+    public static bool PodeMudar(string de, string para) => Nomes.ContainsKey(para) && (de == para || !Final(de));
 }

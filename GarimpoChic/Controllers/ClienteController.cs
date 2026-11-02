@@ -38,6 +38,10 @@ public class ClienteController(BrechoContext db) : Controller
 
     IQueryable<Produto> Disponiveis => db.Produtos.Where(p => p.Status == StatusProduto.Disponivel);
 
+    // Peças que já foram para a loja (disponíveis, reservadas ou vendidas). As "Em avaliação" são rascunhos
+    // da loja ou envios de vendedoras e não podem aparecer para clientes.
+    IQueryable<Produto> Publicadas => db.Produtos.Where(p => p.Status != StatusProduto.Avaliacao);
+
     [HttpGet("/inicio")]
     public async Task<IActionResult> Inicio() =>
         View(await Cards(Disponiveis.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)).Take(3).ToListAsync());
@@ -81,20 +85,29 @@ public class ClienteController(BrechoContext db) : Controller
     public async Task<IActionResult> Favoritos()
     {
         var ids = db.Favoritos.Where(f => f.UsuarioId == Eu.Id).Select(f => f.ProdutoId);
-        return View(await Cards(db.Produtos.Where(p => ids.Contains(p.Id))).ToListAsync());
+        return View(await Cards(Publicadas.Where(p => ids.Contains(p.Id))).ToListAsync());
     }
 
     // Marca ou desmarca o coração de uma peça
     [HttpPost("/favoritos/{id:int}")]
     public async Task<IActionResult> AlternarFavorito(int id)
     {
-        if (!await db.Produtos.AnyAsync(p => p.Id == id)) return NotFound();
+        if (!await Publicadas.AnyAsync(p => p.Id == id)) return NotFound();
 
         var fav = await db.Favoritos.FindAsync(Eu.Id, id);
         if (fav == null) db.Favoritos.Add(new Favorito { UsuarioId = Eu.Id, ProdutoId = id });
         else db.Favoritos.Remove(fav);
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Dois cliques seguidos: o primeiro já gravou; devolve o estado que ficou no banco
+            db.ChangeTracker.Clear();
+            return Json(new { favorito = await db.Favoritos.AnyAsync(f => f.UsuarioId == Eu.Id && f.ProdutoId == id) });
+        }
         return Json(new { favorito = fav == null });
     }
 
@@ -119,10 +132,21 @@ public class ClienteController(BrechoContext db) : Controller
         else if (produto.Status != StatusProduto.Disponivel) return Conflict(new { erro = "Esta peça não está mais disponível." });
         else db.Sacola.Add(new SacolaItem { UsuarioId = Eu.Id, ProdutoId = id });
 
-        await db.SaveChangesAsync();
+        var naSacola = item == null;
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Dois cliques seguidos: o primeiro já gravou; devolve o estado que ficou no banco
+            db.ChangeTracker.Clear();
+            naSacola = await db.Sacola.AnyAsync(s => s.UsuarioId == Eu.Id && s.ProdutoId == id);
+        }
+
         return Json(new
         {
-            naSacola = item == null,
+            naSacola,
             total = await db.Sacola.CountAsync(s => s.UsuarioId == Eu.Id),
         });
     }
@@ -276,11 +300,21 @@ public class ClienteController(BrechoContext db) : Controller
     }
 
     [HttpPost("/perfil/dados")]
-    public async Task<IActionResult> SalvarDados(string? nome, string? email, string? telefone, string? cidade, string? estado)
+    public async Task<IActionResult> SalvarDados(string? nome, string? email, string? telefone, string? cidade, string? estado,
+        string? senhaEmail)
     {
         if (string.IsNullOrWhiteSpace(nome) || !Formato.EmailValido(email) || Formato.SoDigitos(telefone).Length < 10)
         {
             TempData["ErroDados"] = "Confira nome, e-mail e telefone.";
+            return Redirect("/perfil");
+        }
+
+        // O e-mail recebe o link de "esqueci minha senha": trocá-lo pede a senha, para quem pegou uma sessão
+        // aberta (ex.: computador emprestado) não conseguir tomar a conta
+        var trocouEmail = !string.Equals(email!.Trim(), Eu.Email, StringComparison.OrdinalIgnoreCase);
+        if (trocouEmail && !DadosIniciais.SenhaConfere(Eu, senhaEmail ?? ""))
+        {
+            TempData["ErroDados"] = "Para trocar o e-mail, confirme sua senha atual no campo abaixo dele.";
             return Redirect("/perfil");
         }
 
@@ -318,9 +352,13 @@ public class ClienteController(BrechoContext db) : Controller
     }
 
     [HttpGet("/vender")]
-    public async Task<IActionResult> Vender() =>
-        View(await db.Produtos.Where(p => p.VendedoraId == Eu.Id)
+    public async Task<IActionResult> Vender()
+    {
+        ViewData["Repasses"] = await db.Repasses.Where(r => r.VendedoraId == Eu.Id)
+            .OrderByDescending(r => r.Data).ToListAsync();
+        return View(await db.Produtos.Where(p => p.VendedoraId == Eu.Id)
             .OrderByDescending(p => p.CriadoEm).ToListAsync());
+    }
 
     // A vendedora externa envia uma peça; ela entra como "Em avaliação" para a funcionária revisar
     [HttpPost("/vender")]
@@ -360,10 +398,23 @@ public class ClienteController(BrechoContext db) : Controller
 public class FotosController(BrechoContext db) : Controller
 {
     [HttpGet("/fotos/{id:int}")]
-    [ResponseCache(Duration = 86400)]
     public async Task<IActionResult> Foto(int id)
     {
         var foto = await db.ProdutoFotos.FindAsync(id);
+
+        // Foto de peça ainda "Em avaliação": só a funcionária e a vendedora dona da peça podem ver
+        var peca = foto == null ? null
+            : await db.Produtos.Where(p => p.Id == foto.ProdutoId).Select(p => new { p.Status, p.VendedoraId }).FirstOrDefaultAsync();
+        if (peca?.Status == StatusProduto.Avaliacao)
+        {
+            var dona = User.Identity?.IsAuthenticated == true && peca.VendedoraId == User.UsuarioId();
+            if (!User.IsInRole(Papeis.Funcionaria) && !dona) return NotFound();
+            Response.Headers.CacheControl = "private, no-store";
+        }
+        else
+        {
+            Response.Headers.CacheControl = "public, max-age=86400";
+        }
 
         // O tipo é conferido de novo pelos bytes: fotos antigas, salvas antes desta verificação, podem ser SVG
         var tipo = foto == null ? null : Fotos.DetectarTipo(foto.Dados);

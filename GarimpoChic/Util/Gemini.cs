@@ -130,7 +130,7 @@ public class Gemini(HttpClient http, IConfiguration config, ILogger<Gemini> log)
         var preco = 0m;
         if (r.TryGetProperty("preco", out var p))
         {
-            if (p.ValueKind == JsonValueKind.Number) preco = p.GetDecimal();
+            if (p.ValueKind == JsonValueKind.Number && p.TryGetDecimal(out var numero)) preco = numero;
             else if (p.ValueKind == JsonValueKind.String) preco = Precos.Ler(p.GetString());
         }
 

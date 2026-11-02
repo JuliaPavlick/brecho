@@ -19,7 +19,9 @@ public class Relatorios
     {
         var desde = DateTime.UtcNow.AddDays(-400);
 
-        var pedidos = await db.Pedidos.Include(p => p.Itens).Where(p => p.Data >= desde).ToListAsync();
+        // Pedidos cancelados não são venda
+        var pedidos = await db.Pedidos.Include(p => p.Itens)
+            .Where(p => p.Data >= desde && p.Status != StatusPedido.Cancelado).ToListAsync();
         var repasses = await db.Repasses.Include(r => r.Vendedora).Where(r => r.Data >= desde).ToListAsync();
 
         return new Relatorios
@@ -56,12 +58,18 @@ public class Relatorios
     public decimal TicketMedio => PecasMes() == 0 ? 0 : ReceitaMes() / PecasMes();
 
     // Variação de peças vendidas em relação ao mês passado, ex.: "+18%"
+    // Compara com o mesmo trecho do mês passado (do dia 1 até o mesmo dia); senão, no começo do mês daria "-95%"
     public string VariacaoPecas()
     {
-        var antes = PecasMes(1);
+        var agora = Formato.Agora;
+        var inicio = InicioMes(agora);
+        var inicioAntes = inicio.AddMonths(-1);
+        var fimAntes = inicioAntes.Add(agora - inicio);
+
+        var antes = VendasEntre(inicioAntes, fimAntes).Sum(v => v.Pecas);
         if (antes == 0) return "Primeiro mês com vendas";
-        var pct = (PecasMes() - antes) * 100.0 / antes;
-        return $"{(pct >= 0 ? "+" : "")}{pct:0}% comparado ao último mês";
+        var pct = (VendasEntre(inicio, agora).Sum(v => v.Pecas) - antes) * 100.0 / antes;
+        return $"{(pct >= 0 ? "+" : "")}{pct:0}% em relação ao mesmo período do mês passado";
     }
 
     // Dados do gráfico "Movimento de Vendas" nos três períodos

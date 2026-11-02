@@ -29,6 +29,7 @@
         <button class="chip" data-status="preparo">Em preparo</button>
         <button class="chip" data-status="caminho">A caminho</button>
         <button class="chip" data-status="entregue">Entregue</button>
+        <button class="chip" data-status="cancelado">Cancelado</button>
     </div>
 
     <p class="contador" id="contador"></p>
@@ -122,7 +123,8 @@
                     <td>${p.itens.length} ${p.itens.length === 1 ? 'peça' : 'peças'}</td>
                     <td class="preco-cel">${moeda(total(p))}</td>
                     <td>
-                        <select class="status-select ${p.status}" data-id="${p.id}">
+                        <select class="status-select ${p.status}" data-id="${p.id}" aria-label="Status do pedido ${numero(p.id)}"
+                            ${p.status === 'entregue' || p.status === 'cancelado' ? 'disabled' : ''}>
                             ${Object.keys(STATUS).map(s =>
                                 `<option value="${s}" ${s === p.status ? 'selected' : ''}>${STATUS[s]}</option>`
                             ).join('')}
@@ -163,6 +165,15 @@
             if (!select) return;
 
             const pedido = pedidos.find(p => p.id === Number(select.dataset.id));
+
+            const finais = {
+                entregue: 'Marcar como entregue? Depois disso o status não muda mais.',
+                cancelado: 'Cancelar este pedido? As peças voltam a ficar disponíveis na loja e o status não muda mais.',
+            };
+            if (finais[select.value] && !confirm(finais[select.value])) {
+                render();
+                return;
+            }
 
             postar('/painel/pedidos/' + pedido.id + '/status', { status: select.value })
                 .then(() => pedido.status = select.value)

@@ -631,3 +631,55 @@ a.btn-lote {
     text-decoration: none;
     white-space: nowrap;
 }
+
+/* REPASSES (financeiro) */
+
+.form-repasse {
+    margin: 24px 0;
+    padding: 24px;
+}
+
+.form-repasse h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+}
+
+.linha-repasse {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px;
+}
+
+.linha-repasse label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #776843;
+}
+
+.linha-repasse select,
+.linha-repasse input {
+    min-width: 180px;
+    padding: 11px 12px;
+    border: 1px solid #e6dcc3;
+    border-radius: 10px;
+    background: #fffdf7;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--texto, #3a2e1a);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+@media (max-width: 700px) {
+    .linha-repasse label,
+    .linha-repasse select,
+    .linha-repasse input,
+    .linha-repasse .btn-primario {
+        width: 100%;
+    }
+}

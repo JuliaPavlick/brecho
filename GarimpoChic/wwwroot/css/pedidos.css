@@ -26,6 +26,16 @@
     color: var(--verde);
 }
 
+.status-select.cancelado {
+    background: #f6e1de;
+    color: #a2382b;
+}
+
+.status-select:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
 /* DETALHES DO PEDIDO */
 
 .det-sub {

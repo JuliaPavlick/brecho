@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GarimpoChic.Util;
 
@@ -25,6 +26,38 @@ public static class Limites
 
     public static void RegistrarCpfRepetido(HttpContext http) =>
         CpfRepetido.AttemptAcquire(EnderecoDoVisitante(http)).Dispose();
+
+    // Senha errada: depois de 5 erros para o mesmo CPF vindos do mesmo endereço, esse par fica bloqueado por 15 min.
+    // O bloqueio é por CPF + endereço (e não pela conta toda) para que ninguém consiga travar a conta de outra
+    // pessoa de longe; e vale igual para CPF com ou sem cadastro, para a mensagem não revelar quem é cliente.
+    const int MaxErrosLogin = 5;
+    static readonly TimeSpan JanelaLogin = TimeSpan.FromMinutes(15);
+
+    // Link de "esqueci minha senha": no máximo 3 e-mails por hora para a mesma conta, para não lotar a caixa dela
+    const int MaxEmailsRedefinicao = 3;
+
+    static readonly MemoryCache Contadores = new(new MemoryCacheOptions { SizeLimit = 200_000 });
+
+    static int Contar(string chave) => Contadores.TryGetValue(chave, out int n) ? n : 0;
+
+    static void Somar(string chave, TimeSpan validade) =>
+        Contadores.Set(chave, Contar(chave) + 1, new MemoryCacheEntryOptions { Size = 1, AbsoluteExpirationRelativeToNow = validade });
+
+    static string ChaveLogin(HttpContext http, string cpf) => $"login|{cpf}|{EnderecoDoVisitante(http)}";
+
+    public static bool LoginBloqueado(HttpContext http, string cpf) => Contar(ChaveLogin(http, cpf)) >= MaxErrosLogin;
+
+    public static void RegistrarErroLogin(HttpContext http, string cpf) => Somar(ChaveLogin(http, cpf), JanelaLogin);
+
+    public static void LimparErrosLogin(HttpContext http, string cpf) => Contadores.Remove(ChaveLogin(http, cpf));
+
+    public static bool PodeEnviarRedefinicao(string cpf)
+    {
+        var chave = "redefinir|" + cpf;
+        if (Contar(chave) >= MaxEmailsRedefinicao) return false;
+        Somar(chave, TimeSpan.FromHours(1));
+        return true;
+    }
 
     public static void Configurar(RateLimiterOptions o)
     {

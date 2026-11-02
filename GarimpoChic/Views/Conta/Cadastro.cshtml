@@ -28,7 +28,7 @@
 
         <div class="campo">
             <label for="nome">Nome completo</label>
-            <input type="text" id="nome" name="nome" placeholder="Seu nome" autocomplete="name" value="@Model.Nome">
+            <input type="text" id="nome" name="nome" maxlength="120" placeholder="Seu nome" autocomplete="name" value="@Model.Nome">
             <span class="erro-campo" id="erro-nome" style="@Mostrar("nome")">@(Msg("nome") ?? "Informe seu nome completo.")</span>
         </div>
 
@@ -40,7 +40,7 @@
 
         <div class="campo">
             <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" placeholder="voce@email.com" autocomplete="email" value="@Model.Email">
+            <input type="email" id="email" name="email" maxlength="160" placeholder="voce@email.com" autocomplete="email" value="@Model.Email">
             <span class="erro-campo" id="erro-email" style="@Mostrar("email")">@(Msg("email") ?? "Informe um e-mail válido.")</span>
         </div>
 

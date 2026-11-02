@@ -13,14 +13,20 @@ function postar(url, corpo) {
         opcoes.body = JSON.stringify(corpo);
     }
 
-    return fetch(url, opcoes).then(r => {
-        if (!r.ok) throw new Error('Erro ' + r.status);
+    return fetch(url, opcoes).then(async r => {
+        if (!r.ok) {
+            // Quando o servidor explica o motivo ({ erro: "..." }), a mensagem vai junto no erro
+            const corpo = await r.json().catch(() => ({}));
+            const erro = new Error(corpo.erro || 'Erro ' + r.status);
+            erro.doServidor = !!corpo.erro;
+            throw erro;
+        }
         return (r.headers.get('content-type') || '').includes('json') ? r.json() : null;
     });
 }
 
-function falhou() {
-    alert('Não foi possível salvar. Verifique sua conexão e tente novamente.');
+function falhou(erro) {
+    alert(erro && erro.doServidor ? erro.message : 'Não foi possível salvar. Verifique sua conexão e tente novamente.');
 }
 
 function esc(texto) {

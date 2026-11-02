@@ -116,4 +116,4 @@ As migrations são geradas para o Postgres. No desenvolvimento (SQLite), o banco
 ## Ainda não implementado
 
 - **Pagamento online:** finalizar a compra cria o pedido e marca as peças como vendidas, mas o pagamento é combinado direto com a loja.
-- **Repasse automático às vendedoras:** os repasses aparecem no financeiro, mas ainda não são gerados quando uma peça de vendedora externa é vendida.
+- **Repasse automático às vendedoras:** cada pagamento é registrado à mão em **Financeiro → Registrar repasse** (a vendedora vê os dela em **Vender**); ainda não há cálculo automático de comissão.
