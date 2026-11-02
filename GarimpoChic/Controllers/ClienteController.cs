@@ -252,6 +252,15 @@ public class FotosController(BrechoContext db) : Controller
     public async Task<IActionResult> Foto(int id)
     {
         var foto = await db.ProdutoFotos.FindAsync(id);
-        return foto == null ? NotFound() : File(foto.Dados, foto.ContentType);
+
+        // O tipo é conferido de novo pelos bytes: fotos antigas, salvas antes desta verificação, podem ser SVG
+        var tipo = foto == null ? null : Fotos.DetectarTipo(foto.Dados);
+        if (tipo == null) return NotFound();
+
+        // Mesmo que algo escape da verificação, o navegador não executa nada vindo deste endereço
+        Response.Headers.XContentTypeOptions = "nosniff";
+        Response.Headers.ContentSecurityPolicy = "default-src 'none'; sandbox";
+
+        return File(foto!.Dados, tipo);
     }
 }

@@ -260,6 +260,9 @@ namespace GarimpoChic.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("BloqueadoAte")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Cidade")
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
@@ -300,6 +303,9 @@ namespace GarimpoChic.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<int>("TentativasFalhas")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

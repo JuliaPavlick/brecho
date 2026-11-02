@@ -33,6 +33,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddRateLimiter(Limites.Configurar);
+
 builder.Services.AddSingleton<Email>();
 builder.Services.AddSingleton<RedefinicaoSenha>();
 
@@ -68,6 +70,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

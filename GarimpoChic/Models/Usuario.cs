@@ -35,6 +35,11 @@ public class Usuario
 
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 
+    // Senhas erradas seguidas; ao chegar no limite, a conta fica bloqueada até BloqueadoAte
+    public int TentativasFalhas { get; set; }
+
+    public DateTime? BloqueadoAte { get; set; }
+
     public List<Pedido> Pedidos { get; set; } = [];
 
     public List<Favorito> Favoritos { get; set; } = [];

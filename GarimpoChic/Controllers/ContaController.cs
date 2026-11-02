@@ -3,6 +3,7 @@ using GarimpoChic.Models;
 using GarimpoChic.Util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace GarimpoChic.Controllers;
@@ -16,17 +17,47 @@ public class ContaController(BrechoContext db) : Controller
         return View();
     }
 
+    const int MaxTentativas = 5;
+    static readonly TimeSpan TempoBloqueio = TimeSpan.FromMinutes(15);
+
     [HttpPost("/")]
+    [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> Login(string? cpf, string? senha)
     {
         var digitos = Formato.SoDigitos(cpf);
         var u = await db.Usuarios.FirstOrDefaultAsync(x => x.Cpf == digitos);
+        ViewData["Cpf"] = cpf;
+
+        // Conta bloqueada: nem confere a senha, para não dar mais chances de adivinhar
+        if (u?.BloqueadoAte > DateTime.UtcNow)
+        {
+            var minutos = (int)Math.Ceiling((u.BloqueadoAte.Value - DateTime.UtcNow).TotalMinutes);
+            ViewData["Erro"] = $"Muitas tentativas erradas. Tente de novo em {minutos} min ou use \"Esqueci minha senha\".";
+            return View();
+        }
 
         if (u == null || !DadosIniciais.SenhaConfere(u, senha ?? ""))
         {
+            if (u != null)
+            {
+                u.TentativasFalhas++;
+                if (u.TentativasFalhas >= MaxTentativas)
+                {
+                    u.BloqueadoAte = DateTime.UtcNow + TempoBloqueio;
+                    u.TentativasFalhas = 0;
+                }
+                await db.SaveChangesAsync();
+            }
+
             ViewData["Erro"] = "CPF ou senha incorretos.";
-            ViewData["Cpf"] = cpf;
             return View();
+        }
+
+        if (u.TentativasFalhas > 0 || u.BloqueadoAte != null)
+        {
+            u.TentativasFalhas = 0;
+            u.BloqueadoAte = null;
+            await db.SaveChangesAsync();
         }
 
         await Sessao.EntrarAsync(HttpContext, u);
@@ -37,6 +68,7 @@ public class ContaController(BrechoContext db) : Controller
     public IActionResult Cadastro() => View(new CadastroForm());
 
     [HttpPost("/cadastro")]
+    [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> Cadastro(CadastroForm form)
     {
         var cpf = Formato.SoDigitos(form.Cpf);
@@ -79,6 +111,7 @@ public class ContaController(BrechoContext db) : Controller
     // Manda o link de redefinição para o e-mail da conta. A resposta é sempre a mesma,
     // para a tela não revelar quais CPFs estão cadastrados.
     [HttpPost("/recuperar-senha")]
+    [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> RecuperarSenha(string? cpf, [FromServices] RedefinicaoSenha redefinicao,
         [FromServices] Email email, [FromServices] ILogger<ContaController> log)
     {
@@ -125,6 +158,7 @@ public class ContaController(BrechoContext db) : Controller
     }
 
     [HttpPost("/redefinir-senha")]
+    [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> RedefinirSenha(string? codigo, string? senha, [FromServices] RedefinicaoSenha redefinicao)
     {
         var u = await CodigoValidoAsync(codigo, redefinicao);
@@ -140,6 +174,8 @@ public class ContaController(BrechoContext db) : Controller
         }
 
         u.SenhaHash = DadosIniciais.HashSenha(u, senha!);
+        u.TentativasFalhas = 0;
+        u.BloqueadoAte = null;
         await db.SaveChangesAsync();
 
         TempData["Ok"] = "Senha alterada! Agora é só entrar com a nova senha.";

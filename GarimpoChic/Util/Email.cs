@@ -5,8 +5,9 @@ namespace GarimpoChic.Util;
 
 // Envia e-mails por SMTP. Configuração pelas variáveis de ambiente:
 // SMTP_HOST, SMTP_PORTA (padrão 587), SMTP_USUARIO, SMTP_SENHA e SMTP_REMETENTE.
-// Sem SMTP_HOST, o e-mail não é enviado: o conteúdo vai para o log (útil no desenvolvimento).
-public class Email(IConfiguration config, ILogger<Email> log)
+// Sem SMTP_HOST, o e-mail não é enviado. No desenvolvimento o conteúdo vai para o log, para testar;
+// em produção, não: o e-mail pode ter um link de redefinir senha, e quem lê os logs não deve vê-lo.
+public class Email(IConfiguration config, IHostEnvironment env, ILogger<Email> log)
 {
     public bool Configurado => !string.IsNullOrWhiteSpace(config["SMTP_HOST"]);
 
@@ -14,7 +15,10 @@ public class Email(IConfiguration config, ILogger<Email> log)
     {
         if (!Configurado)
         {
-            log.LogWarning("SMTP não configurado. E-mail para {Para} não enviado. Assunto: {Assunto}\n{Html}", para, assunto, html);
+            if (env.IsDevelopment())
+                log.LogWarning("SMTP não configurado. E-mail para {Para} não enviado. Assunto: {Assunto}\n{Html}", para, assunto, html);
+            else
+                log.LogWarning("SMTP não configurado: um e-mail ({Assunto}) não foi enviado.", assunto);
             return;
         }
 
