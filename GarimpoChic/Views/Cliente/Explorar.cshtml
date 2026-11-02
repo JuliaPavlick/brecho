@@ -1,8 +1,20 @@
-@model List<ProdutoCard>
+@model ExplorarPagina
 @{
     Layout = "_LayoutCliente";
     ViewData["Title"] = "Explorar";
     ViewData["Menu"] = "explorar";
+
+    // Monta o endereço mantendo a busca e a ordem atuais
+    string Link(string? categoria = null, int pagina = 1)
+    {
+        var partes = new List<string>();
+        if (Model.Busca != "") partes.Add("q=" + Uri.EscapeDataString(Model.Busca));
+        var cat = categoria ?? Model.Categoria;
+        if (cat != "todos") partes.Add("categoria=" + cat);
+        if (Model.Ordem != "relevancia") partes.Add("ordem=" + Model.Ordem);
+        if (pagina > 1) partes.Add("pagina=" + pagina);
+        return "/explorar" + (partes.Count > 0 ? "?" + string.Join("&", partes) : "");
+    }
 }
 
 @section Estilos {
@@ -17,102 +29,86 @@
 
     <!-- BUSCA + ORDENAR -->
 
-    <div class="explorar-barra">
+    <form class="explorar-barra" action="/explorar" method="get" role="search" id="form-busca">
 
         <div class="busca">
-            <span class="busca-icone">🔎</span>
-            <input type="text" id="busca" placeholder="Buscar por nome da peça...">
+            <span class="busca-icone" aria-hidden="true">🔎</span>
+            <input type="search" id="busca" name="q" value="@Model.Busca" placeholder="Buscar por nome da peça..."
+                aria-label="Buscar por nome da peça" enterkeyhint="search">
         </div>
 
-        <select id="ordenar" class="ordenar">
-            <option value="relevancia">Relevância</option>
-            <option value="menor">Menor preço</option>
-            <option value="maior">Maior preço</option>
+        @if (Model.Categoria != "todos")
+        {
+            <input type="hidden" name="categoria" value="@Model.Categoria">
+        }
+
+        <select id="ordenar" name="ordem" class="ordenar" aria-label="Ordenar peças">
+            <option value="relevancia" selected="@(Model.Ordem == "relevancia")">Mais recentes</option>
+            <option value="menor" selected="@(Model.Ordem == "menor")">Menor preço</option>
+            <option value="maior" selected="@(Model.Ordem == "maior")">Maior preço</option>
         </select>
 
-    </div>
+    </form>
 
     <!-- CATEGORIAS -->
 
-    <div class="chips">
-        <button class="chip ativo" data-categoria="todos">Todos</button>
+    <nav class="chips" aria-label="Categorias">
+        <a class="chip @(Model.Categoria == "todos" ? "ativo" : "")" href="@Link("todos")">Todos</a>
         @foreach (var c in Categorias.Todas)
         {
-            <button class="chip" data-categoria="@c.Slug">@c.Nome</button>
+            <a class="chip @(Model.Categoria == c.Slug ? "ativo" : "")" href="@Link(c.Slug)">@c.Nome</a>
         }
-    </div>
+    </nav>
 
-    <p class="contador" id="contador"></p>
+    <p class="contador">
+        @Model.Total @(Model.Total == 1 ? "peça encontrada" : "peças encontradas")
+        @if (Model.Busca != "")
+        {
+            <text>para “@Model.Busca” · <a href="@("/explorar" + (Model.Categoria != "todos" ? "?categoria=" + Model.Categoria : ""))">limpar busca</a></text>
+        }
+    </p>
 
     <!-- PRODUTOS -->
 
-    <div class="produtos" id="lista">
+    @if (Model.Pecas.Count == 0)
+    {
+        <p class="vazio" style="display:block">Nenhuma peça encontrada ✦</p>
+    }
+    else
+    {
+        <div class="produtos" id="lista">
+            @foreach (var p in Model.Pecas)
+            {
+                <partial name="_ProdutoCard" model="p" />
+            }
+        </div>
+    }
 
-        @foreach (var p in Model)
-        {
-            <partial name="_ProdutoCard" model="p" />
-        }
-
-    </div>
-
-    <p class="vazio" id="vazio">Nenhuma peça encontrada ✦</p>
+    @if (Model.Paginas > 1)
+    {
+        <nav class="paginacao" aria-label="Páginas">
+            @if (Model.Pagina > 1)
+            {
+                <a href="@Link(pagina: Model.Pagina - 1)" rel="prev">← Anterior</a>
+            }
+            <span>Página @Model.Pagina de @Model.Paginas</span>
+            @if (Model.Pagina < Model.Paginas)
+            {
+                <a href="@Link(pagina: Model.Pagina + 1)" rel="next">Próxima →</a>
+            }
+        </nav>
+    }
 
 </main>
 
 @section Scripts {
     <script>
-        const lista = document.getElementById('lista');
-        const produtos = Array.from(document.querySelectorAll('.produto'));
-        const busca = document.getElementById('busca');
-        const ordenar = document.getElementById('ordenar');
-        const chips = document.querySelectorAll('.chip');
-        const contador = document.getElementById('contador');
-        const vazio = document.getElementById('vazio');
-
-        let categoriaAtual = 'todos';
-
-        function atualizar() {
-            const texto = busca.value.trim().toLowerCase();
-
-            let visiveis = produtos.filter(p => {
-                const nome = p.dataset.nome.toLowerCase();
-                const okBusca = nome.includes(texto);
-                const okCategoria = categoriaAtual === 'todos' || p.dataset.categoria === categoriaAtual;
-                return okBusca && okCategoria;
-            });
-
-            if (ordenar.value === 'menor') {
-                visiveis.sort((a, b) => a.dataset.preco - b.dataset.preco);
-            } else if (ordenar.value === 'maior') {
-                visiveis.sort((a, b) => b.dataset.preco - a.dataset.preco);
-            }
-
-            produtos.forEach(p => p.style.display = 'none');
-            visiveis.forEach(p => {
-                p.style.display = '';
-                lista.appendChild(p);
-            });
-
-            contador.textContent = visiveis.length + (visiveis.length === 1 ? ' peça encontrada' : ' peças encontradas');
-            vazio.style.display = visiveis.length === 0 ? 'block' : 'none';
-        }
-
-        chips.forEach(chip => {
-            chip.addEventListener('click', () => {
-                chips.forEach(c => c.classList.remove('ativo'));
-                chip.classList.add('ativo');
-                categoriaAtual = chip.dataset.categoria;
-                atualizar();
-            });
-        });
-
-        busca.addEventListener('input', atualizar);
-        ordenar.addEventListener('change', atualizar);
+        // Mudar a ordem já refaz a busca
+        document.getElementById('ordenar').addEventListener('change', () =>
+            document.getElementById('form-busca').submit());
 
         document.querySelectorAll('.favorito').forEach(btn => {
             btn.addEventListener('click', () => alternarFavorito(btn).catch(falhou));
         });
-
-        atualizar();
     </script>
 }

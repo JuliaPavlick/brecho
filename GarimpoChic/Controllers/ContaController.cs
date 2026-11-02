@@ -13,7 +13,7 @@ public class ContaController(BrechoContext db) : Controller
     [HttpGet("/")]
     public IActionResult Login()
     {
-        if (User.Identity?.IsAuthenticated == true) return Redirect("/perfis");
+        if (User.Identity?.IsAuthenticated == true) return Redirect(User.IsInRole(Papeis.Funcionaria) ? "/perfis" : "/inicio");
         return View();
     }
 
@@ -62,7 +62,8 @@ public class ContaController(BrechoContext db) : Controller
         }
 
         await Sessao.EntrarAsync(HttpContext, u);
-        return Redirect("/perfis");
+        // Só a funcionária tem mais de uma área para escolher; as demais pessoas vão direto para a loja
+        return Redirect(u.EhFuncionaria ? "/perfis" : "/inicio");
     }
 
     [HttpGet("/cadastro")]
@@ -115,7 +116,7 @@ public class ContaController(BrechoContext db) : Controller
         await db.SaveChangesAsync();
 
         await Sessao.EntrarAsync(HttpContext, u);
-        return Redirect("/perfis");
+        return Redirect("/inicio");
     }
 
     [HttpGet("/privacidade")]

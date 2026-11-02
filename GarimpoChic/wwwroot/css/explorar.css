@@ -38,7 +38,7 @@
 }
 
 .busca input::placeholder {
-    color: #bfab82;
+    color: #7f7150;
 }
 
 .ordenar {
@@ -67,6 +67,8 @@
 }
 
 .chip {
+    display: inline-block;
+    text-decoration: none;
     padding: 9px 18px;
     border: 1px solid #e6dcc3;
     border-radius: 999px;
@@ -131,4 +133,32 @@
     .ordenar {
         height: 46px;
     }
+}
+/* PAGINAÇÃO */
+
+.paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--texto-suave);
+}
+
+.paginacao a {
+    padding: 10px 18px;
+    border: 1px solid #e6dcc3;
+    border-radius: 999px;
+    background: #fffdf7;
+    color: var(--texto);
+    text-decoration: none;
+}
+
+.paginacao a:hover {
+    background: #f7f0e3;
+}
+
+.contador a {
+    color: var(--dourado);
 }

@@ -59,7 +59,7 @@
                             </div>
                             <span class="item-preco">@Formato.Moeda(p.Preco)</span>
                             <form action="/sacola/@p.Id/remover" method="post" asp-antiforgery="true">
-                                <button type="submit" class="btn-remover" title="Tirar da sacola">✕</button>
+                                <button type="submit" class="btn-remover" title="Tirar da sacola" aria-label="Tirar @p.Nome da sacola">✕</button>
                             </form>
                         </div>
                     }

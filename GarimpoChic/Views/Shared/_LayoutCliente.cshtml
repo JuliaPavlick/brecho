@@ -2,6 +2,7 @@
     var menu = ViewData["Menu"] as string;
     string Ativo(string item) => item == menu ? "ativo" : "";
     var qtdSacola = ViewData["QtdSacola"] as int? ?? 0;
+    var funcionaria = User.IsInRole(Papeis.Funcionaria);
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -48,28 +49,28 @@
 
                 <a href="/inicio" class="@Ativo("inicio")">
                     <span class="icone">
-                        <img src="~/img/casa.png" alt="Início">
+                        <img src="~/img/casa.png" alt="">
                     </span>
                     <span class="texto-menu">Início</span>
                 </a>
 
                 <a href="/explorar" class="@Ativo("explorar")">
                     <span class="icone">
-                        <img src="~/img/lupa.png" alt="Explorar">
+                        <img src="~/img/lupa.png" alt="">
                     </span>
                     <span class="texto-menu">Explorar</span>
                 </a>
 
                 <a href="/favoritos" class="@Ativo("favoritos")">
                     <span class="icone">
-                        <img src="~/img/coracao.png" alt="Favoritos">
+                        <img src="~/img/coracao.png" alt="">
                     </span>
                     <span class="texto-menu">Favoritos</span>
                 </a>
 
                 <a href="/sacola" class="@Ativo("sacola")">
                     <span class="icone">
-                        <img src="~/img/sacolas-de-comprass.png" alt="Sacola">
+                        <img src="~/img/sacolas-de-comprass.png" alt="">
                     </span>
                     <span class="texto-menu">Sacola</span>
                     <span class="contador-sacola" id="qtd-sacola" style="@(qtdSacola == 0 ? "display:none" : "")">@qtdSacola</span>
@@ -77,14 +78,21 @@
 
                 <a href="/compras" class="@Ativo("compras")">
                     <span class="icone">
-                        <img src="~/img/bolsa.png" alt="Compras">
+                        <img src="~/img/bolsa.png" alt="">
                     </span>
                     <span class="texto-menu">Compras</span>
                 </a>
 
+                <a href="/vender" class="@Ativo("vender")">
+                    <span class="icone">
+                        <img src="~/img/sacola-dinheiro.png" alt="">
+                    </span>
+                    <span class="texto-menu">Vender</span>
+                </a>
+
                 <a href="/perfil" class="@Ativo("perfil")">
                     <span class="icone">
-                        <img src="~/img/pessoa.png" alt="Perfil">
+                        <img src="~/img/pessoa.png" alt="">
                     </span>
                     <span class="texto-menu">Perfil</span>
                 </a>
@@ -97,9 +105,19 @@
 
         <div class="logout">
 
+            @if (funcionaria)
+            {
+                <a href="/painel">
+                    <span class="icone">
+                        <img src="~/img/pranchetas.png" alt="">
+                    </span>
+                    <span class="texto-menu">Painel</span>
+                </a>
+            }
+
             <a href="/sair">
-                <span class="icone">↩</span>
-                <span class="texto-menu">Logout</span>
+                <span class="icone" aria-hidden="true">↩</span>
+                <span class="texto-menu">Sair</span>
             </a>
 
         </div>

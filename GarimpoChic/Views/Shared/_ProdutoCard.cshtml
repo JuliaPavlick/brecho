@@ -17,8 +17,9 @@
             <h4>@Model.Nome</h4>
             <p>@Model.Descricao</p>
         </div>
-        <button class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"
-            title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")">@(Model.Favorito ? "♥" : "♡")</button>
+        <button type="button" class="favorito @(Model.Favorito ? "ativo" : "")" data-id="@Model.Id"
+            title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")"
+            aria-label="Favoritar @Model.Nome" aria-pressed="@(Model.Favorito ? "true" : "false")">@(Model.Favorito ? "♥" : "♡")</button>
     </div>
     <span class="preco">@Formato.Moeda(Model.Preco)</span>
     @if (Model.Disponivel)

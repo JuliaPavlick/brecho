@@ -8,3 +8,7 @@ public record ProdutoCard(int Id, string Nome, string Descricao, string Categori
     public string CategoriaSlug => Categorias.Slug(Categoria);
     public bool Disponivel => Status == StatusProduto.Disponivel;
 }
+
+// Uma página do Explorar, com os filtros escolhidos (para os links de página e de categoria manterem a busca)
+public record ExplorarPagina(List<ProdutoCard> Pecas, string Busca, string Categoria, string Ordem,
+    int Pagina, int Paginas, int Total);

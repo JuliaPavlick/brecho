@@ -2,6 +2,7 @@
 @{
     Layout = "_LayoutCliente";
     ViewData["Title"] = "Vender para a loja";
+    ViewData["Menu"] = "vender";
 }
 
 @section Estilos {
@@ -61,8 +62,8 @@
             </div>
 
             <div class="campo">
-                <label for="fotos">Fotos (JPG, PNG ou WebP; até 5, máx. 5 MB cada)</label>
-                <input type="file" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple>
+                <label for="fotos">Fotos (JPG, PNG ou WebP; até 5). Fotos grandes são reduzidas sozinhas antes do envio.</label>
+                <input type="file" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple data-reduzir>
             </div>
 
             <div class="acoes-form">

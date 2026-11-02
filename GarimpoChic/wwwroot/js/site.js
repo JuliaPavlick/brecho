@@ -92,6 +92,8 @@ function alternarFavorito(btn) {
     return postar('/favoritos/' + btn.dataset.id).then(r => {
         btn.classList.toggle('ativo', r.favorito);
         btn.textContent = r.favorito ? '♥' : '♡';
+        btn.title = r.favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
+        btn.setAttribute('aria-pressed', r.favorito);
         return r.favorito;
     });
 }
@@ -106,4 +108,72 @@ document.addEventListener('click', e => {
 document.addEventListener('submit', e => {
     const form = e.target.closest('form[data-confirmar]');
     if (form && !confirm(form.dataset.confirmar)) e.preventDefault();
+});
+
+// No celular, cada linha das tabelas do painel vira um cartão (veja site.css).
+// Cada célula recebe o nome da sua coluna para aparecer como rótulo dentro do cartão.
+function rotularTabela(tabela) {
+    const titulos = [...tabela.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    tabela.querySelectorAll('tbody tr').forEach(tr =>
+        [...tr.children].forEach((td, i) => {
+            if (titulos[i] && !td.dataset.rotulo) td.dataset.rotulo = titulos[i];
+        }));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('table.tabela').forEach(tabela => {
+        rotularTabela(tabela);
+        // As linhas são montadas por JavaScript depois que a página abre
+        new MutationObserver(() => rotularTabela(tabela)).observe(tabela, { childList: true, subtree: true });
+    });
+});
+
+// Fotos tiradas no celular têm vários MB. Antes de enviar, reduz para no máximo 1600 px no lado maior,
+// em JPEG, o que deixa o envio e as páginas bem mais leves. Vale para <input type="file" data-reduzir>.
+const LADO_MAXIMO = 1600;
+
+async function reduzirFoto(arquivo) {
+    if (!arquivo.type.startsWith('image/')) return arquivo;
+
+    let imagem;
+    try {
+        imagem = await createImageBitmap(arquivo, { imageOrientation: 'from-image' });
+    } catch {
+        return arquivo; // formato que o navegador não abre: o servidor decide
+    }
+
+    const escala = Math.min(1, LADO_MAXIMO / Math.max(imagem.width, imagem.height));
+    if (escala === 1 && arquivo.size < 1024 * 1024) return arquivo;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(imagem.width * escala);
+    canvas.height = Math.round(imagem.height * escala);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; // PNG transparente vira fundo branco no JPEG
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(imagem, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise(ok => canvas.toBlob(ok, 'image/jpeg', 0.82));
+    if (!blob || blob.size >= arquivo.size) return arquivo;
+
+    const nome = arquivo.name.replace(/\.[^.]+$/, '') + '.jpg';
+    return new File([blob], nome, { type: 'image/jpeg' });
+}
+
+document.addEventListener('change', async e => {
+    const campo = e.target;
+    if (!campo.matches('input[type="file"][data-reduzir]') || !campo.files.length) return;
+
+    // Enquanto reduz, o formulário não pode ser enviado com as fotos originais
+    const botoes = campo.form ? campo.form.querySelectorAll('button[type="submit"], button:not([type])') : [];
+    botoes.forEach(b => b.disabled = true);
+
+    try {
+        const reduzidas = await Promise.all([...campo.files].map(reduzirFoto));
+        const lista = new DataTransfer();
+        reduzidas.forEach(f => lista.items.add(f));
+        campo.files = lista.files;
+    } finally {
+        botoes.forEach(b => b.disabled = false);
+    }
 });

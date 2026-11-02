@@ -130,7 +130,7 @@ body {
 
 .logo-slogan {
   font-size: 11px;
-  color: #9a8860;
+  color: #776843;
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
@@ -187,7 +187,7 @@ body {
 }
 
 .campo input::placeholder {
-  color: #bfab82;
+  color: #7f7150;
 }
 
 .erro-campo {
@@ -229,7 +229,7 @@ body {
 
 .area-link p {
   font-size: 12px;
-  color: #9a8860;
+  color: #776843;
   margin-bottom: 4px;
 }
 

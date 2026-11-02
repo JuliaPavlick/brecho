@@ -71,7 +71,7 @@
     display: block;
     margin-top: 12px;
     font-size: 13px;
-    color: var(--texto-suave, #9a8860);
+    color: var(--texto-suave, #776843);
 }
 
 .btn-remover {
@@ -81,7 +81,7 @@
     border: none;
     border-radius: 50%;
     background: #f7f0e3;
-    color: var(--texto-suave, #9a8860);
+    color: var(--texto-suave, #776843);
     cursor: pointer;
 }
 
@@ -98,12 +98,13 @@
 
 .finalizar p {
     font-size: 13px;
-    color: var(--texto-suave, #9a8860);
+    color: var(--texto-suave, #776843);
     margin-bottom: 4px;
 }
 
 /* Ícones do menu sempre do mesmo tamanho, mesmo quando a imagem original é maior */
-.menu .icone img {
+.menu .icone img,
+.logout .icone img {
     width: 24px;
     height: 24px;
     object-fit: contain;
@@ -134,13 +135,17 @@
     margin: 8px 0 16px;
     font-size: 14px;
     line-height: 1.6;
-    color: #7a7263;
+    color: #665e50;
 }
 
 a.botao-topo,
 .hero-texto a {
     text-decoration: none;
     display: inline-block;
+}
+
+a.botao-topo {
+    color: var(--texto, #3a2e1a);
 }
 
 /* PRIVACIDADE (LGPD) */
@@ -160,7 +165,7 @@ a.botao-topo,
 .card-texto .atualizada {
     text-align: center;
     font-size: 12px;
-    color: #9a8860;
+    color: #776843;
     margin: 4px 0 20px;
 }
 
@@ -210,7 +215,7 @@ a.botao-topo,
 .perfil-privacidade p {
     font-size: 14px;
     line-height: 1.6;
-    color: #7a7263;
+    color: #665e50;
     margin-bottom: 14px;
 }
 
@@ -250,4 +255,139 @@ a.botao-topo,
 
 .btn-excluir:hover {
     background: #85291e;
+}
+
+/* CELULAR: menu vira uma barra fixa embaixo, com ícone e nome; tabelas do painel viram cartões.
+   "body" na frente dá prioridade sobre o CSS de cada layout, que é carregado depois deste arquivo. */
+
+@media (max-width: 700px) {
+    body .sidebar,
+    body .sidebar:hover {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: stretch;
+        border-right: none;
+        border-top: 1px solid #e6dcc3;
+        box-shadow: 0 -4px 16px rgba(100, 80, 30, 0.08);
+        padding-bottom: env(safe-area-inset-bottom);
+        overflow-x: auto;
+    }
+
+    body .sidebar > div {
+        display: flex;
+        flex: 1 0 auto;
+    }
+
+    body .sidebar .logo {
+        display: none;
+    }
+
+    body .sidebar .menu {
+        flex-direction: row;
+        flex: 1 0 auto;
+        gap: 0;
+        padding: 6px 4px;
+    }
+
+    body .sidebar .menu a,
+    body .sidebar .logout a {
+        flex: 1 0 58px;
+        min-width: 58px;
+        height: auto;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding: 6px 4px;
+        border-radius: 12px;
+    }
+
+    body .sidebar .menu .icone,
+    body .sidebar .menu .icone img {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+    }
+
+    body .sidebar .texto-menu,
+    body .sidebar .menu .texto {
+        opacity: 1;
+        font-size: 10.5px;
+        white-space: nowrap;
+    }
+
+    body .sidebar .logout {
+        display: flex;
+        padding: 6px 4px;
+        border-top: none;
+        border-left: 1px solid #efe5cd;
+    }
+
+    body .conteudo,
+    body .sidebar:hover ~ .conteudo {
+        margin-left: 0;
+        padding-bottom: 110px;
+    }
+
+    .contador-sacola {
+        top: 2px;
+        left: calc(50% + 4px);
+    }
+
+    /* A linha decorativa de baixo ficaria por cima da barra */
+    body .linha-baixo {
+        display: none;
+    }
+
+    body .tabela-wrap {
+        overflow-x: visible;
+    }
+
+    body .tabela,
+    body .tabela tbody,
+    body .tabela tr,
+    body .tabela td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    body .tabela thead {
+        display: none;
+    }
+
+    body .tabela tr {
+        margin-bottom: 12px;
+        padding: 8px 14px;
+        border: 1px solid #eadfc8;
+        border-radius: 14px;
+        background: #fffdf7;
+    }
+
+    body .tabela td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+    }
+
+    body .tabela td + td {
+        border-top: 1px dashed #efe5cd;
+    }
+
+    body .tabela td::before {
+        content: attr(data-rotulo);
+        flex-shrink: 0;
+        font-size: 11px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #776843;
+        text-align: left;
+    }
 }

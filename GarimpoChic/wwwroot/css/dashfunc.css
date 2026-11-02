@@ -6,7 +6,7 @@
     --card: #fffdf7;
     --borda: #d4c49a;
     --texto: #3a2e1a;
-    --texto-suave: #9a8860;
+    --texto-suave: #776843;
 }
 
 * {
@@ -509,7 +509,7 @@ filter:brightness(0);
 .btn-filtro {
     background: transparent;
     border: none;
-    color: #8C7A80;
+    color: #6f6066;
     padding: 6px 16px;
     border-radius: 20px;
     font-family: 'Lato', sans-serif;

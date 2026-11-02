@@ -43,8 +43,39 @@ public class ClienteController(BrechoContext db) : Controller
         View(await Cards(Disponiveis.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)).Take(3).ToListAsync());
 
     [HttpGet("/explorar")]
-    public async Task<IActionResult> Explorar() =>
-        View(await Cards(Disponiveis.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)).ToListAsync());
+    public async Task<IActionResult> Explorar(string? q, string? categoria, string? ordem, int pagina = 1)
+    {
+        const int PorPagina = 24;
+
+        // Busca, filtro e ordem são feitos no banco: a página só recebe as peças que vai mostrar
+        var consulta = Disponiveis;
+
+        var busca = (q ?? "").Trim();
+        if (busca != "")
+        {
+            var termo = busca.ToLower();
+            consulta = consulta.Where(p => p.Nome.ToLower().Contains(termo));
+        }
+
+        var cat = Categorias.Todas.FirstOrDefault(c => c.Slug == categoria);
+        if (cat.Nome != null) consulta = consulta.Where(p => p.Categoria == cat.Nome);
+
+        // (double): o SQLite do desenvolvimento não ordena decimal
+        consulta = ordem switch
+        {
+            "menor" => consulta.OrderBy(p => (double)p.Preco).ThenBy(p => p.Id),
+            "maior" => consulta.OrderByDescending(p => (double)p.Preco).ThenBy(p => p.Id),
+            _ => consulta.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id),
+        };
+
+        var total = await consulta.CountAsync();
+        var paginas = Math.Max(1, (int)Math.Ceiling(total / (double)PorPagina));
+        pagina = Math.Clamp(pagina, 1, paginas);
+        var pecas = await Cards(consulta.Skip((pagina - 1) * PorPagina).Take(PorPagina)).ToListAsync();
+
+        return View(new ExplorarPagina(pecas, busca, cat.Slug ?? "todos", ordem is "menor" or "maior" ? ordem : "relevancia",
+            pagina, paginas, total));
+    }
 
     [HttpGet("/favoritos")]
     public async Task<IActionResult> Favoritos()
