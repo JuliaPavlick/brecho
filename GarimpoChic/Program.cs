@@ -1,4 +1,5 @@
 using GarimpoChic.Data;
+using GarimpoChic.Util;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -32,6 +33,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton<Email>();
+builder.Services.AddSingleton<RedefinicaoSenha>();
+
 // As telas que usam fetch() mandam o token neste cabeçalho
 builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 
@@ -53,7 +57,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BrechoContext>();
-    await db.Database.EnsureCreatedAsync();
+    await Atualizacao.PrepararBancoAsync(db);
     await DadosIniciais.PopularAsync(db, app.Configuration);
 }
 

@@ -25,14 +25,16 @@ public class ClienteController(BrechoContext db) : Controller
 
         Eu = u;
         ViewData["Usuario"] = u;
+        ViewData["QtdSacola"] = await db.Sacola.CountAsync(s => s.UsuarioId == u.Id);
         await next();
     }
 
     IQueryable<ProdutoCard> Cards(IQueryable<Produto> q) =>
         q.Select(p => new ProdutoCard(
-            p.Id, p.Nome, p.Descricao, p.Categoria, p.Preco,
+            p.Id, p.Nome, p.Descricao, p.Categoria, p.Preco, p.Status,
             p.Fotos.OrderBy(f => f.Id).Select(f => (int?)f.Id).FirstOrDefault(),
-            db.Favoritos.Any(f => f.UsuarioId == Eu.Id && f.ProdutoId == p.Id)));
+            db.Favoritos.Any(f => f.UsuarioId == Eu.Id && f.ProdutoId == p.Id),
+            db.Sacola.Any(s => s.UsuarioId == Eu.Id && s.ProdutoId == p.Id)));
 
     IQueryable<Produto> Disponiveis => db.Produtos.Where(p => p.Status == StatusProduto.Disponivel);
 
@@ -63,6 +65,90 @@ public class ClienteController(BrechoContext db) : Controller
 
         await db.SaveChangesAsync();
         return Json(new { favorito = fav == null });
+    }
+
+    // ---------- Sacola ----------
+
+    [HttpGet("/sacola")]
+    public async Task<IActionResult> Sacola()
+    {
+        var ids = db.Sacola.Where(s => s.UsuarioId == Eu.Id).Select(s => s.ProdutoId);
+        return View(await Cards(db.Produtos.Where(p => ids.Contains(p.Id))).ToListAsync());
+    }
+
+    // Coloca ou tira uma peça da sacola (botão dos cards)
+    [HttpPost("/sacola/{id:int}")]
+    public async Task<IActionResult> AlternarSacola(int id)
+    {
+        var produto = await db.Produtos.FindAsync(id);
+        if (produto == null) return NotFound();
+
+        var item = await db.Sacola.FindAsync(Eu.Id, id);
+        if (item != null) db.Sacola.Remove(item);
+        else if (produto.Status != StatusProduto.Disponivel) return Conflict(new { erro = "Esta peça não está mais disponível." });
+        else db.Sacola.Add(new SacolaItem { UsuarioId = Eu.Id, ProdutoId = id });
+
+        await db.SaveChangesAsync();
+        return Json(new
+        {
+            naSacola = item == null,
+            total = await db.Sacola.CountAsync(s => s.UsuarioId == Eu.Id),
+        });
+    }
+
+    [HttpPost("/sacola/{id:int}/remover")]
+    public async Task<IActionResult> RemoverDaSacola(int id)
+    {
+        await db.Sacola.Where(s => s.UsuarioId == Eu.Id && s.ProdutoId == id).ExecuteDeleteAsync();
+        return Redirect("/sacola");
+    }
+
+    // Transforma a sacola em pedido. Cada peça é única: ela só entra no pedido se ainda estiver
+    // disponível no momento da compra, e passa a "vendido" na mesma operação.
+    [HttpPost("/sacola/finalizar")]
+    public async Task<IActionResult> Finalizar()
+    {
+        var itens = await db.Sacola.Include(s => s.Produto)
+            .Where(s => s.UsuarioId == Eu.Id).ToListAsync();
+        var pecas = itens.Select(s => s.Produto!).Where(p => p.Status == StatusProduto.Disponivel).ToList();
+
+        if (pecas.Count == 0)
+        {
+            TempData["Erro"] = "Não há peças disponíveis na sua sacola.";
+            return Redirect("/sacola");
+        }
+
+        await using var transacao = await db.Database.BeginTransactionAsync();
+
+        var ids = pecas.Select(p => p.Id).ToList();
+        var vendidas = await db.Produtos
+            .Where(p => ids.Contains(p.Id) && p.Status == StatusProduto.Disponivel)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, StatusProduto.Vendido));
+
+        // Outra pessoa comprou alguma dessas peças entre abrir a sacola e finalizar
+        if (vendidas != ids.Count)
+        {
+            await transacao.RollbackAsync();
+            TempData["Erro"] = "Uma das peças acabou de ser vendida. Confira sua sacola e tente de novo.";
+            return Redirect("/sacola");
+        }
+
+        var pedido = new Pedido
+        {
+            ClienteId = Eu.Id,
+            Itens = pecas.Select(p => new PedidoItem
+            {
+                ProdutoId = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
+            }).ToList(),
+        };
+        db.Pedidos.Add(pedido);
+        db.Sacola.RemoveRange(itens.Where(s => ids.Contains(s.ProdutoId)));
+
+        await db.SaveChangesAsync();
+        await transacao.CommitAsync();
+
+        TempData["PedidoNovo"] = pedido.Numero;
+        return Redirect("/compras");
     }
 
     [HttpGet("/compras")]

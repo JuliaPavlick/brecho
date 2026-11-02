@@ -10,6 +10,7 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
     public DbSet<Produto> Produtos => Set<Produto>();
     public DbSet<ProdutoFoto> ProdutoFotos => Set<ProdutoFoto>();
     public DbSet<Favorito> Favoritos => Set<Favorito>();
+    public DbSet<SacolaItem> Sacola => Set<SacolaItem>();
     public DbSet<Pedido> Pedidos => Set<Pedido>();
     public DbSet<PedidoItem> PedidoItens => Set<PedidoItem>();
     public DbSet<Evento> Eventos => Set<Evento>();
@@ -28,6 +29,8 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
             .HasForeignKey(p => p.VendedoraId).OnDelete(DeleteBehavior.SetNull);
 
         mb.Entity<Favorito>().HasKey(f => new { f.UsuarioId, f.ProdutoId });
+
+        mb.Entity<SacolaItem>().HasKey(s => new { s.UsuarioId, s.ProdutoId });
 
         mb.Entity<Pedido>()
             .HasOne(p => p.Cliente).WithMany(u => u.Pedidos)

@@ -66,6 +66,27 @@ function mostrarErro(id, ok) {
     return ok;
 }
 
+// Botão "Adicionar à sacola" dos cards (vale para todas as páginas da área do cliente)
+document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-sacola');
+    if (!btn) return;
+
+    btn.disabled = true;
+    postar('/sacola/' + btn.dataset.id)
+        .then(r => {
+            btn.classList.toggle('ativo', r.naSacola);
+            btn.textContent = r.naSacola ? 'Na sacola ✓' : 'Adicionar à sacola';
+
+            const qtd = document.getElementById('qtd-sacola');
+            if (qtd) {
+                qtd.textContent = r.total;
+                qtd.style.display = r.total ? '' : 'none';
+            }
+        })
+        .catch(() => alert('Esta peça não está mais disponível.'))
+        .finally(() => btn.disabled = false);
+});
+
 // Coração dos cards de peça: marca/desmarca no servidor
 function alternarFavorito(btn) {
     return postar('/favoritos/' + btn.dataset.id).then(r => {

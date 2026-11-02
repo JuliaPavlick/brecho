@@ -21,4 +21,14 @@
             title="@(Model.Favorito ? "Remover dos favoritos" : "Adicionar aos favoritos")">@(Model.Favorito ? "♥" : "♡")</button>
     </div>
     <span class="preco">@Formato.Moeda(Model.Preco)</span>
+    @if (Model.Disponivel)
+    {
+        <button type="button" class="btn-sacola @(Model.NaSacola ? "ativo" : "")" data-id="@Model.Id">
+            @(Model.NaSacola ? "Na sacola ✓" : "Adicionar à sacola")
+        </button>
+    }
+    else
+    {
+        <span class="peca-indisponivel">Indisponível</span>
+    }
 </div>

@@ -13,6 +13,18 @@ public class Favorito
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 }
 
+// Peça guardada na sacola. Não reserva a peça: ela só sai da loja quando a compra é finalizada.
+public class SacolaItem
+{
+    public int UsuarioId { get; set; }
+    public Usuario? Usuario { get; set; }
+
+    public int ProdutoId { get; set; }
+    public Produto? Produto { get; set; }
+
+    public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
+}
+
 public class Evento
 {
     public int Id { get; set; }

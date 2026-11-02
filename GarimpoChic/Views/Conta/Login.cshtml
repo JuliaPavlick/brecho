@@ -20,6 +20,10 @@
     {
         <div class="alerta-erro">@erro</div>
     }
+    @if (TempData["Ok"] is string ok)
+    {
+        <div class="mensagem-sucesso" style="display:block;margin:0 0 1rem">@ok</div>
+    }
 
     <form action="/" method="post" asp-antiforgery="true">
 

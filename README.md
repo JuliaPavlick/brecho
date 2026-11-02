@@ -55,12 +55,37 @@ Opcional: para ter os dados de demonstração também na Render, adicione as var
 | Cadastro | `/cadastro` |
 | Recuperar senha | `/recuperar-senha` |
 | Seleção de perfil | `/perfis` |
-| Cliente | `/inicio`, `/explorar`, `/favoritos`, `/compras`, `/perfil` |
+| Redefinir senha (link do e-mail) | `/redefinir-senha` |
+| Cliente | `/inicio`, `/explorar`, `/favoritos`, `/sacola`, `/compras`, `/perfil` |
 | Vender para a loja | `/vender` |
 | Funcionária | `/painel`, `/painel/produtos`, `/painel/pedidos`, `/painel/calendario`, `/painel/financeiro`, `/painel/clientes` |
 
+## E-mail (recuperação de senha)
+
+O link "Esqueci minha senha" manda um e-mail com um link que vale por 1 hora e só pode ser usado uma vez. Para o envio funcionar, configure na Render (aba **Environment** do serviço `garimpo-chic`):
+
+| Variável | Exemplo |
+|---|---|
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORTA` | `587` |
+| `SMTP_USUARIO` | o e-mail que envia |
+| `SMTP_SENHA` | senha de app do provedor (no Gmail: "Senhas de app") |
+| `SMTP_REMETENTE` | opcional; padrão é o `SMTP_USUARIO` |
+
+Sem `SMTP_HOST`, o e-mail não é enviado: o conteúdo (com o link) aparece no log do servidor. Isso é útil para testar no computador.
+
+## Banco de dados e migrations
+
+Em produção (Postgres), o site aplica as migrations sozinho ao iniciar. Para mudar o modelo:
+
+```bash
+dotnet tool restore
+dotnet ef migrations add NomeDaMudanca --project GarimpoChic -o Data/Migrations
+```
+
+As migrations são geradas para o Postgres. No desenvolvimento (SQLite), o banco é criado direto pelo modelo: depois de mudar o modelo, apague o `GarimpoChic/garimpo.db`.
+
 ## Ainda não implementado
 
-- **Carrinho e finalização de compra:** os pedidos existem no banco e aparecem nas telas, mas a cliente ainda não tem botão de comprar.
-- **E-mail de recuperação de senha:** a tela confirma o pedido, mas nenhum e-mail é enviado.
-- **Migrations:** o banco é criado com `EnsureCreated`. Se o modelo mudar, é preciso recriar o banco ou adotar migrations do EF Core.
+- **Pagamento online:** finalizar a compra cria o pedido e marca as peças como vendidas, mas o pagamento é combinado direto com a loja.
+- **Repasse automático às vendedoras:** os repasses aparecem no financeiro, mas ainda não são gerados quando uma peça de vendedora externa é vendida.

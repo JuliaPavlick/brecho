@@ -1,0 +1,87 @@
+@{
+    ViewData["Title"] = "Nova senha";
+    var valido = ViewData["Valido"] as bool? == true;
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/recuperar-senha.css" asp-append-version="true">
+}
+
+<div class="card">
+
+    <partial name="_LogoCartao" />
+
+    <div class="divisor">
+        <div class="divisor-linha"></div>
+        <span class="divisor-flor">✿</span>
+        <div class="divisor-linha"></div>
+    </div>
+
+    <h1 class="titulo-pagina">Criar nova senha</h1>
+
+    @if (!valido)
+    {
+        <p class="texto-pagina">
+            Este link é inválido ou já venceu. Os links valem por 1 hora e só podem ser usados uma vez.
+        </p>
+
+        <div class="area-link">
+            <a href="/recuperar-senha">Pedir um novo link →</a>
+        </div>
+    }
+    else
+    {
+        <p class="texto-pagina">
+            Escolha uma nova senha para a sua conta.
+        </p>
+
+        @if (ViewData["Erro"] is string erro)
+        {
+            <div class="alerta-erro">@erro</div>
+        }
+
+        <form action="/redefinir-senha" method="post" asp-antiforgery="true" id="form-nova-senha" novalidate>
+
+            <input type="hidden" name="codigo" value="@ViewData["Codigo"]">
+
+            <div class="campo">
+                <label for="senha">Nova senha</label>
+                <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="new-password">
+                <span class="erro-campo" id="erro-senha">Use pelo menos 8 caracteres.</span>
+            </div>
+
+            <div class="campo">
+                <label for="confirma">Confirmar nova senha</label>
+                <input type="password" id="confirma" placeholder="••••••••" autocomplete="new-password">
+                <span class="erro-campo" id="erro-confirma">As senhas não coincidem.</span>
+            </div>
+
+            <button type="submit" class="btn-entrar">Salvar nova senha</button>
+
+        </form>
+    }
+
+    <div class="area-link">
+        <a href="/">← Voltar para o login</a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        const form = document.getElementById('form-nova-senha');
+
+        if (form) {
+            form.addEventListener('submit', e => {
+                const senha = document.getElementById('senha').value;
+                const confirma = document.getElementById('confirma').value;
+
+                const okSenha = mostrarErro('erro-senha', senha.length >= 8);
+                const okConfirma = mostrarErro('erro-confirma', senha === confirma && confirma !== '');
+
+                if (!okSenha || !okConfirma) e.preventDefault();
+            });
+        }
+    </script>
+}

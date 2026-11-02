@@ -76,13 +76,81 @@ public class ContaController(BrechoContext db) : Controller
     [HttpGet("/recuperar-senha")]
     public IActionResult RecuperarSenha() => View();
 
-    // Ainda não há envio de e-mail configurado: a tela só confirma o pedido,
-    // sem revelar se o CPF existe ou não.
+    // Manda o link de redefinição para o e-mail da conta. A resposta é sempre a mesma,
+    // para a tela não revelar quais CPFs estão cadastrados.
     [HttpPost("/recuperar-senha")]
-    public IActionResult RecuperarSenha(string? cpf)
+    public async Task<IActionResult> RecuperarSenha(string? cpf, [FromServices] RedefinicaoSenha redefinicao,
+        [FromServices] Email email, [FromServices] ILogger<ContaController> log)
     {
-        ViewData["Enviado"] = Formato.CpfValido(cpf);
+        var digitos = Formato.SoDigitos(cpf);
+        var u = Formato.CpfValido(digitos) ? await db.Usuarios.FirstOrDefaultAsync(x => x.Cpf == digitos) : null;
+
+        if (u != null && Formato.EmailValido(u.Email))
+        {
+            var link = $"{EnderecoDoSite()}/redefinir-senha?codigo={Uri.EscapeDataString(redefinicao.GerarCodigo(u))}";
+            var html = $"""
+                <p>Olá, {System.Net.WebUtility.HtmlEncode(u.PrimeiroNome)}!</p>
+                <p>Recebemos um pedido para redefinir a senha da sua conta no Garimpo Chic.</p>
+                <p><a href="{link}">Clique aqui para criar uma nova senha</a>. O link vale por 1 hora.</p>
+                <p>Se não foi você, é só ignorar este e-mail: sua senha continua a mesma.</p>
+                """;
+
+            try
+            {
+                await email.EnviarAsync(u.Email, "Redefinir sua senha — Garimpo Chic", html);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Falha ao enviar e-mail de redefinição de senha");
+            }
+        }
+
+        ViewData["Enviado"] = Formato.CpfValido(digitos);
         return View();
+    }
+
+    // Endereço público do site para montar o link do e-mail.
+    // Na Render vem de RENDER_EXTERNAL_URL; não confiamos no cabeçalho Host, que pode ser forjado.
+    string EnderecoDoSite() =>
+        (Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL")
+         ?? HttpContext.RequestServices.GetRequiredService<IConfiguration>()["SITE_URL"]
+         ?? $"{Request.Scheme}://{Request.Host}").TrimEnd('/');
+
+    [HttpGet("/redefinir-senha")]
+    public async Task<IActionResult> RedefinirSenha(string? codigo, [FromServices] RedefinicaoSenha redefinicao)
+    {
+        ViewData["Codigo"] = codigo;
+        ViewData["Valido"] = await CodigoValidoAsync(codigo, redefinicao) != null;
+        return View();
+    }
+
+    [HttpPost("/redefinir-senha")]
+    public async Task<IActionResult> RedefinirSenha(string? codigo, string? senha, [FromServices] RedefinicaoSenha redefinicao)
+    {
+        var u = await CodigoValidoAsync(codigo, redefinicao);
+        ViewData["Codigo"] = codigo;
+        ViewData["Valido"] = u != null;
+
+        if (u == null) return View();
+
+        if ((senha ?? "").Length < 8)
+        {
+            ViewData["Erro"] = "Use pelo menos 8 caracteres.";
+            return View();
+        }
+
+        u.SenhaHash = DadosIniciais.HashSenha(u, senha!);
+        await db.SaveChangesAsync();
+
+        TempData["Ok"] = "Senha alterada! Agora é só entrar com a nova senha.";
+        return Redirect("/");
+    }
+
+    async Task<Usuario?> CodigoValidoAsync(string? codigo, RedefinicaoSenha redefinicao)
+    {
+        var id = redefinicao.LerUsuarioId(codigo);
+        var u = id == null ? null : await db.Usuarios.FindAsync(id.Value);
+        return u != null && redefinicao.CodigoConfere(codigo, u) ? u : null;
     }
 
     [Authorize]

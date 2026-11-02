@@ -1,6 +1,7 @@
 @{
     var menu = ViewData["Menu"] as string;
     string Ativo(string item) => item == menu ? "ativo" : "";
+    var qtdSacola = ViewData["QtdSacola"] as int? ?? 0;
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -64,6 +65,14 @@
                         <img src="~/img/coracao.png" alt="Favoritos">
                     </span>
                     <span class="texto-menu">Favoritos</span>
+                </a>
+
+                <a href="/sacola" class="@Ativo("sacola")">
+                    <span class="icone">
+                        <img src="~/img/sacolas-de-comprass.png" alt="Sacola">
+                    </span>
+                    <span class="texto-menu">Sacola</span>
+                    <span class="contador-sacola" id="qtd-sacola" style="@(qtdSacola == 0 ? "display:none" : "")">@qtdSacola</span>
                 </a>
 
                 <a href="/compras" class="@Ativo("compras")">

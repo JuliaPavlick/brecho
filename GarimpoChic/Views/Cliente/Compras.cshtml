@@ -14,6 +14,11 @@
 
     <partial name="_TopoCliente" model='("Minhas compras", "Acompanhe seus pedidos no Garimpo Chic")' />
 
+    @if (TempData["PedidoNovo"] is string numero)
+    {
+        <div class="alerta-ok">Pedido @numero recebido! A loja vai entrar em contato para combinar o pagamento e a entrega ✦</div>
+    }
+
     <!-- FILTROS DE STATUS -->
 
     <div class="chips">
