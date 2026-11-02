@@ -21,6 +21,8 @@ public static class DadosIniciais
 
         if (config.GetValue<bool>("DadosDemo") && !await db.Produtos.AnyAsync())
             await CriarDemoAsync(db, config["SenhaDemo"]);
+
+        await FotosDemo.AnexarAsync(db);
     }
 
     // Primeira funcionária, definida pelas variáveis ADMIN_CPF / ADMIN_SENHA (ex.: na Render)

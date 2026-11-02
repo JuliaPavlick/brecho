@@ -16,4 +16,9 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
   </ItemGroup>
 
+  <!-- Fotos das peças de demonstração (domínio público / CC0), embutidas no programa -->
+  <ItemGroup>
+    <EmbeddedResource Include="Data\FotosDemo\*.jpg" LogicalName="FotosDemo/%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>
