@@ -50,9 +50,20 @@ public static class DadosIniciais
     // Mesmo conteúdo que as páginas antigas mostravam fixo no HTML
     static async Task CriarDemoAsync(BrechoContext db, string? senha)
     {
+        // Se um CPF de demonstração já tem conta (ex.: a funcionária criada por ADMIN_CPF), reaproveita essa conta
+        // em vez de criar outra: o CPF é único e a duplicata impediria o site de iniciar.
+        var existentes = await db.Usuarios.ToDictionaryAsync(u => u.Cpf);
+
         // Sem SenhaDemo definida, as contas de demonstração ficam sem senha (não dá para entrar com elas)
         Usuario Pessoa(string nome, string cpf, string email, string tel, string cidade, bool vendedora, bool funcionaria, int diasAtras)
         {
+            if (existentes.TryGetValue(cpf, out var jaExiste))
+            {
+                jaExiste.EhVendedora |= vendedora;
+                jaExiste.EhFuncionaria |= funcionaria;
+                return jaExiste;
+            }
+
             var u = new Usuario
             {
                 Nome = nome, Cpf = cpf, Email = email, Telefone = tel, Cidade = cidade, Estado = "SC",
@@ -69,7 +80,8 @@ public static class DadosIniciais
         var beatriz = Pessoa("Beatriz Lima", "98765432100", "bia.lima@email.com", "(47) 96666-8765", "Blumenau", true, false, 120);
         var camila = Pessoa("Camila Rocha", "39053344705", "camila.rocha@email.com", "(47) 95555-2468", "São Francisco do Sul", true, false, 5);
 
-        db.Usuarios.AddRange(julia, ana, mariana, beatriz, camila);
+        // Só as contas novas entram como inserção; as reaproveitadas já estão no banco
+        db.Usuarios.AddRange(new[] { julia, ana, mariana, beatriz, camila }.Where(u => u.Id == 0));
 
         Produto Peca(string nome, string desc, string cat, decimal preco, string status = StatusProduto.Disponivel, Usuario? vendedora = null) =>
             new() { Nome = nome, Descricao = desc, Categoria = cat, Preco = preco, Status = status, Vendedora = vendedora };
