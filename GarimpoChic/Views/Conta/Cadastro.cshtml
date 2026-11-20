@@ -35,7 +35,7 @@
 
         <div class="campo">
             <label for="cpf">CPF</label>
-            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" value="@Model.Cpf">
+            <input type="text" inputmode="numeric" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" value="@Model.Cpf">
             <span class="erro-campo" id="erro-cpf" style="@Mostrar("cpf")">@(Msg("cpf") ?? "Informe um CPF válido.")</span>
         </div>
 
@@ -47,7 +47,7 @@
 
         <div class="campo">
             <label for="telefone">Telefone</label>
-            <input type="text" id="telefone" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
+            <input type="tel" inputmode="numeric" autocomplete="tel-national" id="telefone" name="telefone" placeholder="(00) 00000-0000" maxlength="15"
                 autocomplete="tel" value="@Model.Telefone">
             <span class="erro-campo" id="erro-telefone" style="@Mostrar("telefone")">@(Msg("telefone") ?? "Informe um telefone válido.")</span>
         </div>

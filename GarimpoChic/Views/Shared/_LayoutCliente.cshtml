@@ -1,6 +1,8 @@
 @{
     var menu = ViewData["Menu"] as string;
     string Ativo(string item) => item == menu ? "ativo" : "";
+    // Diz ao leitor de tela qual item do menu é a página aberta
+    string? Atual(string item) => item == menu ? "page" : null;
     var qtdSacola = ViewData["QtdSacola"] as int? ?? 0;
     var funcionaria = User.IsInRole(Papeis.Funcionaria);
     var logado = User.Identity?.IsAuthenticated == true;
@@ -51,7 +53,7 @@
             {
                 <!-- Visitante: só o catálogo, e os caminhos para entrar ou criar conta -->
                 <nav class="menu">
-                    <a href="/explorar" class="@Ativo("explorar")">
+                    <a href="/explorar" class="@Ativo("explorar")" aria-current="@Atual("explorar")">
                         <span class="icone">
                             <img src="~/img/lupa.png" alt="">
                         </span>
@@ -75,28 +77,28 @@
             {
             <nav class="menu">
 
-                <a href="/inicio" class="@Ativo("inicio")">
+                <a href="/inicio" class="@Ativo("inicio")" aria-current="@Atual("inicio")">
                     <span class="icone">
                         <img src="~/img/casa.png" alt="">
                     </span>
                     <span class="texto-menu">Início</span>
                 </a>
 
-                <a href="/explorar" class="@Ativo("explorar")">
+                <a href="/explorar" class="@Ativo("explorar")" aria-current="@Atual("explorar")">
                     <span class="icone">
                         <img src="~/img/lupa.png" alt="">
                     </span>
                     <span class="texto-menu">Explorar</span>
                 </a>
 
-                <a href="/favoritos" class="@Ativo("favoritos")">
+                <a href="/favoritos" class="@Ativo("favoritos")" aria-current="@Atual("favoritos")">
                     <span class="icone">
                         <img src="~/img/coracao.png" alt="">
                     </span>
                     <span class="texto-menu">Favoritos</span>
                 </a>
 
-                <a href="/sacola" class="@Ativo("sacola")">
+                <a href="/sacola" class="@Ativo("sacola")" aria-current="@Atual("sacola")">
                     <span class="icone">
                         <img src="~/img/sacolas-de-comprass.png" alt="">
                     </span>
@@ -104,21 +106,21 @@
                     <span class="contador-sacola" id="qtd-sacola" style="@(qtdSacola == 0 ? "display:none" : "")">@qtdSacola</span>
                 </a>
 
-                <a href="/compras" class="@Ativo("compras")">
+                <a href="/compras" class="@Ativo("compras")" aria-current="@Atual("compras")">
                     <span class="icone">
                         <img src="~/img/bolsa.png" alt="">
                     </span>
                     <span class="texto-menu">Compras</span>
                 </a>
 
-                <a href="/vender" class="@Ativo("vender")">
+                <a href="/vender" class="@Ativo("vender")" aria-current="@Atual("vender")">
                     <span class="icone">
                         <img src="~/img/sacola-dinheiro.png" alt="">
                     </span>
                     <span class="texto-menu">Vender</span>
                 </a>
 
-                <a href="/perfil" class="@Ativo("perfil")">
+                <a href="/perfil" class="@Ativo("perfil")" aria-current="@Atual("perfil")">
                     <span class="icone">
                         <img src="~/img/pessoa.png" alt="">
                     </span>

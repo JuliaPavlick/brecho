@@ -69,6 +69,7 @@
 
         <h3 id="det-titulo"></h3>
         <p class="det-sub" id="det-sub"></p>
+        <p class="det-sub" id="det-contato"></p>
 
         <div id="det-itens"></div>
 
@@ -119,7 +120,7 @@
                 <tr>
                     <td><strong>${numero(p.id)}</strong></td>
                     <td>${esc(p.cliente)}</td>
-                    <td>${p.data}</td>
+                    <td>${esc(p.data)}</td>
                     <td>${p.itens.length} ${p.itens.length === 1 ? 'peça' : 'peças'}</td>
                     <td class="preco-cel">${moeda(total(p))}</td>
                     <td>
@@ -143,6 +144,15 @@
         function abrirDetalhes(pedido) {
             document.getElementById('det-titulo').textContent = 'Pedido ' + numero(pedido.id);
             document.getElementById('det-sub').textContent = pedido.cliente + ' • ' + pedido.data;
+
+            // Contato da cliente: telefone abre o WhatsApp, e-mail abre o programa de e-mail
+            const digitos = (pedido.telefone || '').replace(/\D/g, '');
+            const contato = [];
+            if (digitos.length >= 10)
+                contato.push(`<a href="https://wa.me/55${digitos}" target="_blank" rel="noopener">${esc(pedido.telefone)} (WhatsApp)</a>`);
+            if (pedido.email)
+                contato.push(`<a href="mailto:${esc(pedido.email)}">${esc(pedido.email)}</a>`);
+            document.getElementById('det-contato').innerHTML = contato.length ? contato.join(' • ') : 'Sem contato cadastrado';
 
             document.getElementById('det-itens').innerHTML = pedido.itens.map(i => `
                 <div class="det-item">

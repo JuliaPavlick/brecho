@@ -39,7 +39,11 @@ const Carregando = (() => {
 function postar(url, corpo) {
     const opcoes = {
         method: 'POST',
-        headers: { 'RequestVerificationToken': document.querySelector('meta[name="csrf"]').content }
+        headers: {
+            'RequestVerificationToken': document.querySelector('meta[name="csrf"]').content,
+            // Faz o servidor responder 401 (em vez de mandar para a tela de login) quando a sessão venceu
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     };
 
     if (corpo instanceof FormData) {
@@ -51,6 +55,11 @@ function postar(url, corpo) {
 
     Carregando.inicio();
     return fetch(url, opcoes).then(async r => {
+        // Sessão vencida: leva para o login e volta para esta página depois de entrar
+        if (r.status === 401) {
+            location.href = '/?returnUrl=' + encodeURIComponent(location.pathname + location.search);
+            return new Promise(() => {});
+        }
         if (!r.ok) {
             // Quando o servidor explica o motivo ({ erro: "..." }), a mensagem vai junto no erro
             const corpo = await r.json().catch(() => ({}));
@@ -111,7 +120,8 @@ function mostrarErro(id, ok) {
 
 // Botão "Adicionar à sacola" dos cards (vale para todas as páginas da área do cliente)
 document.addEventListener('click', e => {
-    const btn = e.target.closest('button.btn-sacola');
+    // Só os botões de peça (com data-id); o "Finalizar compra" da sacola é um envio de formulário comum
+    const btn = e.target.closest('button.btn-sacola[data-id]');
     if (!btn) return;
 
     btn.disabled = true;
@@ -119,6 +129,7 @@ document.addEventListener('click', e => {
         .then(r => {
             btn.classList.toggle('ativo', r.naSacola);
             btn.textContent = r.naSacola ? 'Na sacola ✓' : 'Adicionar à sacola';
+            document.querySelectorAll('.link-sacola').forEach(a => a.hidden = !r.naSacola);
 
             const qtd = document.getElementById('qtd-sacola');
             if (qtd) {
@@ -140,6 +151,24 @@ function alternarFavorito(btn) {
         return r.favorito;
     });
 }
+
+// Links "Sair": saem por POST com o token, para que um link de outro site não consiga deslogar ninguém
+document.addEventListener('click', e => {
+    const link = e.target.closest('a[href="/sair"]');
+    if (!link) return;
+    e.preventDefault();
+
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/sair';
+    const token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '__RequestVerificationToken';
+    token.value = document.querySelector('meta[name="csrf"]').content;
+    form.appendChild(token);
+    document.body.appendChild(form);
+    form.submit();
+});
 
 // Comportamentos que antes ficavam em onclick/onsubmit no HTML (a CSP bloqueia esse tipo de código)
 // <button data-href="/explorar"> navega; <form data-confirmar="Tem certeza?"> pergunta antes de enviar
@@ -239,4 +268,44 @@ document.addEventListener('submit', e => {
 window.addEventListener('pageshow', () => {
     Carregando.zerar();
     document.querySelectorAll('form[data-enviando]').forEach(f => delete f.dataset.enviando);
+});
+
+// Janelas do painel (.modal-fundo que recebe a classe "aberto"): para quem usa teclado ou leitor de tela,
+// o foco entra na janela ao abrir, o Tab fica preso dentro dela e, ao fechar, volta ao botão que a abriu
+document.addEventListener('DOMContentLoaded', () => {
+    const FOCAVEIS = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    document.querySelectorAll('.modal-fundo').forEach(fundo => {
+        const janela = fundo.querySelector('.modal') || fundo;
+        const titulo = janela.querySelector('h2, h3');
+        janela.setAttribute('role', 'dialog');
+        janela.setAttribute('aria-modal', 'true');
+        janela.tabIndex = -1;
+        if (titulo) {
+            titulo.id ||= 'titulo-' + (fundo.id || 'janela');
+            janela.setAttribute('aria-labelledby', titulo.id);
+        }
+
+        let origem = null;
+        new MutationObserver(() => {
+            const aberta = fundo.classList.contains('aberto');
+            if (aberta && !origem) {
+                origem = document.activeElement;
+                const primeiro = janela.querySelector(FOCAVEIS);
+                (primeiro || janela).focus();
+            } else if (!aberta && origem) {
+                if (document.contains(origem)) origem.focus();
+                origem = null;
+            }
+        }).observe(fundo, { attributes: true, attributeFilter: ['class'] });
+
+        fundo.addEventListener('keydown', e => {
+            if (e.key !== 'Tab') return;
+            const itens = [...janela.querySelectorAll(FOCAVEIS)].filter(el => el.offsetParent !== null);
+            if (!itens.length) return;
+            const primeiro = itens[0], ultimo = itens[itens.length - 1];
+            if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
+            else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+        });
+    });
 });

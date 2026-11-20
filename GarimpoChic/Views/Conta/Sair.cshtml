@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Sair";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/recuperar-senha.css" asp-append-version="true">
+}
+
+@* Só aparece quando alguém abre /sair direto (link antigo ou de outro site).
+   Sair de verdade exige este envio: assim, um link de outro site não consegue deslogar ninguém. *@
+<div class="card">
+
+    <partial name="_LogoCartao" />
+
+    <h1 class="titulo-pagina">Sair da conta?</h1>
+
+    <form action="/sair" method="post" asp-antiforgery="true">
+        <button type="submit" class="btn-entrar">Sair</button>
+    </form>
+
+    <div class="area-link">
+        <a href="/">← Continuar na loja</a>
+    </div>
+
+</div>

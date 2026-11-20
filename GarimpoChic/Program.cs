@@ -68,7 +68,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BrechoContext>();
     await Atualizacao.PrepararBancoAsync(db);
-    await DadosIniciais.PopularAsync(db, app.Configuration);
+    await DadosIniciais.PopularAsync(db, app.Configuration, app.Environment);
 }
 
 app.UseForwardedHeaders();
@@ -81,6 +81,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseCabecalhosDeSeguranca();
+
+// Endereço inexistente (404) e outros erros sem página própria: mostra a página de erro do site
+app.UseStatusCodePagesWithReExecute("/erro/{0}");
 
 app.UseStaticFiles();
 app.UseRouting();

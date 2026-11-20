@@ -1,0 +1,29 @@
+@model int
+@{
+    var naoEncontrada = Model == 404;
+    ViewData["Title"] = naoEncontrada ? "Página não encontrada" : "Algo deu errado";
+}
+
+@section Estilos {
+    <link rel="stylesheet" href="~/css/logincli.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/recuperar-senha.css" asp-append-version="true">
+}
+
+<div class="card">
+
+    <partial name="_LogoCartao" />
+
+    <h1 class="titulo-pagina">@ViewData["Title"]</h1>
+    <p class="texto-pagina">
+        @(naoEncontrada
+            ? "Este endereço não existe ou a página mudou de lugar."
+            : "Não foi possível concluir agora. Tente de novo em instantes.")
+    </p>
+
+    <a href="/explorar" class="btn-entrar" style="display:block;text-align:center;text-decoration:none">Ver as peças da loja</a>
+
+    <div class="area-link">
+        <a href="/">← Voltar ao início</a>
+    </div>
+
+</div>

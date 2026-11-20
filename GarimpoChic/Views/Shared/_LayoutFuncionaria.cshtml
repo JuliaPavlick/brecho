@@ -1,6 +1,8 @@
 @{
     var menu = ViewData["Menu"] as string;
     string Ativo(string item) => item == menu ? "ativo" : "";
+    // Diz ao leitor de tela qual item do menu é a página aberta
+    string? Atual(string item) => item == menu ? "page" : null;
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -39,49 +41,49 @@
 
         <nav class="menu">
 
-            <a href="/painel" class="@Ativo("dashboard")">
+            <a href="/painel" class="@Ativo("dashboard")" aria-current="@Atual("dashboard")">
                 <span class="icone">
                     <img src="~/img/grafico-preditivo.png" alt="">
                 </span>
                 <span class="texto">Dashboard</span>
             </a>
 
-            <a href="/painel/produtos" class="@Ativo("produtos")">
+            <a href="/painel/produtos" class="@Ativo("produtos")" aria-current="@Atual("produtos")">
                 <span class="icone">
                     <img src="~/img/vestido-de-casamento.png" alt="">
                 </span>
                 <span class="texto">Produtos</span>
             </a>
 
-            <a href="/painel/pedidos" class="@Ativo("pedidos")">
+            <a href="/painel/pedidos" class="@Ativo("pedidos")" aria-current="@Atual("pedidos")">
                 <span class="icone">
                     <img src="~/img/caixa.png" alt="">
                 </span>
                 <span class="texto">Pedidos</span>
             </a>
 
-            <a href="/painel/calendario" class="@Ativo("calendario")">
+            <a href="/painel/calendario" class="@Ativo("calendario")" aria-current="@Atual("calendario")">
                 <span class="icone">
                     <img src="~/img/calendario.png" alt="">
                 </span>
                 <span class="texto">Calendário</span>
             </a>
 
-            <a href="/painel/financeiro" class="@Ativo("financeiro")">
+            <a href="/painel/financeiro" class="@Ativo("financeiro")" aria-current="@Atual("financeiro")">
                 <span class="icone">
                     <img src="~/img/grafico-de-crescimento.png" alt="">
                 </span>
                 <span class="texto">Financeiro</span>
             </a>
 
-            <a href="/painel/clientes" class="@Ativo("clientes")">
+            <a href="/painel/clientes" class="@Ativo("clientes")" aria-current="@Atual("clientes")">
                 <span class="icone">
                     <img src="~/img/pessoas.png" alt="">
                 </span>
                 <span class="texto">Clientes</span>
             </a>
 
-            <a href="/painel/backup" class="@Ativo("backup")">
+            <a href="/painel/backup" class="@Ativo("backup")" aria-current="@Atual("backup")">
                 <span class="icone">
                     <img src="~/img/pranchetas.png" alt="">
                 </span>

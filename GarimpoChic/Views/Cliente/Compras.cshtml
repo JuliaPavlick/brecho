@@ -69,7 +69,16 @@
 
     </div>
 
-    <p class="vazio" id="vazio">Nenhum pedido nesta categoria ✦</p>
+    <p class="vazio" id="vazio">
+        @if (Model.Count == 0)
+        {
+            <text>Você ainda não fez nenhum pedido. <a href="/explorar">Ver as peças da loja →</a></text>
+        }
+        else
+        {
+            <text>Nenhum pedido nesta categoria ✦</text>
+        }
+    </p>
 
 </main>
 

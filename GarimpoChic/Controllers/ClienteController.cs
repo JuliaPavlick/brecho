@@ -28,7 +28,9 @@ public class ClienteController(BrechoContext db) : Controller
                 return;
             }
 
-            ctx.Result = Redirect("/sair");
+            // Conta apagada ou sem acesso: encerra a sessão aqui mesmo (GET /sair só pergunta)
+            await Sessao.SairAsync(HttpContext);
+            ctx.Result = Redirect("/");
             return;
         }
 
@@ -356,7 +358,8 @@ public class ClienteController(BrechoContext db) : Controller
         Eu.Email = email!.Trim();
         Eu.Telefone = telefone!.Trim();
         Eu.Cidade = string.IsNullOrWhiteSpace(cidade) ? null : cidade.Trim();
-        Eu.Estado = string.IsNullOrWhiteSpace(estado) ? null : estado.Trim().ToUpper();
+        var uf = (estado ?? "").Trim().ToUpper();
+        Eu.Estado = Formato.Ufs.Contains(uf) ? uf : null;
         await db.SaveChangesAsync();
 
         // Atualiza o nome guardado no cookie
@@ -395,9 +398,20 @@ public class ClienteController(BrechoContext db) : Controller
     }
 
     // A vendedora externa envia uma peça; ela entra como "Em avaliação" para a funcionária revisar
+    // Peças "Em avaliação" que uma pessoa pode ter ao mesmo tempo. As fotos ficam no banco (que tem espaço
+    // limitado no plano gratuito): sem um teto, uma conta qualquer poderia lotá-lo enviando peças sem parar.
+    const int MaxPecasEmAvaliacao = 20;
+
     [HttpPost("/vender")]
+    [RequestSizeLimit(30_000_000)]
     public async Task<IActionResult> Vender(string? nome, string? descricao, string? categoria, string? preco, List<IFormFile>? fotos)
     {
+        if (await db.Produtos.CountAsync(p => p.VendedoraId == Eu.Id && p.Status == StatusProduto.Avaliacao) >= MaxPecasEmAvaliacao)
+        {
+            TempData["Erro"] = $"Você já tem {MaxPecasEmAvaliacao} peças esperando avaliação. Aguarde a loja avaliar antes de enviar mais.";
+            return Redirect("/vender");
+        }
+
         var valor = Precos.Ler(preco);
         if (string.IsNullOrWhiteSpace(nome) || !Categorias.Existe(categoria ?? "") || valor <= 0)
         {

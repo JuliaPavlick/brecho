@@ -113,7 +113,8 @@
     margin-bottom: 6px;
 }
 
-.campo input {
+.campo input,
+.campo select {
     width: 100%;
     padding: 11px 14px;
     border: 1px solid #d4c49a;
@@ -126,7 +127,8 @@
     transition: 0.2s;
 }
 
-.campo input:focus {
+.campo input:focus,
+.campo select:focus {
     border-color: var(--dourado);
     background: #fffdf7;
 }

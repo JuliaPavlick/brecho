@@ -18,7 +18,9 @@ public class FuncionariaController(BrechoContext db) : Controller
         var u = await db.UsuarioAtualAsync(User);
         if (u == null || !u.EhFuncionaria)
         {
-            ctx.Result = Redirect("/sair");
+            // Conta apagada ou sem acesso: encerra a sessão aqui mesmo (GET /sair só pergunta)
+            await Sessao.SairAsync(HttpContext);
+            ctx.Result = Redirect("/");
             return;
         }
 
@@ -242,6 +244,9 @@ public class FuncionariaController(BrechoContext db) : Controller
         {
             id = p.Id,
             cliente = p.Cliente?.Nome ?? "—",
+            // A loja combina pagamento e entrega com a cliente: o contato fica à mão no detalhe do pedido
+            telefone = p.Cliente?.Telefone ?? "",
+            email = p.Cliente?.Email ?? "",
             data = Formato.Data(p.Data),
             status = p.Status,
             itens = p.Itens.Select(i => new { nome = i.Nome, preco = i.Preco }),

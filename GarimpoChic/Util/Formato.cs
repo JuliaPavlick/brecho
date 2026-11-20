@@ -39,6 +39,12 @@ public static class Formato
     public static string CpfMascarado(string digitos) =>
         digitos.Length == 11 ? $"•••.{digitos[3..6]}.{digitos[6..9]}-••" : "";
 
+    public static readonly string[] Ufs =
+    [
+        "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA",
+        "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO",
+    ];
+
     public static string SoDigitos(string? texto) => new((texto ?? "").Where(char.IsDigit).ToArray());
 
     public static bool CpfValido(string? valor)

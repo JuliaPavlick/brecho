@@ -125,9 +125,9 @@
 
                     <button type="button" class="btn-compartilhar" id="btn-compartilhar">Compartilhar</button>
 
-                    @if (p.NaSacola)
+                    @if (logado && p.Disponivel)
                     {
-                        <a href="/sacola" class="link-sacola">Ir para a sacola →</a>
+                        <a href="/sacola" class="link-sacola" hidden="@(!p.NaSacola)">Ir para a sacola →</a>
                     }
                 </div>
                 <p class="peca-aviso" id="aviso-compartilhar" role="status"></p>

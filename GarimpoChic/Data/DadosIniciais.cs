@@ -15,12 +15,28 @@ public static class DadosIniciais
         !string.IsNullOrEmpty(u.SenhaHash) &&
         Hasher.VerifyHashedPassword(u, u.SenhaHash, senha) != PasswordVerificationResult.Failed;
 
-    public static async Task PopularAsync(BrechoContext db, IConfiguration config)
+    // Hash de uma senha qualquer, só para gastar o mesmo tempo quando o CPF não tem conta
+    static readonly string HashFalso = Hasher.HashPassword(new Usuario(), Guid.NewGuid().ToString());
+
+    // Confere a senha gastando sempre o mesmo tempo, exista a conta ou não. Sem isso, a resposta mais rápida
+    // para um CPF sem conta revelaria quem é cliente da loja.
+    public static bool LoginConfere([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] Usuario? u, string senha)
+    {
+        if (u == null || string.IsNullOrEmpty(u.SenhaHash))
+        {
+            Hasher.VerifyHashedPassword(new Usuario(), HashFalso, senha);
+            return false;
+        }
+        return SenhaConfere(u, senha);
+    }
+
+    public static async Task PopularAsync(BrechoContext db, IConfiguration config, IHostEnvironment env)
     {
         await CriarFuncionariaAsync(db, config);
 
+        // Os CPFs de demonstração estão no README e no código: no site publicado, nenhuma delas pode ser funcionária
         if (config.GetValue<bool>("DadosDemo") && !await db.Produtos.AnyAsync())
-            await CriarDemoAsync(db, config["SenhaDemo"]);
+            await CriarDemoAsync(db, config["SenhaDemo"], funcionariaDemo: env.IsDevelopment());
 
         await FotosDemo.AnexarAsync(db);
     }
@@ -51,7 +67,7 @@ public static class DadosIniciais
     }
 
     // Mesmo conteúdo que as páginas antigas mostravam fixo no HTML
-    static async Task CriarDemoAsync(BrechoContext db, string? senha)
+    static async Task CriarDemoAsync(BrechoContext db, string? senha, bool funcionariaDemo)
     {
         // Se um CPF de demonstração já tem conta (ex.: a funcionária criada por ADMIN_CPF), reaproveita essa conta
         // em vez de criar outra: o CPF é único e a duplicata impediria o site de iniciar.
@@ -63,14 +79,14 @@ public static class DadosIniciais
             if (existentes.TryGetValue(cpf, out var jaExiste))
             {
                 jaExiste.EhVendedora |= vendedora;
-                jaExiste.EhFuncionaria |= funcionaria;
+                jaExiste.EhFuncionaria |= funcionaria && funcionariaDemo;
                 return jaExiste;
             }
 
             var u = new Usuario
             {
                 Nome = nome, Cpf = cpf, Email = email, Telefone = tel, Cidade = cidade, Estado = "SC",
-                EhVendedora = vendedora, EhFuncionaria = funcionaria,
+                EhVendedora = vendedora, EhFuncionaria = funcionaria && funcionariaDemo,
                 CriadoEm = DateTime.UtcNow.AddDays(-diasAtras),
             };
             if (!string.IsNullOrEmpty(senha)) u.SenhaHash = HashSenha(u, senha);

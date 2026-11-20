@@ -44,7 +44,7 @@ public class ContaController(BrechoContext db) : Controller
         var resumo = Protecao.ResumoCpf(digitos);
         var u = resumo == null ? null : await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == resumo);
 
-        if (u == null || !DadosIniciais.SenhaConfere(u, senha ?? ""))
+        if (!DadosIniciais.LoginConfere(u, senha ?? ""))
         {
             Limites.RegistrarErroLogin(HttpContext, digitos);
             ViewData["Erro"] = "CPF ou senha incorretos.";
@@ -202,21 +202,37 @@ public class ContaController(BrechoContext db) : Controller
     public async Task<IActionResult> SelecaoPerfil()
     {
         var u = await db.UsuarioAtualAsync(User);
-        if (u == null) return await Sair();
+        if (u == null)
+        {
+            await Sessao.SairAsync(HttpContext);
+            return Redirect("/");
+        }
         return View(u);
     }
 
+    // Abrir /sair não desloga: só pergunta. Se bastasse abrir o endereço, qualquer site poderia deslogar a pessoa.
+    // Os links "Sair" do site enviam um POST (veja site.js).
     [HttpGet("/sair")]
+    public IActionResult ConfirmarSaida() =>
+        User.Identity?.IsAuthenticated == true ? View("Sair") : Redirect("/");
+
+    [HttpPost("/sair")]
     public async Task<IActionResult> Sair()
     {
         await Sessao.SairAsync(HttpContext);
         return Redirect("/");
     }
 
-    // Chamada pelo tratador de erros também em POSTs, por isso aceita qualquer método
-    [Route("/erro")]
+    // Página de erro e de "não encontrada". Chamada pelo tratador de erros também em POSTs,
+    // por isso aceita qualquer método.
+    [Route("/erro/{codigo:int?}")]
     [IgnoreAntiforgeryToken]
-    public IActionResult Erro() => Content("Ops! Algo deu errado. Tente novamente em instantes.");
+    public IActionResult Erro(int? codigo)
+    {
+        var status = codigo is >= 400 and < 600 ? codigo.Value : 500;
+        Response.StatusCode = status;
+        return View("Erro", status);
+    }
 }
 
 public class CadastroForm
