@@ -13,7 +13,8 @@ public static class Banco
         if (!string.IsNullOrWhiteSpace(url))
             o.UseNpgsql(ConverterUrl(url));
         else
-            o.UseSqlite($"Data Source={Path.Combine(env.ContentRootPath, "garimpo.db")}");
+            // SQLITE_ARQUIVO: os testes automáticos usam um arquivo próprio e não mexem no garimpo.db
+            o.UseSqlite($"Data Source={config["SQLITE_ARQUIVO"] ?? Path.Combine(env.ContentRootPath, "garimpo.db")}");
     }
 
     // A Render entrega "postgresql://usuario:senha@host:porta/banco"; o Npgsql espera "Host=...;Username=..."

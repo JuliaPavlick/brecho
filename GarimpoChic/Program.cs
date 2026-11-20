@@ -94,3 +94,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Deixa os testes automáticos (GarimpoChic.Tests) subirem o site inteiro em memória
+public partial class Program;

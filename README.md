@@ -34,6 +34,14 @@ Abra http://localhost:5213. Sem a variável `DATABASE_URL`, o site cria sozinho 
 
 Para começar do zero, apague o `garimpo.db`.
 
+## Testes automáticos
+
+```bash
+dotnet test GarimpoChic.Tests
+```
+
+Os testes sobem o site inteiro em memória, cada um com um banco SQLite novo e os dados de demonstração, sem mexer no `garimpo.db`. Eles cobrem login, cadastro, sacola e finalizar compra, permissões (visitante, cliente, vendedora e funcionária) e proteções de segurança. No GitHub, eles rodam sozinhos a cada push (aba **Actions**).
+
 ## Publicar na Render
 
 1. No painel da Render: **New → Blueprint** e escolha este repositório. O `render.yaml` cria o Postgres `garimpo-db` e o site `garimpo-chic`.
