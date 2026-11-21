@@ -82,10 +82,10 @@ public partial class Navegador(HttpClient http) : IDisposable
 
     public async Task<HttpResponseMessage> Entrar(string cpf, string senha = SiteDeTeste.Senha, string? returnUrl = null)
     {
-        await Abrir("/");
+        await Abrir("/entrar");
         var campos = new Dictionary<string, string> { ["cpf"] = cpf, ["senha"] = senha };
         if (returnUrl != null) campos["returnUrl"] = returnUrl;
-        var resposta = await Enviar("/", campos);
+        var resposta = await Enviar("/entrar", campos);
         // Depois de entrar, o token muda (fica ligado à conta): pega o novo
         token = null;
         return resposta;

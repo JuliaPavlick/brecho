@@ -337,7 +337,7 @@ public class ClienteController(BrechoContext db) : Controller
 
         await Sessao.SairAsync(HttpContext);
         TempData["Ok"] = "Sua conta foi excluída e seus dados pessoais foram apagados.";
-        return Redirect("/");
+        return Redirect("/entrar");
     }
 
     [HttpPost("/perfil/dados")]

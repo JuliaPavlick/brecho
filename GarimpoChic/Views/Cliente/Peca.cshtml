@@ -7,7 +7,7 @@
     var p = Model.Peca;
     var categoria = Categorias.Todas.FirstOrDefault(c => c.Nome == p.Categoria);
     var logado = User.Identity?.IsAuthenticated == true;
-    var entrar = "/?ReturnUrl=" + Uri.EscapeDataString("/peca/" + p.Id);
+    var entrar = "/entrar?ReturnUrl=" + Uri.EscapeDataString("/peca/" + p.Id);
 
     // Prévia do link no WhatsApp/Instagram (eles leem estas tags sem login)
     var site = $"{Context.Request.Scheme}://{Context.Request.Host}";

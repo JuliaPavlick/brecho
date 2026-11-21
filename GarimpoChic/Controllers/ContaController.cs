@@ -10,7 +10,19 @@ namespace GarimpoChic.Controllers;
 
 public class ContaController(BrechoContext db) : Controller
 {
+    // Endereço principal: quem chega sem conta vê as peças da loja; quem já entrou vai para a sua área
     [HttpGet("/")]
+    public IActionResult Raiz(string? returnUrl)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return Destino(returnUrl, User.IsInRole(Papeis.Funcionaria));
+        // Links antigos de login ("/?ReturnUrl=...") continuam funcionando
+        if (!string.IsNullOrEmpty(returnUrl))
+            return Redirect("/entrar?ReturnUrl=" + Uri.EscapeDataString(returnUrl));
+        return Redirect("/explorar");
+    }
+
+    [HttpGet("/entrar")]
     public IActionResult Login(string? returnUrl)
     {
         if (User.Identity?.IsAuthenticated == true)
@@ -26,6 +38,8 @@ public class ContaController(BrechoContext db) : Controller
             ? LocalRedirect(returnUrl)
             : Redirect(funcionaria ? "/perfis" : "/inicio");
 
+    // "/" também recebe o login, para formulários abertos antes da mudança de endereço
+    [HttpPost("/entrar")]
     [HttpPost("/")]
     [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> Login(string? cpf, string? senha, string? returnUrl)
@@ -187,7 +201,7 @@ public class ContaController(BrechoContext db) : Controller
         await db.SaveChangesAsync();
 
         TempData["Ok"] = "Senha alterada! Agora é só entrar com a nova senha.";
-        return Redirect("/");
+        return Redirect("/entrar");
     }
 
     async Task<Usuario?> CodigoValidoAsync(string? codigo, RedefinicaoSenha redefinicao)

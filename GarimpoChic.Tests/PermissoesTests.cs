@@ -48,7 +48,7 @@ public class PermissoesTests
         var (r, _) = await nav.Abrir(url);
 
         Assert.Equal(HttpStatusCode.Redirect, r.StatusCode);
-        Assert.StartsWith("/?ReturnUrl=", r.Destino());
+        Assert.StartsWith("/entrar?ReturnUrl=", r.Destino());
     }
 
     [Fact]

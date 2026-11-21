@@ -80,7 +80,8 @@ No plano gratuito não há cobrança enquanto o faturamento não for ativado na 
 
 | Página | Endereço |
 |---|---|
-| Login | `/` |
+| Catálogo (início para visitantes) | `/` → `/explorar` |
+| Login | `/entrar` |
 | Política de Privacidade | `/privacidade` |
 | Cadastro | `/cadastro` |
 | Recuperar senha | `/recuperar-senha` |

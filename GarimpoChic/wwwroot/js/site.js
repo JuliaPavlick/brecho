@@ -57,7 +57,7 @@ function postar(url, corpo) {
     return fetch(url, opcoes).then(async r => {
         // Sessão vencida: leva para o login e volta para esta página depois de entrar
         if (r.status === 401) {
-            location.href = '/?returnUrl=' + encodeURIComponent(location.pathname + location.search);
+            location.href = '/entrar?returnUrl=' + encodeURIComponent(location.pathname + location.search);
             return new Promise(() => {});
         }
         if (!r.ok) {
@@ -335,5 +335,41 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
             else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
         });
+    });
+});
+
+// Celular: a barra de baixo só cabe 4 ou 5 itens. Os itens marcados com "extra" somem da barra
+// e aparecem num painel aberto pelo botão "Mais" (no computador, o botão e o painel ficam escondidos).
+document.addEventListener('DOMContentLoaded', () => {
+    const botao = document.querySelector('.menu-mais');
+    if (!botao) return;
+
+    const extras = [...document.querySelectorAll('.sidebar .extra')];
+    const painel = document.createElement('nav');
+    painel.className = 'painel-mais';
+    painel.id = 'painel-mais';
+    painel.setAttribute('aria-label', 'Mais opções');
+    painel.hidden = true;
+    extras.forEach(item => painel.appendChild(item.cloneNode(true)));
+    document.body.appendChild(painel);
+
+    // A página aberta está escondida no "Mais": o botão fica destacado
+    if (extras.some(item => item.classList.contains('ativo'))) botao.classList.add('ativo');
+
+    function abrir(aberto) {
+        painel.hidden = !aberto;
+        botao.setAttribute('aria-expanded', aberto);
+        if (aberto) painel.querySelector('a')?.focus();
+    }
+
+    botao.addEventListener('click', () => abrir(painel.hidden));
+    document.addEventListener('click', e => {
+        if (!painel.hidden && !painel.contains(e.target) && !botao.contains(e.target)) abrir(false);
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !painel.hidden) {
+            abrir(false);
+            botao.focus();
+        }
     });
 });

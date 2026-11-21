@@ -59,7 +59,7 @@
                         </span>
                         <span class="texto-menu">Explorar</span>
                     </a>
-                    <a href="/?ReturnUrl=@voltar">
+                    <a href="/entrar?ReturnUrl=@voltar">
                         <span class="icone">
                             <img src="~/img/pessoa.png" alt="">
                         </span>
@@ -106,26 +106,32 @@
                     <span class="contador-sacola" id="qtd-sacola" style="@(qtdSacola == 0 ? "display:none" : "")">@qtdSacola</span>
                 </a>
 
-                <a href="/compras" class="@Ativo("compras")" aria-current="@Atual("compras")">
+                <a href="/compras" class="extra @Ativo("compras")" aria-current="@Atual("compras")">
                     <span class="icone">
                         <img src="~/img/bolsa.png" alt="">
                     </span>
                     <span class="texto-menu">Compras</span>
                 </a>
 
-                <a href="/vender" class="@Ativo("vender")" aria-current="@Atual("vender")">
+                <a href="/vender" class="extra @Ativo("vender")" aria-current="@Atual("vender")">
                     <span class="icone">
                         <img src="~/img/sacola-dinheiro.png" alt="">
                     </span>
                     <span class="texto-menu">Vender</span>
                 </a>
 
-                <a href="/perfil" class="@Ativo("perfil")" aria-current="@Atual("perfil")">
+                <a href="/perfil" class="extra @Ativo("perfil")" aria-current="@Atual("perfil")">
                     <span class="icone">
                         <img src="~/img/pessoa.png" alt="">
                     </span>
                     <span class="texto-menu">Perfil</span>
                 </a>
+
+                <!-- Só no celular: abre os itens marcados com "extra" (veja site.js) -->
+                <button type="button" class="menu-mais" aria-expanded="false" aria-controls="painel-mais">
+                    <span class="icone" aria-hidden="true">☰</span>
+                    <span class="texto-menu">Mais</span>
+                </button>
 
             </nav>
             }
@@ -140,7 +146,7 @@
 
             @if (funcionaria)
             {
-                <a href="/painel">
+                <a href="/painel" class="extra">
                     <span class="icone">
                         <img src="~/img/pranchetas.png" alt="">
                     </span>
@@ -148,7 +154,7 @@
                 </a>
             }
 
-            <a href="/sair">
+            <a href="/sair" class="extra">
                 <span class="icone" aria-hidden="true">↩</span>
                 <span class="texto-menu">Sair</span>
             </a>

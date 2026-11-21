@@ -491,7 +491,7 @@ public class FuncionariaController(BrechoContext db) : Controller
         // As contas foram trocadas pelas do backup: todos (inclusive quem restaurou) entram de novo
         await Sessao.SairAsync(HttpContext);
         TempData["Ok"] = "Backup restaurado! Entre com uma conta que existia no backup.";
-        return Redirect("/");
+        return Redirect("/entrar");
     }
 
     // ---------- Clientes ----------

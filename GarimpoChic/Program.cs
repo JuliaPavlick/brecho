@@ -27,7 +27,7 @@ builder.Services.AddDataProtection()
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
-        o.LoginPath = "/";
+        o.LoginPath = "/entrar";
         o.AccessDeniedPath = "/perfis";
         o.ExpireTimeSpan = TimeSpan.FromDays(7);
         o.SlidingExpiration = true;

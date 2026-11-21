@@ -62,40 +62,46 @@
                 <span class="texto">Pedidos</span>
             </a>
 
-            <a href="/painel/calendario" class="@Ativo("calendario")" aria-current="@Atual("calendario")">
+            <a href="/painel/calendario" class="extra @Ativo("calendario")" aria-current="@Atual("calendario")">
                 <span class="icone">
                     <img src="~/img/calendario.png" alt="">
                 </span>
                 <span class="texto">Calendário</span>
             </a>
 
-            <a href="/painel/financeiro" class="@Ativo("financeiro")" aria-current="@Atual("financeiro")">
+            <a href="/painel/financeiro" class="extra @Ativo("financeiro")" aria-current="@Atual("financeiro")">
                 <span class="icone">
                     <img src="~/img/grafico-de-crescimento.png" alt="">
                 </span>
                 <span class="texto">Financeiro</span>
             </a>
 
-            <a href="/painel/clientes" class="@Ativo("clientes")" aria-current="@Atual("clientes")">
+            <a href="/painel/clientes" class="extra @Ativo("clientes")" aria-current="@Atual("clientes")">
                 <span class="icone">
                     <img src="~/img/pessoas.png" alt="">
                 </span>
                 <span class="texto">Clientes</span>
             </a>
 
-            <a href="/painel/backup" class="@Ativo("backup")" aria-current="@Atual("backup")">
+            <a href="/painel/backup" class="extra @Ativo("backup")" aria-current="@Atual("backup")">
                 <span class="icone">
                     <img src="~/img/pranchetas.png" alt="">
                 </span>
                 <span class="texto">Backup</span>
             </a>
 
-            <a href="/inicio" class="link-loja">
+            <a href="/inicio" class="extra">
                 <span class="icone">
                     <img src="~/img/sacolas-de-comprass.png" alt="">
                 </span>
                 <span class="texto">Ver a loja</span>
             </a>
+
+            <!-- Só no celular: abre os itens marcados com "extra" (veja site.js) -->
+            <button type="button" class="menu-mais" aria-expanded="false" aria-controls="painel-mais">
+                <span class="icone" aria-hidden="true">☰</span>
+                <span class="texto">Mais</span>
+            </button>
 
         </nav>
 

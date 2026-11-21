@@ -260,7 +260,95 @@ a.botao-topo {
 /* CELULAR: menu vira uma barra fixa embaixo, com ícone e nome; tabelas do painel viram cartões.
    "body" na frente dá prioridade sobre o CSS de cada layout, que é carregado depois deste arquivo. */
 
+/* Botão "Mais" e o painel dele só existem no celular (veja o bloco abaixo e site.js) */
+.menu-mais,
+.painel-mais {
+    display: none;
+}
+
 @media (max-width: 700px) {
+    /* Itens que não cabem na barra de baixo: ficam no painel "Mais" */
+    body .sidebar .extra,
+    body .sidebar .menu a.extra,
+    body .sidebar .logout a.extra {
+        display: none;
+    }
+
+    body .sidebar .menu-mais {
+        display: flex;
+        flex: 1 0 58px;
+        min-width: 58px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 6px 4px;
+        border: none;
+        border-radius: 12px;
+        background: none;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    body .sidebar .menu-mais .icone {
+        font-size: 20px;
+        line-height: 22px;
+    }
+
+    body .sidebar .menu-mais.ativo,
+    body .sidebar .menu-mais[aria-expanded="true"] {
+        background: #f3ecdc;
+    }
+
+    .painel-mais:not([hidden]) {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        right: 8px;
+        bottom: calc(76px + env(safe-area-inset-bottom));
+        z-index: 1000;
+        min-width: 200px;
+        padding: 6px;
+        background: #fffdf7;
+        border: 1px solid #e6dcc3;
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(100, 80, 30, 0.18);
+    }
+
+    .painel-mais a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        color: #4a3f2a;
+        text-decoration: none;
+        font-size: 15px;
+    }
+
+    .painel-mais a.ativo,
+    .painel-mais a:hover,
+    .painel-mais a:focus-visible {
+        background: #f3ecdc;
+    }
+
+    .painel-mais .icone,
+    .painel-mais .icone img {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .painel-mais .texto-menu,
+    .painel-mais .texto {
+        opacity: 1;
+        display: inline;
+    }
+
     body .sidebar,
     body .sidebar:hover {
         top: auto;
@@ -320,10 +408,7 @@ a.botao-topo {
     }
 
     body .sidebar .logout {
-        display: flex;
-        padding: 6px 4px;
-        border-top: none;
-        border-left: 1px solid #efe5cd;
+        display: none;
     }
 
     body .conteudo,

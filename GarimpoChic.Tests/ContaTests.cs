@@ -193,7 +193,7 @@ public class ContaTests
 
         var r = await nav.Enviar("/perfil/excluir", new() { ["senha"] = SiteDeTeste.Senha });
 
-        Assert.Equal("/", r.Destino());
+        Assert.Equal("/entrar", r.Destino());
         var conta = await site.Banco(db => db.Usuarios.AsNoTracking().SingleAsync(u => u.ExcluidaEm != null));
         Assert.Equal("Conta excluída", conta.Nome);
         Assert.Equal("", conta.Cpf);

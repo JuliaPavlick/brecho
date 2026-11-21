@@ -48,7 +48,7 @@ public class SegurancaTests
         using var site = new SiteDeTeste();
         using var nav = site.Navegador();
 
-        var (r, _) = await nav.Abrir("/");
+        var (r, _) = await nav.Abrir("/entrar");
 
         var csp = string.Join(" ", r.Headers.GetValues("Content-Security-Policy"));
         Assert.Contains("script-src 'self' 'nonce-", csp);
@@ -81,9 +81,9 @@ public class SegurancaTests
             for (var i = 0; i < 3; i++)
             {
                 using var nav = site.Navegador();
-                await nav.Abrir("/");
+                await nav.Abrir("/entrar");
                 var relogio = Stopwatch.StartNew();
-                await nav.Enviar("/", new() { ["cpf"] = cpf, ["senha"] = "senha-errada" });
+                await nav.Enviar("/entrar", new() { ["cpf"] = cpf, ["senha"] = "senha-errada" });
                 tempos.Add(relogio.Elapsed.TotalMilliseconds);
             }
             return tempos.Order().ElementAt(1); // mediana

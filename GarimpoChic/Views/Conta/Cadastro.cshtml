@@ -76,7 +76,7 @@
 
     <div class="area-link">
         <p>Já tem uma conta?</p>
-        <a href="/@(string.IsNullOrEmpty(Model.ReturnUrl) ? "" : "?ReturnUrl=" + Uri.EscapeDataString(Model.ReturnUrl))">Entrar →</a>
+        <a href="/entrar@(string.IsNullOrEmpty(Model.ReturnUrl) ? "" : "?ReturnUrl=" + Uri.EscapeDataString(Model.ReturnUrl))">Entrar →</a>
     </div>
 
     <div class="rodape-login">

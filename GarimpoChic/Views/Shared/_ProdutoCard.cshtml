@@ -1,7 +1,7 @@
 @model ProdutoCard
 @{
     var logado = User.Identity?.IsAuthenticated == true;
-    var entrar = "/?ReturnUrl=" + Uri.EscapeDataString("/peca/" + Model.Id);
+    var entrar = "/entrar?ReturnUrl=" + Uri.EscapeDataString("/peca/" + Model.Id);
 }
 
 <div class="produto" data-nome="@Model.Nome" data-categoria="@Model.CategoriaSlug"
