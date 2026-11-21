@@ -53,7 +53,7 @@
 
             <form action="/painel/backup/restaurar" method="post" asp-antiforgery="true" enctype="multipart/form-data"
                 data-confirmar="Restaurar este backup? As contas atuais serão substituídas pelas do arquivo.">
-                <input type="file" name="arquivo" accept=".zip,application/zip" required>
+                <input type="file" name="arquivo" accept=".zip,application/zip" required aria-label="Arquivo .zip do backup">
                 <button type="submit" class="btn-primario">Restaurar</button>
             </form>
         }

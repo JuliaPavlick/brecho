@@ -350,7 +350,8 @@ a.botao-topo {
     }
 
     body .sidebar,
-    body .sidebar:hover {
+    body .sidebar:hover,
+    body .sidebar:focus-within {
         top: auto;
         bottom: 0;
         left: 0;
@@ -412,7 +413,8 @@ a.botao-topo {
     }
 
     body .conteudo,
-    body .sidebar:hover ~ .conteudo {
+    body .sidebar:hover ~ .conteudo,
+    body .sidebar:focus-within ~ .conteudo {
         margin-left: 0;
         padding-bottom: 110px;
     }
@@ -904,4 +906,29 @@ a.favorito-link {
     margin-top: 6px;
     font-size: 13px;
     color: #776843;
+}
+
+/* Foco do teclado sempre visível. Vários campos tiram o contorno (outline: none) e trocam por uma
+   mudança sutil de cor; para quem navega com Tab, isso some. O !important vence essas regras. */
+:focus-visible {
+    outline: 2px solid #7a5c12 !important;
+    outline-offset: 2px;
+}
+
+/* Texto só para leitor de tela (ex.: o resumo do gráfico) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.hero-texto .botao-hero {
+    display: inline-block;
+    text-decoration: none;
 }

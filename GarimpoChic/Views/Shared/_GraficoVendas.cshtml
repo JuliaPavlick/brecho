@@ -12,15 +12,17 @@
 
         <!-- Filtros de Período -->
         <div class="filtros" style="display: flex; gap: 8px; background: #FDF7F5; padding: 4px; border-radius: 24px; border: 1px solid #F3E5E1;">
-            <button type="button" class="btn-filtro ativo" data-periodo="semana">Semana</button>
-            <button type="button" class="btn-filtro" data-periodo="mes">Mês</button>
-            <button type="button" class="btn-filtro" data-periodo="ano">Ano</button>
+            <button type="button" class="btn-filtro ativo" data-periodo="semana" aria-pressed="true">Semana</button>
+            <button type="button" class="btn-filtro" data-periodo="mes" aria-pressed="false">Mês</button>
+            <button type="button" class="btn-filtro" data-periodo="ano" aria-pressed="false">Ano</button>
         </div>
     </div>
 
     <!-- Contêiner do Gráfico Canvas -->
     <div style="position: relative; height: 320px; width: 100%;">
-        <canvas id="graficoRosaChampanhe"></canvas>
+        <canvas id="graficoRosaChampanhe" role="img" aria-describedby="grafico-resumo"></canvas>
+        <!-- O mesmo conteúdo do gráfico, em texto, para leitor de tela -->
+        <p id="grafico-resumo" class="sr-only"></p>
     </div>
 </div>
 
@@ -93,12 +95,24 @@
         }
     });
 
+    function descreverGrafico(periodo) {
+        const d = DADOS_GRAFICO[periodo];
+        document.getElementById('grafico-resumo').textContent = 'Vendas: ' +
+            d.labels.map((l, i) => l + ', ' + d.valores[i].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })).join('; ') + '.';
+    }
+    descreverGrafico('semana');
+
     document.querySelectorAll('.btn-filtro').forEach(btn =>
         btn.addEventListener('click', () => atualizarGrafico(btn.dataset.periodo, btn)));
 
     function atualizarGrafico(periodo, el) {
-        document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('ativo'));
+        document.querySelectorAll('.btn-filtro').forEach(btn => {
+            btn.classList.remove('ativo');
+            btn.setAttribute('aria-pressed', 'false');
+        });
         el.classList.add('ativo');
+        el.setAttribute('aria-pressed', 'true');
+        descreverGrafico(periodo);
 
         chartInstancia.data.labels = DADOS_GRAFICO[periodo].labels;
         chartInstancia.data.datasets[0].data = DADOS_GRAFICO[periodo].valores;

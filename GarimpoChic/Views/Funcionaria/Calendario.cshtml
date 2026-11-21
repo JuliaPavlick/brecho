@@ -25,9 +25,9 @@
                 <h3 id="cal-titulo"></h3>
 
                 <div class="cal-nav">
-                    <button type="button" class="btn-acao" id="btn-anterior">←</button>
+                    <button type="button" class="btn-acao" id="btn-anterior" aria-label="Mês anterior">←</button>
                     <button type="button" class="btn-acao" id="btn-hoje">Hoje</button>
-                    <button type="button" class="btn-acao" id="btn-proximo">→</button>
+                    <button type="button" class="btn-acao" id="btn-proximo" aria-label="Próximo mês">→</button>
                 </div>
 
             </div>
@@ -171,16 +171,22 @@
 
             for (let d = 1; d <= total; d++) {
                 const dia = chave(new Date(ano, mes, d));
-                const tipos = [...new Set(eventosDoDia(dia).map(e => e.tipo))].slice(0, 4);
+                const doDia = eventosDoDia(dia);
+                const tipos = [...new Set(doDia.map(e => e.tipo))].slice(0, 4);
+                // O leitor de tela diz o dia inteiro e quantos eventos há (as bolinhas só mostram por cor)
+                const rotulo = `${d} de ${MESES[mes]}` + (doDia.length
+                    ? `, ${doDia.length} ${doDia.length === 1 ? 'evento' : 'eventos'}: ${doDia.map(e => TIPOS[e.tipo]).join(', ')}`
+                    : ', sem eventos');
 
                 const classes = ['dia'];
                 if (dia === chaveHoje) classes.push('hoje');
                 if (dia === selecionada) classes.push('selecionado');
 
                 html += `
-                    <button type="button" class="${classes.join(' ')}" data-dia="${dia}">
+                    <button type="button" class="${classes.join(' ')}" data-dia="${dia}" aria-label="${esc(rotulo)}"
+                        aria-pressed="${dia === selecionada}" ${dia === chaveHoje ? 'aria-current="date"' : ''}>
                         <span class="num">${d}</span>
-                        <span class="dots">${tipos.map(t => `<i class="dot ${t}"></i>`).join('')}</span>
+                        <span class="dots" aria-hidden="true">${tipos.map(t => `<i class="dot ${esc(t)}"></i>`).join('')}</span>
                     </button>
                 `;
             }
@@ -206,10 +212,10 @@
             area.innerHTML = lista.map(e => `
                 <div class="ev-item ${e.tipo}">
                     <div class="ev-info">
-                        <strong>${e.hora} • ${esc(e.titulo)}</strong>
+                        <strong>${esc(e.hora)} • ${esc(e.titulo)}</strong>
                         <p>${TIPOS[e.tipo]}</p>
                     </div>
-                    <button type="button" class="btn-acao perigo" data-id="${e.id}">Excluir</button>
+                    <button type="button" class="btn-acao perigo" data-id="${e.id}" aria-label="Excluir ${esc(e.titulo)}">Excluir</button>
                 </div>
             `).join('');
         }

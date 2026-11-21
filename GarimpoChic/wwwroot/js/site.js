@@ -113,10 +113,35 @@ function cpfValido(valor) {
     return true;
 }
 
+// Mostra ou esconde a mensagem de erro de um campo e liga a mensagem ao campo,
+// para o leitor de tela dizer o erro quando o foco chega nele
 function mostrarErro(id, ok) {
-    document.getElementById(id).style.display = ok ? 'none' : 'block';
+    const msg = document.getElementById(id);
+    msg.style.display = ok ? 'none' : 'block';
+    ligarErro(msg, !ok);
     return ok;
 }
+
+function ligarErro(msg, comErro) {
+    const campo = msg.closest('.campo')?.querySelector('input:not([type="hidden"]), select, textarea')
+        || (msg.previousElementSibling?.querySelector?.('input'));
+    if (!campo) return;
+
+    const ids = (campo.getAttribute('aria-describedby') || '').split(' ').filter(i => i && i !== msg.id);
+    if (comErro) ids.push(msg.id);
+    if (ids.length) campo.setAttribute('aria-describedby', ids.join(' '));
+    else campo.removeAttribute('aria-describedby');
+
+    if (comErro) campo.setAttribute('aria-invalid', 'true');
+    else campo.removeAttribute('aria-invalid');
+}
+
+// Erros que já vêm do servidor (ex.: cadastro com CPF repetido): liga ao campo e leva o foco até o primeiro
+document.addEventListener('DOMContentLoaded', () => {
+    const visiveis = [...document.querySelectorAll('.erro-campo[id]')].filter(m => getComputedStyle(m).display !== 'none');
+    visiveis.forEach(m => ligarErro(m, true));
+    document.querySelector('[aria-invalid="true"]')?.focus();
+});
 
 // Botão "Adicionar à sacola" dos cards (vale para todas as páginas da área do cliente)
 document.addEventListener('click', e => {
@@ -282,7 +307,11 @@ function avisarFotos(campo, arquivos) {
 // Fica por último: as validações e o data-confirmar acima já rodaram e podem ter cancelado o envio.
 document.addEventListener('submit', e => {
     const form = e.target;
-    if (e.defaultPrevented) return;
+    if (e.defaultPrevented) {
+        // A validação barrou o envio: leva o foco ao primeiro campo com erro
+        form.querySelector('[aria-invalid="true"]')?.focus();
+        return;
+    }
 
     if (form.dataset.enviando) {
         e.preventDefault();
@@ -371,5 +400,16 @@ document.addEventListener('DOMContentLoaded', () => {
             abrir(false);
             botao.focus();
         }
+    });
+});
+
+// Chips de filtro (Compras, Produtos, Pedidos, Clientes...): o leitor de tela diz qual está escolhido.
+// Cada tela troca a classe "ativo"; aqui o aria-pressed acompanha a classe.
+document.addEventListener('DOMContentLoaded', () => {
+    const chips = document.querySelectorAll('button.chip');
+    const sincronizar = chip => chip.setAttribute('aria-pressed', chip.classList.contains('ativo'));
+    chips.forEach(chip => {
+        sincronizar(chip);
+        new MutationObserver(() => sincronizar(chip)).observe(chip, { attributes: true, attributeFilter: ['class'] });
     });
 });

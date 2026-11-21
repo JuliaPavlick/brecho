@@ -86,7 +86,8 @@ body {
     z-index: 998;
 }
 
-.sidebar:hover {
+.sidebar:hover,
+.sidebar:focus-within {
     width: 260px;
 }
 
@@ -156,7 +157,8 @@ body {
     white-space: nowrap;
 }
 
-.sidebar:hover .logo-texto {
+.sidebar:hover .logo-texto,
+.sidebar:focus-within .logo-texto {
     opacity: 1;
 }
 
@@ -230,7 +232,8 @@ transform:scale(1.08);
     font-size: 14px;
 }
 
-.sidebar:hover .menu .texto {
+.sidebar:hover .menu .texto,
+.sidebar:focus-within .menu .texto {
     opacity: 1;
 }
 
@@ -484,7 +487,8 @@ filter:brightness(0);
     color: var(--texto-suave);
 }
 
-.sidebar:hover ~ .conteudo {
+.sidebar:hover ~ .conteudo,
+.sidebar:focus-within ~ .conteudo {
     margin-left: 260px;
 }
 

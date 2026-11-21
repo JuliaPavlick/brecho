@@ -94,7 +94,8 @@ body {
     justify-content: space-between;
 }
 
-.sidebar:hover {
+.sidebar:hover,
+.sidebar:focus-within {
     width: 260px;
 }
 
@@ -170,7 +171,8 @@ body {
     white-space: nowrap;
 }
 
-.sidebar:hover .logo-texto {
+.sidebar:hover .logo-texto,
+.sidebar:focus-within .logo-texto {
     opacity: 1;
 }
 
@@ -254,7 +256,8 @@ body {
     color: var(--texto);
 }
 
-.sidebar:hover .texto-menu {
+.sidebar:hover .texto-menu,
+.sidebar:focus-within .texto-menu {
     opacity: 1;
 }
 
@@ -273,7 +276,8 @@ body {
     transition: 0.3s;
 }
 
-.sidebar:hover ~ .conteudo {
+.sidebar:hover ~ .conteudo,
+.sidebar:focus-within ~ .conteudo {
     margin-left: 260px;
 }
 
@@ -373,7 +377,8 @@ body {
     margin-bottom: 20px;
 }
 
-.hero-texto button {
+.hero-texto button,
+.hero-texto .botao-hero {
     border: none;
     background: var(--verde);
     color: white;
@@ -387,7 +392,8 @@ body {
     transition: 0.2s;
 }
 
-.hero-texto button:hover {
+.hero-texto button:hover,
+.hero-texto .botao-hero:hover {
     background: var(--verde-hover);
 }
 
