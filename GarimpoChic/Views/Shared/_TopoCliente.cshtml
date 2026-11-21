@@ -10,15 +10,19 @@
         <p>@Model.Subtitulo</p>
     </div>
 
-    @if (eu != null)
-    {
-        <div class="foto">@eu.Inicial</div>
-    }
-    else
-    {
-        <div class="acoes-visitante">
-            <a href="/cadastro?ReturnUrl=@voltar" class="botao-topo">Criar conta</a>
-            <a href="/entrar?ReturnUrl=@voltar" class="botao-entrar">Entrar</a>
-        </div>
-    }
+    <div class="acoes-topo">
+        <partial name="_BotaoTema" />
+
+        @if (eu != null)
+        {
+            <div class="foto">@eu.Inicial</div>
+        }
+        else
+        {
+            <div class="acoes-visitante">
+                <a href="/cadastro?ReturnUrl=@voltar" class="botao-topo">Criar conta</a>
+                <a href="/entrar?ReturnUrl=@voltar" class="botao-entrar">Entrar</a>
+            </div>
+        }
+    </div>
 </div>

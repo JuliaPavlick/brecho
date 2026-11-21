@@ -1,14 +1,3 @@
-:root {
-    --verde: #4c6b44;
-    --verde-hover: #3a5234;
-    --dourado: #8b6d38;
-    --creme: #f5f0e8;
-    --card: #fffdf7;
-    --borda: #d4c49a;
-    --texto: #3a2e1a;
-    --texto-suave: #776843;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -16,7 +5,7 @@
 }
 
 body {
-    font-family: 'Lato', sans-serif;
+    font-family: var(--fonte-texto);
     background: var(--creme);
     color: var(--texto);
     min-height: 100vh;
@@ -59,14 +48,14 @@ body {
     height: 2px;
     background: linear-gradient(90deg,
             transparent,
-            #8b6d38,
-            #4c6b44,
-            #8b6d38,
+            var(--acao),
+            var(--acao),
+            var(--acao),
             transparent);
 }
 
 .brilho {
-    color: #c4a96a;
+    color: var(--texto-suave);
     font-size: 14px;
     opacity: 0.7;
 }
@@ -79,8 +68,8 @@ body {
     left: 0;
     width: 85px;
     height: calc(100vh - 48px);
-    background: #fffdf7;
-    border-right: 1px solid #e6dcc3;
+    background: var(--superficie);
+    border-right: 1px solid var(--linha);
     transition: 0.3s;
     overflow: hidden;
     z-index: 998;
@@ -93,7 +82,7 @@ body {
 
 .logo {
     padding: 28px 18px;
-    border-bottom: 1px solid #efe5cd;
+    border-bottom: 1px solid var(--linha);
     display: flex;
     align-items: center;
     gap: 16px;
@@ -104,8 +93,8 @@ body {
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: #f0ebe0;
-    border: 2px solid #c4a96a;
+    background: var(--fundo-2);
+    border: 2px solid var(--linha-forte);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,7 +107,7 @@ body {
 }
 
 .logo-o {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     font-size: 7px;
     color: var(--verde);
@@ -126,7 +115,7 @@ body {
 }
 
 .logo-garimpo {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     font-weight: 600;
     font-size: 10px;
@@ -135,7 +124,7 @@ body {
 }
 
 .logo-chic {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     font-size: 12px;
     color: var(--verde);
@@ -163,7 +152,7 @@ body {
 }
 
 .logo-texto h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 20px;
     font-style: italic;
     color: var(--texto);
@@ -199,7 +188,7 @@ body {
 }
 
 .menu a:hover {
-    background: #f3ecdc;
+    background: var(--superficie-2);
 }
 
 .menu .icone {
@@ -255,7 +244,7 @@ transform:scale(1.08);
 }
 
 .boas-vindas h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 34px;
     font-weight: 600;
     margin-bottom: 8px;
@@ -268,8 +257,8 @@ transform:scale(1.08);
 
 .logout {
     text-decoration: none;
-    background: #fffdf7;
-    border: 1px solid #eadfc8;
+    background: var(--superficie);
+    border: 1px solid var(--linha);
     padding: 10px 18px;
     border-radius: 10px;
     color: var(--texto);
@@ -278,7 +267,7 @@ transform:scale(1.08);
 }
 
 .logout:hover {
-    background: #f3ecdc;
+    background: var(--superficie-2);
     transform: translateY(-1px);
 }
 
@@ -293,7 +282,7 @@ transform:scale(1.08);
 
 .card {
     background: var(--card);
-    border: 1px solid #eadfc8;
+    border: 1px solid var(--linha);
     border-radius: 14px;
     padding: 24px;
     box-shadow: 0 2px 14px rgba(80, 60, 20, 0.05);
@@ -323,7 +312,7 @@ transform:scale(1.08);
 width:52px;
 height:52px;
 border-radius:50%;
-background:#f3ecdc;
+background: var(--superficie-2);
 display:flex;
 align-items:center;
 justify-content:center;
@@ -359,13 +348,13 @@ filter:brightness(0);
 
 .painel {
     background: var(--card);
-    border: 1px solid #eadfc8;
+    border: 1px solid var(--linha);
     border-radius: 14px;
     padding: 24px;
 }
 
 .painel h3 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 22px;
     margin-bottom: 18px;
 }
@@ -392,14 +381,14 @@ filter:brightness(0);
 .filtro {
     padding: 8px 14px;
     border-radius: 8px;
-    background: #f3ecdc;
+    background: var(--superficie-2);
     font-size: 12px;
     cursor: pointer;
     transition: 0.2s;
 }
 
 .filtro:hover {
-    background: #e8dcc1;
+    background: var(--superficie-2);
 }
 
 /* GRAFICO */
@@ -415,8 +404,8 @@ filter:brightness(0);
 .barra {
     flex: 1;
     background: linear-gradient(180deg,
-            #7f9a77,
-            #4c6b44);
+            var(--acao-hover),
+            var(--acao));
     border-radius: 12px 12px 0 0;
     position: relative;
     transition: 0.25s;
@@ -442,8 +431,8 @@ filter:brightness(0);
     top: -38px;
     left: 50%;
     transform: translateX(-50%);
-    background: #fffdf7;
-    border: 1px solid #d8c79f;
+    background: var(--superficie);
+    border: 1px solid var(--linha-forte);
     padding: 6px 10px;
     border-radius: 8px;
     font-size: 11px;
@@ -463,7 +452,7 @@ filter:brightness(0);
 
 .calendario-item {
     padding: 14px 0;
-    border-bottom: 1px solid #efe5cd;
+    border-bottom: 1px solid var(--linha);
     transition: 0.2s;
     cursor: pointer;
 }
@@ -513,10 +502,10 @@ filter:brightness(0);
 .btn-filtro {
     background: transparent;
     border: none;
-    color: #6f6066;
+    color: var(--texto-suave);
     padding: 6px 16px;
     border-radius: 20px;
-    font-family: 'Lato', sans-serif;
+    font-family: var(--fonte-texto);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -524,12 +513,12 @@ filter:brightness(0);
 }
 
 .btn-filtro:hover {
-    color: #D87D9A;
+    color: var(--acao-forte);
     background: rgba(216, 125, 154, 0.08);
 }
 
 .btn-filtro.ativo {
-    background: #D87D9A;
-    color: #FFFFFF;
+    background: var(--acao);
+    color: var(--acao-texto);
     box-shadow: 0 2px 10px rgba(216, 125, 154, 0.35);
 }

@@ -479,3 +479,34 @@ function tabelaPaginada({ corpo, contador, vazio, linha, singular, plural, porPa
         },
     };
 }
+
+// ---------- Tema claro / escuro ----------
+// O tema inicial é aplicado no <head> (_Head.cshtml), antes de a página aparecer.
+// Aqui fica só o botão: troca, guarda a escolha no navegador e avisa quem precisa redesenhar (ex.: o gráfico).
+function temaAtual() {
+    return document.documentElement.getAttribute('data-tema') === 'claro' ? 'claro' : 'escuro';
+}
+
+function rotularBotoesTema() {
+    const proximo = temaAtual() === 'claro' ? 'escuro' : 'claro';
+    document.querySelectorAll('[data-alternar-tema]').forEach(b => {
+        b.setAttribute('aria-label', 'Mudar para o tema ' + proximo);
+        b.title = 'Tema ' + proximo;
+    });
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('[data-alternar-tema]')) return;
+    const novo = temaAtual() === 'claro' ? 'escuro' : 'claro';
+    document.documentElement.setAttribute('data-tema', novo);
+    try { localStorage.setItem('tema', novo); } catch { /* navegador sem armazenamento: vale só nesta página */ }
+    rotularBotoesTema();
+    document.dispatchEvent(new CustomEvent('tema-mudou', { detail: novo }));
+});
+
+document.addEventListener('DOMContentLoaded', rotularBotoesTema);
+
+// Lê uma cor do tema atual (ex.: corDoTema('--acao')), para gráficos e outras coisas desenhadas por script
+function corDoTema(variavel) {
+    return getComputedStyle(document.documentElement).getPropertyValue(variavel).trim();
+}

@@ -3,15 +3,15 @@
 <script src="~/lib/chartjs/chart.umd.js" asp-append-version="true"></script>
 
 <!-- Bloco do Painel com o Gráfico -->
-<div class="painel" style="background: #FFFDFB; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(216, 125, 154, 0.08); border: 1px solid #F5EAE6;">
+<div class="painel" style="background: var(--superficie); border-radius: 16px; padding: 24px; border: 1px solid var(--linha);">
     <div class="painel-cabecalho" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
-            <h3 style="font-family: 'Playfair Display', serif; color: #4A3A3E; margin: 0; font-size: 1.25rem;">Movimento de Vendas ✦</h3>
-            <p style="font-family: 'Lato', sans-serif; color: #6f6066; font-size: 0.85rem; margin: 4px 0 0 0;">Acompanhamento do desempenho financeiro</p>
+            <h3 style="font-family: var(--fonte-titulo); color: var(--texto); margin: 0; font-size: 1.9rem; font-weight: 400;">Movimento de <em>vendas</em></h3>
+            <p style="font-family: var(--fonte-texto); color: var(--texto-suave); font-size: 0.85rem; margin: 4px 0 0 0;">Acompanhamento do desempenho financeiro</p>
         </div>
 
         <!-- Filtros de Período -->
-        <div class="filtros" style="display: flex; gap: 8px; background: #FDF7F5; padding: 4px; border-radius: 24px; border: 1px solid #F3E5E1;">
+        <div class="filtros" style="display: flex; gap: 8px; background: var(--fundo-2); padding: 4px; border-radius: 24px; border: 1px solid var(--linha);">
             <button type="button" class="btn-filtro ativo" data-periodo="semana" aria-pressed="true">Semana</button>
             <button type="button" class="btn-filtro" data-periodo="mes" aria-pressed="false">Mês</button>
             <button type="button" class="btn-filtro" data-periodo="ano" aria-pressed="false">Ano</button>
@@ -32,10 +32,15 @@
 
     const ctxGrafico = document.getElementById('graficoRosaChampanhe').getContext('2d');
 
-    // Gradiente suave no tom Rosa / Champanhe
-    const gradiente = ctxGrafico.createLinearGradient(0, 0, 0, 300);
-    gradiente.addColorStop(0, 'rgba(216, 125, 154, 0.35)'); // Rosa translúcido no topo
-    gradiente.addColorStop(1, 'rgba(247, 235, 228, 0.05)'); // Champanhe suave na base
+    // Cores do tema atual (tema.css); o gráfico é redesenhado quando a pessoa troca claro/escuro
+    function coresDoGrafico() {
+        const acao = corDoTema('--acao');
+        const gradiente = ctxGrafico.createLinearGradient(0, 0, 0, 300);
+        gradiente.addColorStop(0, acao + '59'); // a cor de ação, translúcida no topo
+        gradiente.addColorStop(1, acao + '05');
+        return { acao, gradiente, texto: corDoTema('--texto-suave'), linha: corDoTema('--linha'), superficie: corDoTema('--superficie'), fundoDica: corDoTema('--inverso'), textoDica: corDoTema('--inverso-texto') };
+    }
+    let cores = coresDoGrafico();
 
     let chartInstancia = new Chart(ctxGrafico, {
         type: 'line',
@@ -44,18 +49,18 @@
             datasets: [{
                 label: 'Vendas (R$)',
                 data: DADOS_GRAFICO.semana.valores,
-                borderColor: '#D87D9A',             // Rosa Principal
+                borderColor: cores.acao,
                 borderWidth: 3,
-                backgroundColor: gradiente,         // Gradiente Rosa & Champanhe
+                backgroundColor: cores.gradiente,
                 fill: true,
-                tension: 0.4,                       // Curvatura elegante na linha
-                pointBackgroundColor: '#D87D9A',
-                pointBorderColor: '#FFFFFF',
+                tension: 0.4,                       // Curvatura suave na linha
+                pointBackgroundColor: cores.acao,
+                pointBorderColor: cores.superficie,
                 pointBorderWidth: 2,
                 pointRadius: 5,
                 pointHoverRadius: 8,
-                pointHoverBackgroundColor: '#B85D7A',
-                pointHoverBorderColor: '#FFFFFF'
+                pointHoverBackgroundColor: cores.acao,
+                pointHoverBorderColor: cores.superficie
             }]
         },
         options: {
@@ -64,9 +69,11 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#4A3A3E',       // Tom escuro de vinho/marrom para contraste
-                    titleFont: { family: 'Lato', size: 12 },
-                    bodyFont: { family: 'Lato', size: 14, weight: 'bold' },
+                    backgroundColor: cores.fundoDica,
+                    titleColor: cores.textoDica,
+                    bodyColor: cores.textoDica,
+                    titleFont: { family: 'Inter', size: 12 },
+                    bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
                     padding: 12,
                     cornerRadius: 10,
                     displayColors: false,
@@ -80,14 +87,14 @@
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { font: { family: 'Lato', size: 12 }, color: '#6f6066' }
+                    ticks: { font: { family: 'Inter', size: 12 }, color: cores.texto }
                 },
                 y: {
                     border: { dash: [4, 4] },
-                    grid: { color: '#F5EAE6' },      // Linhas de grade sutis tom Champanhe
+                    grid: { color: cores.linha },
                     ticks: {
-                        font: { family: 'Lato', size: 12 },
-                        color: '#6f6066',
+                        font: { family: 'Inter', size: 12 },
+                        color: cores.texto,
                         callback: function(value) { return 'R$ ' + value; }
                     }
                 }
@@ -118,4 +125,19 @@
         chartInstancia.data.datasets[0].data = DADOS_GRAFICO[periodo].valores;
         chartInstancia.update();
     }
+
+    document.addEventListener('tema-mudou', () => {
+        cores = coresDoGrafico();
+        const serie = chartInstancia.data.datasets[0];
+        Object.assign(serie, {
+            borderColor: cores.acao, backgroundColor: cores.gradiente, pointBackgroundColor: cores.acao,
+            pointBorderColor: cores.superficie, pointHoverBackgroundColor: cores.acao, pointHoverBorderColor: cores.superficie,
+        });
+        const o = chartInstancia.options;
+        Object.assign(o.plugins.tooltip, { backgroundColor: cores.fundoDica, titleColor: cores.textoDica, bodyColor: cores.textoDica });
+        o.scales.x.ticks.color = cores.texto;
+        o.scales.y.ticks.color = cores.texto;
+        o.scales.y.grid.color = cores.linha;
+        chartInstancia.update();
+    });
 </script>

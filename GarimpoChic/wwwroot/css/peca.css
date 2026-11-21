@@ -30,8 +30,8 @@
 .peca-foto-principal {
     aspect-ratio: 4 / 5;
     border-radius: 22px;
-    background: #f4ede1;
-    border: 1px solid #eadfc8;
+    background: var(--fundo-2);
+    border: 1px solid var(--linha);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -61,7 +61,7 @@
     padding: 0;
     border: 2px solid transparent;
     border-radius: 12px;
-    background: #f4ede1;
+    background: var(--fundo-2);
     overflow: hidden;
     cursor: pointer;
 }
@@ -87,14 +87,14 @@
 .peca-categoria {
     align-self: flex-start;
     padding: 6px 14px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 999px;
-    background: #fffdf7;
+    background: var(--superficie);
     font-size: 13px;
 }
 
 .peca-info h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 34px;
     line-height: 1.2;
 }
@@ -111,13 +111,13 @@
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
-    background: #ece7dd;
-    color: #665e50;
+    background: var(--fundo-2);
+    color: var(--texto-suave);
 }
 
 .peca-info .badge.reservado {
-    background: #e3ecf5;
-    color: #3d5f80;
+    background: var(--info-fundo);
+    color: var(--info);
 }
 
 .peca-descricao h2 {
@@ -137,9 +137,9 @@
 .peca-detalhes {
     list-style: none;
     padding: 14px 16px;
-    border: 1px dashed #e0d3b4;
+    border: 1px dashed var(--linha-forte);
     border-radius: 16px;
-    background: #fffdf7;
+    background: var(--superficie);
     font-size: 14px;
     line-height: 1.9;
 }
@@ -170,17 +170,17 @@
 
 .btn-compartilhar {
     padding: 12px 18px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 12px;
-    background: #fffdf7;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 14px;
     color: var(--texto);
     cursor: pointer;
 }
 
 .btn-compartilhar:hover {
-    background: #f7f0e3;
+    background: var(--fundo-2);
 }
 
 .link-sacola {
@@ -199,9 +199,9 @@
 .peca-indisponivel {
     padding: 14px;
     border-radius: 12px;
-    background: #f1ece2;
+    background: var(--fundo-2);
     font-size: 14px;
-    color: #665e50;
+    color: var(--texto-suave);
     text-align: center;
 }
 
@@ -213,7 +213,7 @@
 
 .peca-semelhantes h2 {
     margin-bottom: 18px;
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 24px;
 }
 

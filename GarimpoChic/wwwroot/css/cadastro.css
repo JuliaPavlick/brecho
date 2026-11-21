@@ -3,10 +3,10 @@
 }
 
 .titulo-cadastro {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--fonte-titulo);
   font-size: 22px;
   font-weight: 600;
-  color: #3a2e1a;
+  color: var(--texto);
   text-align: center;
   margin-bottom: 1.25rem;
 }

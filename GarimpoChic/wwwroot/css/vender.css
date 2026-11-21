@@ -17,10 +17,10 @@
 .campo textarea {
     width: 100%;
     padding: 11px 14px;
-    border: 1px solid #d4c49a;
+    border: 1px solid var(--linha-forte);
     border-radius: 10px;
-    background: #faf8f2;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 14px;
     color: var(--texto);
     outline: none;
@@ -30,7 +30,7 @@
 .campo select:focus,
 .campo textarea:focus {
     border-color: var(--dourado);
-    background: #fffdf7;
+    background: var(--superficie);
 }
 
 .sem-pecas {
@@ -48,21 +48,21 @@
 }
 
 .badge.disponivel {
-    background: #e2ecdf;
+    background: var(--ok-fundo);
     color: var(--verde);
 }
 
 .badge.reservado {
-    background: #e3ecf5;
-    color: #3d5f80;
+    background: var(--info-fundo);
+    color: var(--info);
 }
 
 .badge.avaliacao {
-    background: #f6ecd0;
+    background: var(--fundo-2);
     color: var(--dourado);
 }
 
 .badge.vendido {
-    background: #ece7dd;
-    color: #665e50;
+    background: var(--fundo-2);
+    color: var(--texto-suave);
 }

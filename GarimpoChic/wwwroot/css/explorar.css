@@ -23,10 +23,10 @@
 .busca input {
     width: 100%;
     padding: 13px 16px 13px 44px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 12px;
-    background: #fffdf7;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 14px;
     color: var(--texto);
     outline: none;
@@ -38,15 +38,15 @@
 }
 
 .busca input::placeholder {
-    color: #7f7150;
+    color: var(--texto-suave);
 }
 
 .ordenar {
     padding: 0 16px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 12px;
-    background: #fffdf7;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 14px;
     color: var(--texto);
     cursor: pointer;
@@ -70,10 +70,10 @@
     display: inline-block;
     text-decoration: none;
     padding: 9px 18px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 999px;
-    background: #fffdf7;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 13px;
     color: var(--texto);
     cursor: pointer;
@@ -81,13 +81,13 @@
 }
 
 .chip:hover {
-    background: #f7f0e3;
+    background: var(--fundo-2);
 }
 
 .chip.ativo {
     background: var(--verde);
     border-color: var(--verde);
-    color: #fff;
+    color: var(--acao-texto);
 }
 
 /* CONTADOR / VAZIO */
@@ -103,7 +103,7 @@
     text-align: center;
     padding: 60px 0;
     color: var(--texto-suave);
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     font-size: 20px;
 }
@@ -115,12 +115,12 @@
 }
 
 .favorito:hover {
-    background: #efe4cd;
+    background: var(--superficie-2);
 }
 
 .favorito.ativo {
     background: var(--verde);
-    color: #fff;
+    color: var(--acao-texto);
 }
 
 /* RESPONSIVO */
@@ -148,15 +148,15 @@
 
 .paginacao a {
     padding: 10px 18px;
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 999px;
-    background: #fffdf7;
+    background: var(--superficie);
     color: var(--texto);
     text-decoration: none;
 }
 
 .paginacao a:hover {
-    background: #f7f0e3;
+    background: var(--fundo-2);
 }
 
 .contador a {

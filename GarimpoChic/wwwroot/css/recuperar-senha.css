@@ -1,15 +1,15 @@
 .titulo-pagina {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--fonte-titulo);
   font-size: 22px;
   font-weight: 600;
-  color: #3a2e1a;
+  color: var(--texto);
   text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .texto-pagina {
   font-size: 13px;
-  color: #776843;
+  color: var(--texto-suave);
   text-align: center;
   line-height: 1.6;
   margin-bottom: 1.5rem;
@@ -19,11 +19,11 @@
   display: none;
   margin-top: 1rem;
   padding: 12px 14px;
-  background: #e2ecdf;
-  border: 1px solid #b9cfb3;
+  background: var(--ok-fundo);
+  border: 1px solid var(--ok);
   border-radius: 2px;
   font-size: 12px;
   line-height: 1.5;
-  color: #4c6b44;
+  color: var(--acao-forte);
   text-align: center;
 }

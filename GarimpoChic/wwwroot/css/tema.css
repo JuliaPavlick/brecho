@@ -1,0 +1,359 @@
+/* ==========================================================================
+   TEMA "NOITE" — cores, fontes e identidade do Garimpo Chic
+   --------------------------------------------------------------------------
+   Todas as cores do site vêm destas variáveis. Há duas versões:
+     escuro  (padrão da loja)
+     claro   (padrão do painel da funcionária)
+   O <html> recebe data-tema="escuro" ou "claro" (veja _Head.cshtml e site.js).
+   A pessoa escolhe no botão de tema; a escolha fica guardada no navegador.
+   ========================================================================== */
+
+:root,
+[data-tema="escuro"] {
+    color-scheme: dark;
+
+    --fundo: #141214;          /* fundo das páginas */
+    --fundo-2: #1A171A;        /* faixas e seções alternadas */
+    --superficie: #1E1B1E;     /* cartões, campos, menus */
+    --superficie-2: #2A2629;   /* hover, item ativo, chips */
+    --texto: #F3EEE6;
+    --texto-suave: #B5ADA3;
+    --linha: #3A3538;
+    --linha-forte: #5A5357;
+
+    --acao: #E7B3A3;           /* botões principais (rosé) */
+    --acao-hover: #F0C6B9;
+    --acao-texto: #141214;     /* texto sobre o botão */
+    --acao-forte: #E7B3A3;     /* links e destaques em texto */
+
+    --moldura: #EDE7DE;        /* fundo claro atrás das fotos */
+
+    --erro: #F0B45E;
+    --erro-fundo: #3A2A14;
+    --ok: #9CCB9F;
+    --ok-fundo: #1F2E21;
+    --info: #9DBBE0;
+    --info-fundo: #1B2532;
+
+    --inverso: #F3EEE6;        /* blocos invertidos (ex.: item escolhido) */
+    --inverso-texto: #141214;
+    --sombra: rgba(0, 0, 0, 0.45);
+    --foco: #E7B3A3;
+}
+
+[data-tema="claro"] {
+    color-scheme: light;
+
+    --fundo: #F3EEE6;
+    --fundo-2: #EDE6DA;
+    --superficie: #FFFDF9;
+    --superficie-2: #F1E9DD;
+    --texto: #141214;
+    --texto-suave: #6B645C;
+    --linha: #E2D9CC;
+    --linha-forte: #CFC6B9;
+
+    /* No claro, o rosé fica mais escuro para texto e botões terem contraste */
+    --acao: #9E5A48;
+    --acao-hover: #874A3A;
+    --acao-texto: #FFFDF9;
+    --acao-forte: #9E5A48;
+
+    --moldura: #EDE7DE;
+
+    --erro: #A3361F;
+    --erro-fundo: #FBE6DF;
+    --ok: #2F6B3A;
+    --ok-fundo: #E3F0E2;
+    --info: #2E5A87;
+    --info-fundo: #E3ECF5;
+
+    --inverso: #141214;
+    --inverso-texto: #F3EEE6;
+    --sombra: rgba(60, 40, 30, 0.10);
+    --foco: #9E5A48;
+}
+
+/* Nomes antigos das variáveis, usados pelo CSS de cada tela */
+:root {
+    --verde: var(--acao);
+    --verde-hover: var(--acao-hover);
+    --dourado: var(--acao-forte);
+    --creme: var(--fundo);
+    --card: var(--superficie);
+    --borda: var(--linha-forte);
+
+    --fonte-titulo: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --fonte-texto: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ---------- Base ---------- */
+
+html {
+    background: var(--fundo);
+}
+
+body {
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: var(--fonte-texto);
+    /* A serifa dos títulos só tem um peso: sem isto o navegador "engorda" a letra e ela fica borrada */
+    font-synthesis: none;
+}
+
+/* ---------- Identidade (ajustes que valem para todas as telas) ---------- */
+
+/* As linhas e os brilhos decorativos do visual antigo saem */
+html body .linha-topo,
+html body .linha-baixo,
+html body .ornamento,
+html body .divisor {
+    display: none;
+}
+
+/* Logo: "Garimpo Chic" em itálico; no menu recolhido, só o "G" */
+html body .logo-circulo {
+    border: 1px solid var(--acao-forte);
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html body .logo-circulo .logo-interno {
+    display: none;
+}
+
+html body .logo-circulo::before {
+    content: "G";
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: 30px;
+    line-height: 1;
+    color: var(--texto);
+}
+
+.marca {
+    display: block;
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--texto);
+    text-decoration: none;
+}
+
+.marca-slogan {
+    margin: 8px 0 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+html body .logo-texto h1 {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Títulos de página e de seção na serifa da marca */
+html body h1,
+html body h2,
+html body h3 {
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+    letter-spacing: -0.3px;
+}
+
+/* Fotos das peças em "moldura": fundo claro e a peça inteira à mostra */
+html body .produto-img,
+html body .item-img,
+html body .peca-foto-principal,
+html body .peca-miniaturas button,
+html body .produto-thumb {
+    background: var(--moldura);
+}
+
+html body .produto-img img,
+html body .peca-foto-principal img {
+    object-fit: contain;
+    padding: 6%;
+    box-sizing: border-box;
+}
+
+/* Botões em pílula */
+html body .btn-sacola,
+html body .btn-entrar,
+html body .btn-primario,
+html body .btn-secundario,
+html body .btn-salvar,
+html body .botao-topo,
+html body .botao-entrar,
+html body .chip {
+    border-radius: 999px;
+}
+
+/* Foco do teclado na cor do tema */
+:focus-visible {
+    outline-color: var(--foco) !important;
+}
+
+/* ---------- Botão de tema (claro / escuro) ---------- */
+
+.btn-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    padding: 0;
+    border: 1px solid var(--linha-forte);
+    border-radius: 50%;
+    background: var(--superficie);
+    color: var(--texto);
+    cursor: pointer;
+}
+
+.btn-tema:hover {
+    background: var(--superficie-2);
+}
+
+.btn-tema svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Mostra a lua no claro (para ir ao escuro) e o sol no escuro (para ir ao claro) */
+.btn-tema .icone-sol { display: none; }
+[data-tema="escuro"] .btn-tema .icone-sol { display: block; }
+[data-tema="escuro"] .btn-tema .icone-lua { display: none; }
+
+/* Nas telas de cartão (entrar, cadastro…), o botão fica no canto */
+.tema-canto {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 50;
+}
+
+/* Grupo de ações no topo das telas (botão de tema, foto, sair…) */
+html body .acoes-topo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Os ícones do menu e dos cartões são PNGs pretos: no escuro, ficam claros */
+/* Algumas telas forçam o ícone a preto puro (filter: brightness(0)); por isso o !important */
+html[data-tema="escuro"] img[src*="/img/"] {
+    filter: brightness(0) invert(0.93) !important;
+}
+
+/* ---------- Cartão de peça no estilo editorial ----------
+   A foto em moldura e o texto direto sobre o fundo, como numa revista: sem caixa em volta */
+html body .produto {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+html body .produto:hover {
+    transform: none;
+}
+
+html body .produto:hover .produto-img img {
+    transform: scale(1.03);
+}
+
+html body .produto-img {
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+html body .produto-img img {
+    transition: transform 0.4s ease;
+}
+
+html body .produto-info h4 {
+    font-family: var(--fonte-titulo);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.05;
+}
+
+html body .preco {
+    color: var(--texto);
+    font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body .produto-img img {
+        transition: none;
+    }
+}
+
+/* Links sem cor própria seguem o tema (antes caíam no azul padrão do navegador) */
+a {
+    color: var(--acao-forte);
+}
+
+/* Rótulos pequenos em caixa alta continuam na fonte de texto, não na serifa */
+html body .peca-info h2,
+html body .hero-texto > span {
+    font-family: var(--fonte-texto);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+/* Página da peça: moldura de cantos retos e preço sem cor de destaque */
+html body .peca-foto-principal {
+    border-radius: 2px;
+}
+
+html body .peca-preco {
+    color: var(--texto);
+    font-weight: 500;
+}
+
+html body .peca-categoria {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Início: destaque em moldura no lugar do emoji */
+html body .hero-moldura {
+    display: block;
+    width: 220px;
+    flex: none;
+    padding: 14px;
+    background: var(--moldura);
+    font-size: 0;
+}
+
+html body .hero-moldura img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: contain;
+    display: block;
+}
+
+html body .hero h1 em {
+    color: var(--acao-forte);
+}
+
+@media (max-width: 700px) {
+    html body .hero-moldura {
+        display: none;
+    }
+}

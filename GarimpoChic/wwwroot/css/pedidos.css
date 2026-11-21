@@ -4,7 +4,7 @@
     padding: 6px 12px;
     border: none;
     border-radius: 999px;
-    font-family: 'Lato', sans-serif;
+    font-family: var(--fonte-texto);
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
@@ -12,23 +12,23 @@
 }
 
 .status-select.preparo {
-    background: #f6ecd0;
-    color: #8b6d38;
+    background: var(--fundo-2);
+    color: var(--acao-forte);
 }
 
 .status-select.caminho {
-    background: #e3ecf5;
-    color: #3d5f80;
+    background: var(--info-fundo);
+    color: var(--info);
 }
 
 .status-select.entregue {
-    background: #e2ecdf;
+    background: var(--ok-fundo);
     color: var(--verde);
 }
 
 .status-select.cancelado {
-    background: #f6e1de;
-    color: #a2382b;
+    background: var(--erro-fundo);
+    color: var(--erro);
 }
 
 .status-select:disabled {
@@ -48,7 +48,7 @@
     display: flex;
     justify-content: space-between;
     padding: 12px 0;
-    border-bottom: 1px solid #efe5cd;
+    border-bottom: 1px solid var(--linha);
     font-size: 14px;
 }
 

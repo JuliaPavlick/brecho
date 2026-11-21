@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema-padrao="escuro">
 
 <head>
     <partial name="_Head" />
@@ -7,6 +7,7 @@
 </head>
 
 <body>
+    <div class="tema-canto"><partial name="_BotaoTema" /></div>
     @RenderBody()
 
     @RenderSection("Scripts", required: false)

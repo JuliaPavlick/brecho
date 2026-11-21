@@ -1,7 +1,7 @@
 /* MENU ATIVO */
 
 .menu a.ativo {
-    background: #f3ecdc;
+    background: var(--superficie-2);
 }
 
 /* AVATAR */
@@ -11,12 +11,12 @@
     height: 44px;
     border-radius: 50%;
     background: var(--verde);
-    border: 2px solid #c4a96a;
-    color: #fff;
+    border: 2px solid var(--linha-forte);
+    color: var(--acao-texto);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     font-size: 18px;
     flex-shrink: 0;
@@ -41,18 +41,18 @@
 }
 
 .papel.cliente {
-    background: #e2ecdf;
+    background: var(--ok-fundo);
     color: var(--verde);
 }
 
 .papel.vendedora {
-    background: #f6ecd0;
+    background: var(--fundo-2);
     color: var(--dourado);
 }
 
 .papel.funcionaria {
-    background: #e3ecf5;
-    color: #3d5f80;
+    background: var(--info-fundo);
+    color: var(--info);
 }
 
 /* DETALHES */
@@ -73,7 +73,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 12px 0;
-    border-bottom: 1px solid #efe5cd;
+    border-bottom: 1px solid var(--linha);
     font-size: 14px;
 }
 

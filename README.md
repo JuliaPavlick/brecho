@@ -8,6 +8,14 @@ Este projeto consiste no desenvolvimento de um sistema web de brechó online, cr
 - **Front-end:** views Razor (`.cshtml`) com o HTML, CSS e JavaScript originais
 - **Hospedagem:** Render, com Docker
 
+## Visual e tema claro/escuro
+
+A identidade visual é a **"Noite"**: títulos em Instrument Serif (com itálico no trecho que importa), textos em Inter, rosé como cor de ação e as fotos das peças em moldura clara.
+
+- **Todas as cores ficam em `wwwroot/css/tema.css`**, em duas versões: escuro e claro. Os outros arquivos de CSS só usam as variáveis (`var(--texto)`, `var(--acao)`…). Um teste automático falha se alguém escrever uma cor fixa (como `#fff`) fora do `tema.css`, porque ela não mudaria com o tema.
+- **Botão de tema** (sol/lua) no topo de todas as telas. A escolha fica guardada no navegador.
+- **Sem escolha, vale o padrão:** a loja e as telas de conta abrem no escuro; o painel da funcionária abre no claro, mais confortável para um dia inteiro de uso.
+
 ## Estrutura
 
 ```

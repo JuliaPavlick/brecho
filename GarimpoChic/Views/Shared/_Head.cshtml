@@ -3,8 +3,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken">
 <title>@ViewData["Title"] — Garimpo Chic</title>
+@* Tema claro/escuro antes de desenhar a página (senão ela pisca no tema errado). A escolha da pessoa fica no
+   navegador; sem escolha, vale o padrão do layout: escuro na loja, claro no painel (data-tema-padrao no <html>). *@
+<script>
+    (function () {
+        var raiz = document.documentElement, escolhido = null;
+        try { escolhido = localStorage.getItem('tema'); } catch (e) { }
+        raiz.setAttribute('data-tema', escolhido === 'claro' || escolhido === 'escuro'
+            ? escolhido
+            : (raiz.getAttribute('data-tema-padrao') || 'escuro'));
+    })();
+</script>
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet">
+<link rel="stylesheet" href="~/css/tema.css" asp-append-version="true">
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
 <script src="~/js/site.js" asp-append-version="true"></script>

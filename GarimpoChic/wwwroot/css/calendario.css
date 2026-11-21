@@ -1,7 +1,7 @@
 /* MENU ATIVO */
 
 .menu a.ativo {
-    background: #f3ecdc;
+    background: var(--superficie-2);
 }
 
 /* O produtos.css reduz o padding do painel; aqui volta ao normal */
@@ -63,10 +63,10 @@
 .dia {
     height: 76px;
     padding: 8px;
-    border: 1px solid #efe5cd;
+    border: 1px solid var(--linha);
     border-radius: 10px;
-    background: #fffdf7;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     color: var(--texto);
     text-align: left;
     cursor: pointer;
@@ -77,7 +77,7 @@
 }
 
 .dia:hover {
-    background: #f7f0e3;
+    background: var(--fundo-2);
 }
 
 .dia .num {
@@ -94,7 +94,7 @@
 }
 
 .dia.selecionado {
-    background: #f3ecdc;
+    background: var(--superficie-2);
     border: 2px solid var(--verde);
 }
 
@@ -117,15 +117,15 @@
 }
 
 .dot.avaliacao {
-    background: #c4a96a;
+    background: var(--superficie-2);
 }
 
 .dot.colecao {
-    background: #3d5f80;
+    background: var(--info);
 }
 
 .dot.outro {
-    background: #776843;
+    background: var(--inverso);
 }
 
 /* LEGENDA */
@@ -136,7 +136,7 @@
     gap: 18px;
     margin-top: 18px;
     padding-top: 16px;
-    border-top: 1px solid #efe5cd;
+    border-top: 1px solid var(--linha);
     font-size: 12px;
     color: var(--texto-suave);
 }
@@ -160,9 +160,9 @@
     gap: 12px;
     padding: 12px 14px;
     margin-bottom: 10px;
-    background: #faf8f2;
-    border: 1px solid #efe5cd;
-    border-left: 4px solid #776843;
+    background: var(--superficie);
+    border: 1px solid var(--linha);
+    border-left: 4px solid var(--linha-forte);
     border-radius: 10px;
 }
 
@@ -171,11 +171,11 @@
 }
 
 .ev-item.avaliacao {
-    border-left-color: #c4a96a;
+    border-left-color: var(--linha-forte);
 }
 
 .ev-item.colecao {
-    border-left-color: #3d5f80;
+    border-left-color: var(--info);
 }
 
 .ev-info strong {
@@ -192,7 +192,7 @@
 .sem-eventos {
     padding: 24px 0;
     text-align: center;
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-style: italic;
     color: var(--texto-suave);
 }
@@ -208,10 +208,10 @@
 .campo input[type="time"] {
     width: 100%;
     padding: 11px 14px;
-    border: 1px solid #d4c49a;
+    border: 1px solid var(--linha-forte);
     border-radius: 10px;
-    background: #faf8f2;
-    font-family: 'Lato', sans-serif;
+    background: var(--superficie);
+    font-family: var(--fonte-texto);
     font-size: 14px;
     color: var(--texto);
     outline: none;
@@ -220,7 +220,7 @@
 .campo input[type="date"]:focus,
 .campo input[type="time"]:focus {
     border-color: var(--dourado);
-    background: #fffdf7;
+    background: var(--superficie);
 }
 
 /* RESPONSIVO */

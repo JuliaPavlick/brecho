@@ -5,8 +5,8 @@
 }
 
 body {
-  font-family: 'Lato', sans-serif;
-  background: #f5f0e8;
+  font-family: var(--fonte-texto);
+  background: var(--fundo-2);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -15,8 +15,8 @@ body {
 }
 
 .card {
-  background: #fffdf7;
-  border: 1px solid #d4c49a;
+  background: var(--superficie);
+  border: 1px solid var(--linha-forte);
   border-radius: 4px;
   padding: 2.5rem 2rem;
   width: 100%;
@@ -32,7 +32,7 @@ body {
   left: 12px;
   right: 12px;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #8b6d38, #4c6b44, #8b6d38, transparent);
+  background: linear-gradient(90deg, transparent, var(--acao), var(--acao), var(--acao), transparent);
 }
 
 .card::before {
@@ -46,7 +46,7 @@ body {
 .ornamento {
   position: absolute;
   font-size: 18px;
-  color: #c4a96a;
+  color: var(--texto-suave);
   opacity: 0.4;
 }
 
@@ -80,8 +80,8 @@ body {
   height: 110px;
   margin: 0 auto 0.75rem;
   border-radius: 50%;
-  background: #f0ebe0;
-  border: 2px solid #c4a96a;
+  background: var(--fundo-2);
+  border: 2px solid var(--linha-forte);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,36 +93,36 @@ body {
 }
 
 .logo-o {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--fonte-titulo);
   font-style: italic;
   font-size: 13px;
-  color: #4c6b44;
+  color: var(--acao-forte);
   display: block;
   margin-bottom: 1px;
 }
 
 .logo-garimpo {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--fonte-titulo);
   font-style: italic;
   font-weight: 600;
   font-size: 18px;
-  color: #3a2e1a;
+  color: var(--texto);
   display: block;
 }
 
 .logo-chic {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--fonte-titulo);
   font-style: italic;
   font-size: 22px;
-  color: #4c6b44;
+  color: var(--acao-forte);
   display: block;
 }
 
 .logo-brecho {
-  font-family: 'Lato', sans-serif;
+  font-family: var(--fonte-texto);
   font-size: 8px;
   letter-spacing: 2px;
-  color: #8b6d38;
+  color: var(--acao-forte);
   text-transform: uppercase;
   display: block;
   margin-top: 3px;
@@ -130,7 +130,7 @@ body {
 
 .logo-slogan {
   font-size: 11px;
-  color: #776843;
+  color: var(--texto-suave);
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
@@ -145,11 +145,11 @@ body {
 .divisor-linha {
   flex: 1;
   height: 1px;
-  background: #d4c49a;
+  background: var(--superficie-2);
 }
 
 .divisor-flor {
-  color: #8b6d38;
+  color: var(--acao-forte);
   font-size: 14px;
 }
 
@@ -164,35 +164,35 @@ body {
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #7a6540;
+  color: var(--texto-suave);
   margin-bottom: 5px;
 }
 
 .campo input {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #d4c49a;
+  border: 1px solid var(--linha-forte);
   border-radius: 2px;
-  background: #faf8f2;
-  font-family: 'Lato', sans-serif;
+  background: var(--superficie);
+  font-family: var(--fonte-texto);
   font-size: 14px;
-  color: #3a2e1a;
+  color: var(--texto);
   outline: none;
   transition: border-color 0.2s;
 }
 
 .campo input:focus {
-  border-color: #8b6d38;
-  background: #fffdf7;
+  border-color: var(--acao);
+  background: var(--superficie);
 }
 
 .campo input::placeholder {
-  color: #7f7150;
+  color: var(--texto-suave);
 }
 
 .erro-campo {
   font-size: 11px;
-  color: #c0392b;
+  color: var(--erro);
   margin-top: 3px;
   display: none;
 }
@@ -200,11 +200,11 @@ body {
 .btn-entrar {
   width: 100%;
   padding: 12px;
-  background: #4c6b44;
-  color: #f0ebe0;
+  background: var(--acao);
+  color: var(--acao-texto);
   border: none;
   border-radius: 2px;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--fonte-texto);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -215,11 +215,11 @@ body {
 }
 
 .btn-entrar:hover {
-  background: #3a5234;
+  background: var(--acao-hover);
 }
 
 .btn-entrar:active {
-  background: #2e4029;
+  background: var(--acao-hover);
 }
 
 .area-link {
@@ -229,13 +229,13 @@ body {
 
 .area-link p {
   font-size: 12px;
-  color: #776843;
+  color: var(--texto-suave);
   margin-bottom: 4px;
 }
 
 .area-link a {
   font-size: 12px;
-  color: #8b6d38;
+  color: var(--acao-forte);
   text-decoration: none;
   font-weight: 700;
 }
@@ -251,7 +251,7 @@ body {
 
 .rodape-login a {
   font-size: 12px;
-  color: #8b6d38;
+  color: var(--acao-forte);
   text-decoration: none;
 }
 

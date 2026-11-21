@@ -7,8 +7,8 @@
 }
 
 .pedido {
-    background: #fffdf7;
-    border: 1px solid #eadfc8;
+    background: var(--superficie);
+    border: 1px solid var(--linha);
     border-radius: 20px;
     padding: 22px;
     transition: 0.2s;
@@ -24,11 +24,11 @@
     align-items: flex-start;
     padding-bottom: 16px;
     margin-bottom: 8px;
-    border-bottom: 1px solid #efe5cd;
+    border-bottom: 1px solid var(--linha);
 }
 
 .pedido-topo h4 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--fonte-titulo);
     font-size: 18px;
     margin-bottom: 4px;
 }
@@ -49,23 +49,23 @@
 }
 
 .status.preparo {
-    background: #f6ecd0;
-    color: #8b6d38;
+    background: var(--fundo-2);
+    color: var(--acao-forte);
 }
 
 .status.caminho {
-    background: #e3ecf5;
-    color: #3d5f80;
+    background: var(--info-fundo);
+    color: var(--info);
 }
 
 .status.entregue {
-    background: #e2ecdf;
+    background: var(--ok-fundo);
     color: var(--verde);
 }
 
 .status.cancelado {
-    background: #f6e1de;
-    color: #a2382b;
+    background: var(--erro-fundo);
+    color: var(--erro);
 }
 
 /* ITENS */
@@ -81,7 +81,7 @@
     width: 58px;
     height: 58px;
     border-radius: 14px;
-    background: #f4ede1;
+    background: var(--fundo-2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,7 +116,7 @@
     align-items: center;
     padding-top: 14px;
     margin-top: 6px;
-    border-top: 1px solid #efe5cd;
+    border-top: 1px solid var(--linha);
     font-size: 14px;
     color: var(--texto-suave);
 }
@@ -136,11 +136,11 @@
 }
 /* Escolha da entrega na sacola */
 .entrega {
-    border: 1px solid #e6dcc3;
+    border: 1px solid var(--linha);
     border-radius: 14px;
     padding: 16px 18px;
     margin: 0 0 16px;
-    background: #fffdf7;
+    background: var(--superficie);
     text-align: left;
 }
 
@@ -173,5 +173,5 @@
 .pedido-entrega {
     margin: 10px 0 0;
     font-size: 13px;
-    color: #776843;
+    color: var(--texto-suave);
 }
