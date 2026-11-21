@@ -54,13 +54,13 @@
 
         <div class="campo">
             <label for="senha">Senha</label>
-            <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="new-password">
+            <input type="password" id="senha" name="senha" placeholder="Pelo menos 8 caracteres" autocomplete="new-password">
             <span class="erro-campo" id="erro-senha" style="@Mostrar("senha")">@(Msg("senha") ?? "Use pelo menos 8 caracteres.")</span>
         </div>
 
         <div class="campo">
             <label for="confirma">Confirmar senha</label>
-            <input type="password" id="confirma" placeholder="••••••••" autocomplete="new-password">
+            <input type="password" id="confirma" placeholder="Repita a senha" autocomplete="new-password">
             <span class="erro-campo" id="erro-confirma">As senhas não coincidem.</span>
         </div>
 

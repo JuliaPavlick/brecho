@@ -38,7 +38,7 @@ Precisa do [.NET 10 SDK](https://dotnet.microsoft.com/download).
 dotnet run --project GarimpoChic
 ```
 
-Abra http://localhost:5213. Sem a variável `DATABASE_URL`, o site cria sozinho um banco SQLite (`GarimpoChic/garimpo.db`) com dados de demonstração. As contas de demonstração usam a senha definida em `SenhaDemo` no arquivo `GarimpoChic/appsettings.Development.json`. A Julia (CPF 529.982.247-25) é cliente e funcionária.
+Abra http://localhost:5213. Sem a variável `DATABASE_URL`, o site cria sozinho um banco SQLite (`GarimpoChic/garimpo.db`) com dados de demonstração. As contas de demonstração usam a senha definida em `SenhaDemo` no arquivo `GarimpoChic/appsettings.Development.json`. A Julia (CPF 529.982.247-25) é cliente e funcionária; a conta **Admin Teste** (CPF 000.000.001-91) tem os três papéis: cliente, vendedora e funcionária. No site publicado, nenhuma conta de demonstração vira funcionária.
 
 Para começar do zero, apague o `garimpo.db`.
 

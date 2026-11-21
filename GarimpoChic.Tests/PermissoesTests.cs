@@ -145,6 +145,20 @@ public class PermissoesTests
         Assert.Equal(HttpStatusCode.Redirect, (await julia.Abrir("/painel")).Resposta.StatusCode);
     }
 
+    // Conta de demonstração com os três papéis, para testar tudo com um login só
+    [Fact]
+    public async Task Admin_de_teste_entra_na_loja_no_painel_e_no_vender()
+    {
+        using var site = new SiteDeTeste();
+        using var nav = site.Navegador();
+
+        var r = await nav.Entrar("000.000.001-91");
+
+        Assert.Equal("/perfis", r.Destino());
+        foreach (var url in new[] { "/inicio", "/vender", "/painel", "/painel/financeiro", "/painel/clientes" })
+            Assert.Equal(HttpStatusCode.OK, (await nav.Abrir(url)).Resposta.StatusCode);
+    }
+
     [Fact]
     public async Task Vendedora_tem_limite_de_pecas_esperando_avaliacao()
     {

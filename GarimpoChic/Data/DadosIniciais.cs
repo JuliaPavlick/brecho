@@ -98,9 +98,11 @@ public static class DadosIniciais
         var mariana = Pessoa("Mariana Souza", "12345678909", "mariana.souza@email.com", "(47) 97777-4321", "Jaraguá do Sul", false, false, 75);
         var beatriz = Pessoa("Beatriz Lima", "98765432100", "bia.lima@email.com", "(47) 96666-8765", "Blumenau", true, false, 120);
         var camila = Pessoa("Camila Rocha", "39053344705", "camila.rocha@email.com", "(47) 95555-2468", "São Francisco do Sul", true, false, 5);
+        // Conta para testar tudo: cliente, vendedora e funcionária (funcionária só no desenvolvimento, como a Julia)
+        var admin = Pessoa("Admin Teste", "00000000191", "admin@garimpochic.local", "(47) 90000-0001", "Joinville", true, true, 100);
 
         // Só as contas novas entram como inserção; as reaproveitadas já estão no banco
-        db.Usuarios.AddRange(new[] { julia, ana, mariana, beatriz, camila }.Where(u => u.Id == 0));
+        db.Usuarios.AddRange(new[] { julia, ana, mariana, beatriz, camila, admin }.Where(u => u.Id == 0));
 
         Produto Peca(string nome, string desc, string cat, decimal preco, string status = StatusProduto.Disponivel, Usuario? vendedora = null) =>
             new() { Nome = nome, Descricao = desc, Categoria = cat, Preco = preco, Status = status, Vendedora = vendedora };
