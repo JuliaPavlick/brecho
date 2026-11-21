@@ -118,7 +118,9 @@
 
             <div class="campo">
                 <label for="fotos">Fotos</label>
-                <input type="file" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple data-reduzir>
+                <input type="file" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple data-reduzir
+                    aria-describedby="dica-fotos">
+                <p class="dica-fotos" id="dica-fotos"></p>
             </div>
 
             <div class="acoes-modal">
@@ -197,6 +199,13 @@
             document.getElementById('preco').value = produto ? produto.preco : '';
             document.getElementById('status').value = produto ? produto.status : 'avaliacao';
             document.getElementById('fotos').value = '';
+            document.querySelectorAll('#form-produto .aviso-fotos').forEach(a => a.remove());
+
+            // Ao editar, avisa que fotos novas apagam as atuais
+            const qtd = produto ? produto.qtdFotos : 0;
+            document.getElementById('dica-fotos').textContent = qtd > 0
+                ? `Esta peça tem ${qtd} ${qtd === 1 ? 'foto' : 'fotos'}. Se você escolher fotos novas, elas substituem ${qtd === 1 ? 'a atual' : 'as atuais'}.`
+                : 'Até 5 fotos JPG, PNG ou WebP.';
 
             document.getElementById('erro-nome').style.display = 'none';
             document.getElementById('erro-preco').style.display = 'none';
@@ -236,6 +245,7 @@
             // FormData leva também as fotos escolhidas
             postar(editandoId ? '/painel/produtos/' + editandoId : '/painel/produtos', new FormData(form))
                 .then(salvo => {
+                    if (salvo.aviso) alert(salvo.aviso);
                     if (editandoId) {
                         produtos = produtos.map(p => p.id === salvo.id ? salvo : p);
                     } else {
@@ -257,7 +267,9 @@
 
             if (btn.dataset.acao === 'editar') {
                 abrirModal(produto);
-            } else if (confirm('Excluir "' + produto.nome + '"?')) {
+            } else if (confirm(produto.vendedora && produto.status === 'avaliacao'
+                ? 'Recusar e excluir "' + produto.nome + '", enviada por ' + produto.vendedora + '? A peça e as fotos são apagadas e não dá para desfazer.'
+                : 'Excluir "' + produto.nome + '"? A peça e as fotos são apagadas e não dá para desfazer.')) {
                 postar('/painel/produtos/' + id + '/excluir')
                     .then(() => {
                         produtos = produtos.filter(p => p.id !== id);

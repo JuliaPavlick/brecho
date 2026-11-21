@@ -47,7 +47,7 @@ public class FuncionariaController(BrechoContext db) : Controller
 
     // ---------- Produtos ----------
 
-    object ProdutoJson(Produto p) => new
+    object ProdutoJson(Produto p, string? aviso = null) => new
     {
         id = p.Id,
         nome = p.Nome,
@@ -57,6 +57,9 @@ public class FuncionariaController(BrechoContext db) : Controller
         status = p.Status,
         vendedora = p.Vendedora?.Nome,
         foto = p.Fotos.OrderBy(f => f.Id).Select(f => "/fotos/" + f.Id).FirstOrDefault(),
+        qtdFotos = p.Fotos.Count,
+        // Ex.: fotos recusadas no envio; a tela mostra para a funcionária
+        aviso,
     };
 
     // Carrega a peça com os ids das fotos, sem trazer as imagens em si
@@ -83,7 +86,7 @@ public class FuncionariaController(BrechoContext db) : Controller
             })
             .ToListAsync();
 
-        return View(produtos.Select(ProdutoJson).ToList());
+        return View(produtos.Select(p => ProdutoJson(p)).ToList());
     }
 
     public class ProdutoForm
@@ -137,7 +140,7 @@ public class FuncionariaController(BrechoContext db) : Controller
         p.Preco = preco;
         p.Status = form.Status!;
 
-        // Fotos novas substituem as antigas
+        // Fotos novas substituem as antigas (a tela avisa antes)
         var novas = await Fotos.LerAsync(form.Fotos);
         if (novas.Count > 0)
         {
@@ -146,13 +149,31 @@ public class FuncionariaController(BrechoContext db) : Controller
         }
 
         await db.SaveChangesAsync();
-        return Json(ProdutoJson((await BuscarProduto(p.Id))!));
+        return Json(ProdutoJson((await BuscarProduto(p.Id))!, Fotos.AvisoRecusadas(Fotos.Recusadas(form.Fotos, novas))));
     }
 
+    // Excluir apaga a peça e as fotos de vez. Fica bloqueado quando apagar faria a loja perder controle:
+    //   - a peça está num pedido em andamento (a cliente ainda vai recebê-la)
+    //   - a peça é de uma vendedora e já foi para a loja (ela precisa ver a peça e o status em "Vender");
+    //     enquanto está "Em avaliação", excluir é recusar o envio, e isso é permitido
     [HttpPost("produtos/{id:int}/excluir")]
     public async Task<IActionResult> ExcluirProduto(int id)
     {
-        await db.Produtos.Where(p => p.Id == id).ExecuteDeleteAsync();
+        var p = await db.Produtos.Include(x => x.Vendedora).FirstOrDefaultAsync(x => x.Id == id);
+        if (p == null) return NotFound();
+
+        var pedidoAtivo = await db.PedidoItens
+            .Where(i => i.ProdutoId == id && (i.Pedido!.Status == StatusPedido.Preparo || i.Pedido.Status == StatusPedido.Caminho))
+            .Select(i => (int?)i.PedidoId).FirstOrDefaultAsync();
+        if (pedidoAtivo != null)
+            return BadRequest(new { erro = $"Esta peça está no pedido #{pedidoAtivo:0000}, que ainda não foi entregue. Ela não pode ser excluída." });
+
+        if (p.VendedoraId != null && p.Status != StatusProduto.Avaliacao)
+            return BadRequest(new { erro = $"Esta peça é de {p.Vendedora?.Nome ?? "uma vendedora"} e já está na loja. " +
+                "Excluir apagaria a peça da lista que a vendedora acompanha em \"Vender\". Para tirá-la da venda, mude o status." });
+
+        db.Produtos.Remove(p);
+        await db.SaveChangesAsync();
         return Ok();
     }
 
@@ -175,7 +196,7 @@ public class FuncionariaController(BrechoContext db) : Controller
             .ToListAsync();
 
         ViewData["GeminiLigado"] = gemini.Configurado;
-        return View(rascunhos.Select(ProdutoJson).ToList());
+        return View(rascunhos.Select(p => ProdutoJson(p)).ToList());
     }
 
     [HttpPost("lote/foto")]

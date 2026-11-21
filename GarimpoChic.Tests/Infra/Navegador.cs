@@ -50,6 +50,26 @@ public partial class Navegador(HttpClient http) : IDisposable
         return await http.SendAsync(p);
     }
 
+    // Formulário com arquivos (multipart), como "Vender" e o modal de produtos
+    public static MultipartFormDataContent Multipart(Dictionary<string, string> campos, params (string Campo, string Nome, byte[] Dados)[] arquivos)
+    {
+        var corpo = new MultipartFormDataContent();
+        foreach (var (k, v) in campos) corpo.Add(new StringContent(v), k);
+        foreach (var (campo, nome, dados) in arquivos) corpo.Add(new ByteArrayContent(dados), campo, nome);
+        return corpo;
+    }
+
+    public async Task<HttpResponseMessage> EnviarArquivos(string url, Dictionary<string, string> campos,
+        params (string Campo, string Nome, byte[] Dados)[] arquivos)
+    {
+        var corpo = Multipart(campos, arquivos);
+        corpo.Add(new StringContent(await Token()), "__RequestVerificationToken");
+
+        var p = Pedido(HttpMethod.Post, url);
+        p.Content = corpo;
+        return await http.SendAsync(p);
+    }
+
     // Chamada feita por fetch() no site.js (postar): token no cabeçalho e marcada como AJAX
     public async Task<HttpResponseMessage> Fetch(string url, HttpContent? corpo = null)
     {

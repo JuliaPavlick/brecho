@@ -249,11 +249,16 @@ public class ClienteController(BrechoContext db) : Controller
             .OrderByDescending(p => p.Data).ToListAsync());
 
     [HttpGet("/perfil")]
-    public async Task<IActionResult> Perfil()
+    public Task<IActionResult> Perfil() => TelaPerfil(null, null);
+
+    // Com erro, a tela volta com o que a pessoa digitou (e não com os dados antigos do banco)
+    async Task<IActionResult> TelaPerfil(PerfilForm? digitado, string? erro)
     {
         ViewData["TotalPedidos"] = await db.Pedidos.CountAsync(p => p.ClienteId == Eu.Id);
         ViewData["TotalFavoritos"] = await db.Favoritos.CountAsync(f => f.UsuarioId == Eu.Id);
-        return View(Eu);
+        ViewData["Digitado"] = digitado;
+        ViewData["ErroDados"] = erro;
+        return View("Perfil", Eu);
     }
 
     // LGPD (art. 18): a pessoa pode pedir uma cópia de tudo o que a loja guarda sobre ela
@@ -339,20 +344,16 @@ public class ClienteController(BrechoContext db) : Controller
     public async Task<IActionResult> SalvarDados(string? nome, string? email, string? telefone, string? cidade, string? estado,
         string? senhaEmail)
     {
+        var digitado = new PerfilForm(nome, email, telefone, cidade, estado);
+
         if (string.IsNullOrWhiteSpace(nome) || !Formato.EmailValido(email) || Formato.SoDigitos(telefone).Length < 10)
-        {
-            TempData["ErroDados"] = "Confira nome, e-mail e telefone.";
-            return Redirect("/perfil");
-        }
+            return await TelaPerfil(digitado, "Confira nome, e-mail e telefone.");
 
         // O e-mail recebe o link de "esqueci minha senha": trocá-lo pede a senha, para quem pegou uma sessão
         // aberta (ex.: computador emprestado) não conseguir tomar a conta
         var trocouEmail = !string.Equals(email!.Trim(), Eu.Email, StringComparison.OrdinalIgnoreCase);
         if (trocouEmail && !DadosIniciais.SenhaConfere(Eu, senhaEmail ?? ""))
-        {
-            TempData["ErroDados"] = "Para trocar o e-mail, confirme sua senha atual no campo abaixo dele.";
-            return Redirect("/perfil");
-        }
+            return await TelaPerfil(digitado, "Para trocar o e-mail, confirme sua senha atual no campo abaixo dele.");
 
         Eu.Nome = nome.Trim();
         Eu.Email = email!.Trim();
@@ -389,11 +390,16 @@ public class ClienteController(BrechoContext db) : Controller
     }
 
     [HttpGet("/vender")]
-    public async Task<IActionResult> Vender()
+    public Task<IActionResult> Vender() => TelaVender(null, null);
+
+    // Com erro, a tela volta com o que a pessoa digitou (as fotos o navegador não deixa preencher de novo)
+    async Task<IActionResult> TelaVender(VenderForm? digitado, string? erro)
     {
         ViewData["Repasses"] = await db.Repasses.Where(r => r.VendedoraId == Eu.Id)
             .OrderByDescending(r => r.Data).ToListAsync();
-        return View(await db.Produtos.Where(p => p.VendedoraId == Eu.Id)
+        ViewData["Digitado"] = digitado;
+        ViewData["Erro"] = erro;
+        return View("Vender", await db.Produtos.Where(p => p.VendedoraId == Eu.Id)
             .OrderByDescending(p => p.CriadoEm).ToListAsync());
     }
 
@@ -406,18 +412,16 @@ public class ClienteController(BrechoContext db) : Controller
     [RequestSizeLimit(30_000_000)]
     public async Task<IActionResult> Vender(string? nome, string? descricao, string? categoria, string? preco, List<IFormFile>? fotos)
     {
+        var digitado = new VenderForm(nome, descricao, categoria, preco);
+        var refazerFotos = fotos is { Count: > 0 } ? " Escolha as fotos de novo." : "";
+
         if (await db.Produtos.CountAsync(p => p.VendedoraId == Eu.Id && p.Status == StatusProduto.Avaliacao) >= MaxPecasEmAvaliacao)
-        {
-            TempData["Erro"] = $"Você já tem {MaxPecasEmAvaliacao} peças esperando avaliação. Aguarde a loja avaliar antes de enviar mais.";
-            return Redirect("/vender");
-        }
+            return await TelaVender(digitado,
+                $"Você já tem {MaxPecasEmAvaliacao} peças esperando avaliação. Aguarde a loja avaliar antes de enviar mais.");
 
         var valor = Precos.Ler(preco);
         if (string.IsNullOrWhiteSpace(nome) || !Categorias.Existe(categoria ?? "") || valor <= 0)
-        {
-            TempData["Erro"] = "Preencha nome, categoria e um preço maior que zero.";
-            return Redirect("/vender");
-        }
+            return await TelaVender(digitado, "Preencha nome, categoria e um preço maior que zero." + refazerFotos);
 
         var produto = new Produto
         {
@@ -428,7 +432,8 @@ public class ClienteController(BrechoContext db) : Controller
             Status = StatusProduto.Avaliacao,
             VendedoraId = Eu.Id,
         };
-        produto.Fotos.AddRange(await Fotos.LerAsync(fotos));
+        var aceitas = await Fotos.LerAsync(fotos);
+        produto.Fotos.AddRange(aceitas);
         db.Produtos.Add(produto);
 
         var virouVendedora = !Eu.EhVendedora;
@@ -438,9 +443,14 @@ public class ClienteController(BrechoContext db) : Controller
         if (virouVendedora) await Sessao.EntrarAsync(HttpContext, Eu);
 
         TempData["Ok"] = true;
+        TempData["AvisoFotos"] = Fotos.AvisoRecusadas(Fotos.Recusadas(fotos, aceitas));
         return Redirect("/vender");
     }
 }
+
+public record PerfilForm(string? Nome, string? Email, string? Telefone, string? Cidade, string? Estado);
+
+public record VenderForm(string? Nome, string? Descricao, string? Categoria, string? Preco);
 
 // Fotos das peças são públicas, então ficam fora da área que exige login
 public class FotosController(BrechoContext db) : Controller

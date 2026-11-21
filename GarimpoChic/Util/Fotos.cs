@@ -5,8 +5,21 @@ namespace GarimpoChic.Util;
 
 public static class Fotos
 {
-    const int MaxFotos = 5;
-    const long MaxBytes = 5 * 1024 * 1024;
+    public const int MaxFotos = 5;
+    public const long MaxBytes = 5 * 1024 * 1024;
+
+    public const string Regra = "Envie até 5 fotos JPG, PNG ou WebP de até 5 MB cada.";
+
+    // Quantos arquivos escolhidos ficaram de fora (formato errado, grandes demais ou além do limite)
+    public static int Recusadas(IEnumerable<IFormFile>? arquivos, List<ProdutoFoto> aceitas) =>
+        (arquivos?.Count(a => a.Length > 0) ?? 0) - aceitas.Count;
+
+    public static string? AvisoRecusadas(int recusadas) => recusadas switch
+    {
+        0 => null,
+        1 => "1 foto não foi aceita. " + Regra,
+        _ => $"{recusadas} fotos não foram aceitas. " + Regra,
+    };
 
     // Só estes formatos são aceitos. SVG fica de fora de propósito: ele pode conter JavaScript.
     public static readonly string[] TiposPermitidos = ["image/jpeg", "image/png", "image/webp"];

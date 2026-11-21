@@ -245,10 +245,38 @@ document.addEventListener('change', async e => {
         const lista = new DataTransfer();
         reduzidas.forEach(f => lista.items.add(f));
         campo.files = lista.files;
+        avisarFotos(campo, reduzidas);
     } finally {
         botoes.forEach(b => b.disabled = false);
     }
 });
+
+// As mesmas regras do servidor (Util/Fotos.cs): avisa antes do envio, em vez de a foto sumir sem explicação
+const FOTOS_MAX = 5;
+const FOTO_MAX_BYTES = 5 * 1024 * 1024;
+const FOTO_TIPOS = ['image/jpeg', 'image/png', 'image/webp'];
+
+function avisarFotos(campo, arquivos) {
+    const problemas = [];
+    const ruins = arquivos.filter(f => !FOTO_TIPOS.includes(f.type)).length;
+    const grandes = arquivos.filter(f => FOTO_TIPOS.includes(f.type) && f.size > FOTO_MAX_BYTES).length;
+    if (ruins) problemas.push(`${ruins} ${ruins === 1 ? 'arquivo não é' : 'arquivos não são'} JPG, PNG ou WebP`);
+    if (grandes) problemas.push(`${grandes} ${grandes === 1 ? 'foto passa' : 'fotos passam'} de 5 MB`);
+    if (arquivos.length > FOTOS_MAX) problemas.push(`só as ${FOTOS_MAX} primeiras fotos serão usadas`);
+
+    let aviso = campo.parentElement.querySelector('.aviso-fotos');
+    if (!problemas.length) {
+        if (aviso) aviso.remove();
+        return;
+    }
+    if (!aviso) {
+        aviso = document.createElement('p');
+        aviso.className = 'aviso-fotos';
+        aviso.setAttribute('role', 'alert');
+        campo.insertAdjacentElement('afterend', aviso);
+    }
+    aviso.textContent = 'Atenção: ' + problemas.join('; ') + '. Essas fotos não serão enviadas.';
+}
 
 // Formulário enviado do jeito normal (a página vai recarregar): mostra "Carregando…" e ignora novos envios.
 // Fica por último: as validações e o data-confirmar acima já rodaram e podem ter cancelado o envio.

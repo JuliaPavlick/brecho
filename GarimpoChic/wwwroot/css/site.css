@@ -807,3 +807,16 @@ a.favorito-link {
     color: #8b6d38;
     font-weight: 700;
 }
+
+/* Avisos do campo de fotos (site.js: avisarFotos; Produtos: dica-fotos) */
+.aviso-fotos {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #c0392b;
+}
+
+.dica-fotos {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #776843;
+}
