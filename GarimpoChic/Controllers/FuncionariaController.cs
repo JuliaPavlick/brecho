@@ -13,6 +13,8 @@ namespace GarimpoChic.Controllers;
 [Route("painel")]
 public class FuncionariaController(BrechoContext db) : Controller
 {
+    Avisos Avisos => HttpContext.RequestServices.GetRequiredService<Avisos>();
+
     public override async Task OnActionExecutionAsync(ActionExecutingContext ctx, ActionExecutionDelegate next)
     {
         var u = await db.UsuarioAtualAsync(User);
@@ -108,6 +110,7 @@ public class FuncionariaController(BrechoContext db) : Controller
             return BadRequest(new { erro = "Dados inválidos." });
 
         Produto? p;
+        string? statusAntes = null;
         if (id == null)
         {
             p = new Produto();
@@ -117,6 +120,7 @@ public class FuncionariaController(BrechoContext db) : Controller
         {
             p = await db.Produtos.FindAsync(id);
             if (p == null) return NotFound();
+            statusAntes = p.Status;
 
             // Peça que está num pedido ativo já foi vendida: só volta para a loja cancelando o pedido
             if (form.Status != StatusProduto.Vendido)
@@ -144,6 +148,11 @@ public class FuncionariaController(BrechoContext db) : Controller
         }
 
         await db.SaveChangesAsync();
+
+        // Envio de vendedora que sai da avaliação direto para a venda: avisa a vendedora
+        if (p.VendedoraId != null && statusAntes == StatusProduto.Avaliacao && p.Status == StatusProduto.Disponivel)
+            Avisos.PecaAprovada((await db.Usuarios.FindAsync(p.VendedoraId))!, p);
+
         return Json(ProdutoJson((await BuscarProduto(p.Id))!, Fotos.AvisoRecusadas(Fotos.Recusadas(form.Fotos, novas))));
     }
 
@@ -169,6 +178,9 @@ public class FuncionariaController(BrechoContext db) : Controller
 
         db.Produtos.Remove(p);
         await db.SaveChangesAsync();
+
+        // Só chega aqui peça de vendedora que estava em avaliação: excluir é recusar o envio
+        if (p.Vendedora != null) Avisos.PecaRecusada(p.Vendedora, p);
         return Ok();
     }
 
@@ -279,9 +291,10 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpPost("pedidos/{id:int}/status")]
     public async Task<IActionResult> AlterarStatusPedido(int id, [FromBody] StatusForm? form)
     {
-        var pedido = await db.Pedidos.Include(p => p.Itens).FirstOrDefaultAsync(p => p.Id == id);
+        var pedido = await db.Pedidos.Include(p => p.Itens).Include(p => p.Cliente).FirstOrDefaultAsync(p => p.Id == id);
         if (pedido == null) return NotFound();
 
+        var antes = pedido.Status;
         var novo = form?.Status ?? "";
         if (!StatusPedido.PodeMudar(pedido.Status, novo))
             return BadRequest(new { erro = $"Um pedido {StatusPedido.Nomes[pedido.Status].ToLower()} não muda mais de status." });
@@ -299,6 +312,22 @@ public class FuncionariaController(BrechoContext db) : Controller
         pedido.Status = novo;
         await db.SaveChangesAsync();
         await transacao.CommitAsync();
+
+        if (antes != novo)
+        {
+            Avisos.PedidoMudou(pedido.Cliente!, pedido);
+
+            // Entregue: cada vendedora com peça neste pedido fica sabendo quanto vai receber
+            if (novo == StatusPedido.Entregue)
+            {
+                foreach (var g in pedido.Itens.Where(i => i.VendedoraId != null).GroupBy(i => i.VendedoraId!.Value))
+                {
+                    var vendedora = await db.Usuarios.FindAsync(g.Key);
+                    var saldo = (await Comissao.ExtratosAsync(db, g.Key)).FirstOrDefault()?.Saldo ?? 0;
+                    if (vendedora != null) Avisos.PecasEntregues(vendedora, g.ToList(), saldo);
+                }
+            }
+        }
         return Ok();
     }
 
@@ -393,14 +422,17 @@ public class FuncionariaController(BrechoContext db) : Controller
         if (data > Formato.Hoje)
             return BadRequest(new { erro = "A data do repasse não pode ser no futuro." });
 
-        db.Repasses.Add(new Repasse
+        var repasse = new Repasse
         {
             VendedoraId = form.VendedoraId,
             Valor = valor,
             // Meio-dia no horário de Brasília, para a data não "virar" ao converter para UTC
             Data = Formato.ParaUtc(data.ToDateTime(new TimeOnly(12, 0))),
-        });
+        };
+        db.Repasses.Add(repasse);
         await db.SaveChangesAsync();
+
+        Avisos.RepasseRegistrado((await db.Usuarios.FindAsync(form.VendedoraId))!, valor, repasse.Data);
         return Ok();
     }
 

@@ -47,6 +47,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHsts(o => o.MaxAge = TimeSpan.FromDays(365));
 
 builder.Services.AddSingleton<Email>();
+// Avisos por e-mail para clientes e vendedoras, enviados em segundo plano (veja Util/Avisos.cs)
+builder.Services.AddSingleton<FilaDeEmails>();
+builder.Services.AddHostedService<EnvioDeEmails>();
+builder.Services.AddSingleton<Avisos>();
 builder.Services.AddHttpClient<Gemini>(c => c.Timeout = TimeSpan.FromSeconds(60));
 builder.Services.AddSingleton<RedefinicaoSenha>();
 

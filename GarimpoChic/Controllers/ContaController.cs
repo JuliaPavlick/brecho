@@ -135,14 +135,14 @@ public class ContaController(BrechoContext db) : Controller
     [HttpPost("/recuperar-senha")]
     [EnableRateLimiting(Limites.Autenticacao)]
     public async Task<IActionResult> RecuperarSenha(string? cpf, [FromServices] RedefinicaoSenha redefinicao,
-        [FromServices] Email email, [FromServices] ILogger<ContaController> log)
+        [FromServices] Email email, [FromServices] Avisos avisos, [FromServices] ILogger<ContaController> log)
     {
         var digitos = Formato.SoDigitos(cpf);
         var u = Formato.CpfValido(digitos) ? await db.Usuarios.FirstOrDefaultAsync(x => x.CpfResumo == Protecao.ResumoCpf(digitos)) : null;
 
         if (u != null && Formato.EmailValido(u.Email) && Limites.PodeEnviarRedefinicao(digitos))
         {
-            var link = $"{EnderecoDoSite()}/redefinir-senha?codigo={Uri.EscapeDataString(redefinicao.GerarCodigo(u))}";
+            var link = $"{avisos.EnderecoDoSite()}/redefinir-senha?codigo={Uri.EscapeDataString(redefinicao.GerarCodigo(u))}";
             var html = $"""
                 <p>Olá, {System.Net.WebUtility.HtmlEncode(u.PrimeiroNome)}!</p>
                 <p>Recebemos um pedido para redefinir a senha da sua conta no Garimpo Chic.</p>
@@ -163,13 +163,6 @@ public class ContaController(BrechoContext db) : Controller
         ViewData["Enviado"] = Formato.CpfValido(digitos);
         return View();
     }
-
-    // Endereço público do site para montar o link do e-mail.
-    // Na Render vem de RENDER_EXTERNAL_URL; não confiamos no cabeçalho Host, que pode ser forjado.
-    string EnderecoDoSite() =>
-        (Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL")
-         ?? HttpContext.RequestServices.GetRequiredService<IConfiguration>()["SITE_URL"]
-         ?? $"{Request.Scheme}://{Request.Host}").TrimEnd('/');
 
     [HttpGet("/redefinir-senha")]
     public async Task<IActionResult> RedefinirSenha(string? codigo, [FromServices] RedefinicaoSenha redefinicao)

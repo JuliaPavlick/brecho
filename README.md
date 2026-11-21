@@ -101,7 +101,17 @@ A vendedora externa recebe um percentual do preço de cada peça dela que foi ve
 | Vender para a loja | `/vender` |
 | Funcionária | `/painel`, `/painel/produtos`, `/painel/lote`, `/painel/pedidos`, `/painel/calendario`, `/painel/financeiro`, `/painel/clientes` |
 
-## E-mail (recuperação de senha)
+## E-mail (recuperação de senha e avisos)
+
+Além do link de "Esqueci minha senha", o site manda avisos automáticos:
+
+| Para quem | Quando |
+|---|---|
+| Cliente | pedido recebido; pedido a caminho, entregue ou cancelado |
+| Vendedora | peça aprovada (sai de "Em avaliação" para "Disponível"); peça recusada (excluída durante a avaliação); peça entregue, com o valor a receber; repasse registrado |
+
+Os avisos são enviados em segundo plano: se o servidor de e-mail falhar, a ação no site continua valendo e o erro só vai para o log. Conta sem e-mail (ou excluída) não recebe aviso. Os links dos e-mails usam o endereço do site na Render (`RENDER_EXTERNAL_URL`); fora dela, defina `SITE_URL`.
+
 
 O link "Esqueci minha senha" manda um e-mail com um link que vale por 1 hora e só pode ser usado uma vez. Para o envio funcionar, configure na Render (aba **Environment** do serviço `garimpo-chic`):
 

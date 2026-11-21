@@ -242,6 +242,8 @@ public class ClienteController(BrechoContext db) : Controller
         await db.SaveChangesAsync();
         await transacao.CommitAsync();
 
+        HttpContext.RequestServices.GetRequiredService<Avisos>().PedidoRecebido(Eu, pedido);
+
         TempData["PedidoNovo"] = pedido.Numero;
         return Redirect("/compras");
     }

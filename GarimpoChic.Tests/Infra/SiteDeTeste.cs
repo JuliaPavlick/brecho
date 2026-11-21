@@ -1,10 +1,14 @@
+using System.Collections.Concurrent;
 using GarimpoChic.Data;
 using GarimpoChic.Models;
+using GarimpoChic.Util;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace GarimpoChic.Tests.Infra;
 
@@ -40,7 +44,16 @@ public class SiteDeTeste : WebApplicationFactory<Program>
         builder.UseSetting("DadosDemo", "true");
         builder.UseSetting("SenhaDemo", Senha);
         foreach (var (chave, valor) in extras) builder.UseSetting(chave, valor);
+
+        // Os avisos por e-mail ficam guardados em Emails, em vez de irem para a fila de envio
+        builder.ConfigureTestServices(s =>
+        {
+            s.RemoveAll<FilaDeEmails>();
+            s.AddSingleton<FilaDeEmails>(Emails);
+        });
     }
+
+    public EmailsCapturados Emails { get; } = new();
 
     public Navegador Navegador() => new(CreateClient(new WebApplicationFactoryClientOptions
     {
@@ -57,6 +70,18 @@ public class SiteDeTeste : WebApplicationFactory<Program>
 
     public Task<Produto> Produto(string nome) =>
         Banco(db => db.Produtos.AsNoTracking().FirstAsync(p => p.Nome == nome));
+
+    // E-mails que o site mandaria, para os testes conferirem destinatário, assunto e texto
+    public class EmailsCapturados : FilaDeEmails
+    {
+        readonly ConcurrentQueue<EmailPendente> enviados = new();
+
+        public IReadOnlyList<EmailPendente> Todos => [.. enviados];
+
+        public override void Enfileirar(EmailPendente email) => enviados.Enqueue(email);
+
+        public List<EmailPendente> Para(string email) => Todos.Where(e => e.Para == email).ToList();
+    }
 
     protected override void Dispose(bool disposing)
     {
