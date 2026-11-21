@@ -51,7 +51,7 @@ public class ContaController(BrechoContext db) : Controller
         // Muitos erros para este CPF a partir deste endereço: nem confere a senha (veja Limites)
         if (Limites.LoginBloqueado(HttpContext, digitos))
         {
-            ViewData["Erro"] = "Muitas tentativas erradas para este CPF. Aguarde 15 minutos ou use \"Esqueci minha senha\".";
+            ViewData["Erro"] = "Muitas tentativas erradas para este CPF. Aguarde ou use \"Esqueci minha senha\" para entrar agora.";
             return View();
         }
 
@@ -199,6 +199,7 @@ public class ContaController(BrechoContext db) : Controller
         u.TentativasFalhas = 0;
         u.BloqueadoAte = null;
         await db.SaveChangesAsync();
+        Limites.LiberarCpf(u.Cpf);
 
         TempData["Ok"] = "Senha alterada! Agora é só entrar com a nova senha.";
         return Redirect("/entrar");

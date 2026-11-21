@@ -2,6 +2,7 @@ using GarimpoChic.Data;
 using GarimpoChic.Util;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.WebEncoders;
@@ -23,6 +24,9 @@ builder.Services.AddDbContext<BrechoContext>(o => Banco.Configurar(o, builder.Co
 builder.Services.AddDataProtection()
     .SetApplicationName("GarimpoChic")
     .PersistKeysToDbContext<BrechoContext>();
+
+// As chaves do login ficam cifradas no banco (veja Util/CifraDeChaves.cs)
+builder.Services.Configure<KeyManagementOptions>(o => o.XmlEncryptor = new CifraDeChaves());
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
@@ -68,6 +72,10 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BrechoContext>();
     await Atualizacao.PrepararBancoAsync(db);
+    // Antes de qualquer login: some com as chaves antigas gravadas sem criptografia
+    var apagadas = await CifraDeChaves.ApagarChavesEmTextoPuroAsync(db);
+    if (apagadas > 0)
+        app.Logger.LogWarning("{Qtd} chave(s) de login sem criptografia apagada(s); quem estava logado entra de novo.", apagadas);
     await DadosIniciais.PopularAsync(db, app.Configuration, app.Environment);
 }
 

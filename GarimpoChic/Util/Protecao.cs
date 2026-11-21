@@ -13,6 +13,7 @@ public static class Protecao
 
     static byte[]? chaveCifra;
     static byte[]? chaveResumo;
+    static byte[]? chaveLogin;
 
     public static void Configurar(string? segredo)
     {
@@ -24,6 +25,7 @@ public static class Protecao
         var semente = Encoding.UTF8.GetBytes(segredo);
         chaveCifra = HKDF.DeriveKey(HashAlgorithmName.SHA256, semente, 32, info: "GarimpoChic.Cpf.Cifra"u8.ToArray());
         chaveResumo = HKDF.DeriveKey(HashAlgorithmName.SHA256, semente, 32, info: "GarimpoChic.Cpf.Resumo"u8.ToArray());
+        chaveLogin = HKDF.DeriveKey(HashAlgorithmName.SHA256, semente, 32, info: "GarimpoChic.ChavesDeLogin"u8.ToArray());
     }
 
     static byte[] Chave(byte[]? chave) =>
@@ -32,33 +34,42 @@ public static class Protecao
     public static string? ResumoCpf(string cpf) =>
         cpf == "" ? null : Convert.ToHexString(HMACSHA256.HashData(Chave(chaveResumo), Encoding.UTF8.GetBytes(cpf)));
 
-    public static string Cifrar(string texto)
-    {
-        if (texto == "") return "";
-
-        var claro = Encoding.UTF8.GetBytes(texto);
-        var nonce = RandomNumberGenerator.GetBytes(AesGcm.NonceByteSizes.MaxSize);
-        var tag = new byte[AesGcm.TagByteSizes.MaxSize];
-        var cifrado = new byte[claro.Length];
-
-        using (var aes = new AesGcm(Chave(chaveCifra), tag.Length))
-            aes.Encrypt(nonce, claro, cifrado, tag);
-
-        return Prefixo + Convert.ToBase64String([.. nonce, .. tag, .. cifrado]);
-    }
+    public static string Cifrar(string texto) => texto == "" ? "" : CifrarCom(Chave(chaveCifra), texto);
 
     public static string Decifrar(string valor)
     {
         // Contas antigas, de antes da criptografia: o valor ainda está em texto puro até o site convertê-lo ao iniciar
         if (!valor.StartsWith(Prefixo)) return valor;
+        return DecifrarCom(Chave(chaveCifra), valor);
+    }
 
+    // Chaves do cookie de login (veja CifraDeChaves). Usa uma chave derivada só para isso.
+    public static string CifrarChaveDeLogin(string xml) => CifrarCom(Chave(chaveLogin), xml);
+
+    public static string DecifrarChaveDeLogin(string valor) => DecifrarCom(Chave(chaveLogin), valor);
+
+    static string CifrarCom(byte[] chave, string texto)
+    {
+        var claro = Encoding.UTF8.GetBytes(texto);
+        var nonce = RandomNumberGenerator.GetBytes(AesGcm.NonceByteSizes.MaxSize);
+        var tag = new byte[AesGcm.TagByteSizes.MaxSize];
+        var cifrado = new byte[claro.Length];
+
+        using (var aes = new AesGcm(chave, tag.Length))
+            aes.Encrypt(nonce, claro, cifrado, tag);
+
+        return Prefixo + Convert.ToBase64String([.. nonce, .. tag, .. cifrado]);
+    }
+
+    static string DecifrarCom(byte[] chave, string valor)
+    {
         var dados = Convert.FromBase64String(valor[Prefixo.Length..]);
         var nonce = dados.AsSpan(0, AesGcm.NonceByteSizes.MaxSize);
         var tag = dados.AsSpan(nonce.Length, AesGcm.TagByteSizes.MaxSize);
         var cifrado = dados.AsSpan(nonce.Length + tag.Length);
         var claro = new byte[cifrado.Length];
 
-        using (var aes = new AesGcm(Chave(chaveCifra), tag.Length))
+        using (var aes = new AesGcm(chave, tag.Length))
             aes.Decrypt(nonce, cifrado, tag, claro);
 
         return Encoding.UTF8.GetString(claro);

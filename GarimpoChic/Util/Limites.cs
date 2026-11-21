@@ -43,13 +43,30 @@ public static class Limites
     static void Somar(string chave, TimeSpan validade) =>
         Contadores.Set(chave, Contar(chave) + 1, new MemoryCacheEntryOptions { Size = 1, AbsoluteExpirationRelativeToNow = validade });
 
+    // Segundo freio, que não depende do endereço: 20 senhas erradas para o mesmo CPF em 1 hora, vindas de onde for,
+    // pausam o login desse CPF. Assim, mesmo quem consegue trocar de endereço a cada tentativa (ou forjar o
+    // cabeçalho do IP) não testa senhas sem parar. Vale igual para CPF com ou sem conta (não revela quem é cliente),
+    // e "Esqueci minha senha" libera na hora, para a dona da conta não ficar presa.
+    const int MaxErrosPorCpf = 20;
+    static readonly TimeSpan JanelaPorCpf = TimeSpan.FromHours(1);
+
     static string ChaveLogin(HttpContext http, string cpf) => $"login|{cpf}|{EnderecoDoVisitante(http)}";
 
-    public static bool LoginBloqueado(HttpContext http, string cpf) => Contar(ChaveLogin(http, cpf)) >= MaxErrosLogin;
+    static string ChaveCpf(string cpf) => $"login-cpf|{cpf}";
 
-    public static void RegistrarErroLogin(HttpContext http, string cpf) => Somar(ChaveLogin(http, cpf), JanelaLogin);
+    public static bool LoginBloqueado(HttpContext http, string cpf) =>
+        Contar(ChaveLogin(http, cpf)) >= MaxErrosLogin || Contar(ChaveCpf(cpf)) >= MaxErrosPorCpf;
+
+    public static void RegistrarErroLogin(HttpContext http, string cpf)
+    {
+        Somar(ChaveLogin(http, cpf), JanelaLogin);
+        Somar(ChaveCpf(cpf), JanelaPorCpf);
+    }
 
     public static void LimparErrosLogin(HttpContext http, string cpf) => Contadores.Remove(ChaveLogin(http, cpf));
+
+    // Senha redefinida pelo link do e-mail: a dona da conta provou quem é, então o CPF volta a poder entrar
+    public static void LiberarCpf(string cpf) => Contadores.Remove(ChaveCpf(cpf));
 
     public static bool PodeEnviarRedefinicao(string cpf)
     {

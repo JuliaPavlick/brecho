@@ -58,6 +58,7 @@ Opcional: para ter os dados de demonstração também na Render, adicione as var
 ## Privacidade (LGPD)
 
 - **CPF criptografado:** no banco, o CPF fica cifrado (AES-GCM), e o login acha a conta por um resumo (HMAC) do CPF. A chave vem da variável `CHAVE_DADOS`, que a Render sorteia sozinha pelo `render.yaml`. **Não troque nem apague essa variável:** sem ela o site não sobe, e com outra chave os CPFs antigos ficam ilegíveis. Se isso acontecer, restaure um backup.
+- **Chaves do login cifradas:** as chaves que assinam o cookie de login também ficam no banco, cifradas com a mesma `CHAVE_DADOS`. Quem tiver só uma cópia do banco não consegue fabricar um login. Se a `CHAVE_DADOS` mudar, todo mundo só precisa entrar de novo.
 - **Política de Privacidade** em `/privacidade`. Para mostrar o e-mail de quem responde pelos dados, defina `CONTATO_PRIVACIDADE` na Render.
 - **Aceite no cadastro:** a data fica guardada em `AceitouPrivacidadeEm`.
 - **Meu perfil → Baixar meus dados:** a pessoa baixa um `.json` com tudo o que a loja guarda sobre ela.
