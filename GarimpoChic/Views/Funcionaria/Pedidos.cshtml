@@ -96,9 +96,7 @@
 
         const corpo = document.getElementById('corpo');
         const busca = document.getElementById('busca');
-        const contador = document.getElementById('contador');
-        const vazio = document.getElementById('vazio');
-        const modal = document.getElementById('modal');
+        const modal = janela('modal', 'btn-fechar');
 
         function numero(id) {
             return '#' + String(id).padStart(4, '0');
@@ -108,15 +106,13 @@
             return pedido.itens.reduce((soma, i) => soma + i.preco, 0);
         }
 
-        function render() {
-            const texto = busca.value.trim().toLowerCase();
-
-            const lista = pedidos.filter(p =>
-                (filtroStatus === 'todos' || p.status === filtroStatus) &&
-                (p.cliente.toLowerCase().includes(texto) || numero(p.id).includes(texto))
-            );
-
-            corpo.innerHTML = lista.map(p => `
+        const tabela = tabelaPaginada({
+            corpo,
+            contador: document.getElementById('contador'),
+            vazio: document.getElementById('vazio'),
+            singular: 'pedido',
+            plural: 'pedidos',
+            linha: p => `
                 <tr>
                     <td><strong>${numero(p.id)}</strong></td>
                     <td>${esc(p.cliente)}</td>
@@ -135,10 +131,16 @@
                         <button class="btn-acao" data-id="${p.id}">Ver detalhes</button>
                     </td>
                 </tr>
-            `).join('');
+            `,
+        });
 
-            contador.textContent = lista.length + (lista.length === 1 ? ' pedido' : ' pedidos');
-            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        function render(opcoes) {
+            const texto = busca.value.trim().toLowerCase();
+
+            tabela.mostrar(pedidos.filter(p =>
+                (filtroStatus === 'todos' || p.status === filtroStatus) &&
+                (p.cliente.toLowerCase().includes(texto) || numero(p.id).includes(texto))
+            ), opcoes);
         }
 
         function abrirDetalhes(pedido) {
@@ -163,11 +165,7 @@
 
             document.getElementById('det-total').textContent = moeda(total(pedido));
 
-            modal.classList.add('aberto');
-        }
-
-        function fecharModal() {
-            modal.classList.remove('aberto');
+            modal.abrir();
         }
 
         corpo.addEventListener('change', e => {
@@ -181,14 +179,14 @@
                 cancelado: 'Cancelar este pedido? As peças voltam a ficar disponíveis na loja e o status não muda mais.',
             };
             if (finais[select.value] && !confirm(finais[select.value])) {
-                render();
+                render({ manterPosicao: true });
                 return;
             }
 
             postar('/painel/pedidos/' + pedido.id + '/status', { status: select.value })
                 .then(() => pedido.status = select.value)
                 .catch(falhou)
-                .finally(render);
+                .finally(() => render({ manterPosicao: true }));
         });
 
         corpo.addEventListener('click', e => {
@@ -198,26 +196,12 @@
             abrirDetalhes(pedidos.find(p => p.id === Number(btn.dataset.id)));
         });
 
-        document.querySelectorAll('.chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
-                chip.classList.add('ativo');
-                filtroStatus = chip.dataset.status;
-                render();
-            });
+        chipsDeFiltro('status', status => {
+            filtroStatus = status;
+            render();
         });
 
-        document.getElementById('btn-fechar').addEventListener('click', fecharModal);
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) fecharModal();
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') fecharModal();
-        });
-
-        busca.addEventListener('input', render);
+        busca.addEventListener('input', () => render());
 
         render();
     </script>

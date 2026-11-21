@@ -932,3 +932,13 @@ a.favorito-link {
     display: inline-block;
     text-decoration: none;
 }
+
+/* "Mostrar mais" embaixo das tabelas do painel (site.js: tabelaPaginada) */
+.btn-mais {
+    display: block;
+    margin: 16px auto 4px;
+}
+
+.btn-mais[hidden] {
+    display: none;
+}

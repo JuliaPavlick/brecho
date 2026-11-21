@@ -20,13 +20,22 @@ public class Relatorios
         var desde = DateTime.UtcNow.AddDays(-400);
 
         // Pedidos cancelados não são venda
-        var pedidos = await db.Pedidos.Include(p => p.Itens)
-            .Where(p => p.Data >= desde && p.Status != StatusPedido.Cancelado).ToListAsync();
-        var repasses = await db.Repasses.Include(r => r.Vendedora).Where(r => r.Data >= desde).ToListAsync();
+        var pedidos = await db.Pedidos.AsNoTracking()
+            .Where(p => p.Data >= desde && p.Status != StatusPedido.Cancelado)
+            .Select(p => new { p.Data, Precos = p.Itens.Select(i => i.Preco).ToList() })
+            .ToListAsync();
+        // Da vendedora só o nome (a conta inteira faria o CPF ser decifrado em cada repasse)
+        var repasses = await db.Repasses.AsNoTracking().Where(r => r.Data >= desde)
+            .Select(r => new Repasse
+            {
+                Id = r.Id, VendedoraId = r.VendedoraId, Valor = r.Valor, Data = r.Data,
+                Vendedora = new Usuario { Nome = r.Vendedora!.Nome },
+            })
+            .ToListAsync();
 
         return new Relatorios
         {
-            Vendas = pedidos.Select(p => new Venda(Formato.Local(p.Data), p.Total, p.Itens.Count)).ToList(),
+            Vendas = pedidos.Select(p => new Venda(Formato.Local(p.Data), p.Precos.Sum(), p.Precos.Count)).ToList(),
             Repasses = repasses,
         };
     }

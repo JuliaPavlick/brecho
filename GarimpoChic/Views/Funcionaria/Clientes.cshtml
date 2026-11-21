@@ -98,23 +98,19 @@
 
         const corpo = document.getElementById('corpo');
         const busca = document.getElementById('busca');
-        const contador = document.getElementById('contador');
-        const vazio = document.getElementById('vazio');
-        const modal = document.getElementById('modal');
+        const modal = janela('modal', 'btn-fechar');
 
         function tagsPapeis(papeis) {
             return papeis.map(p => `<span class="papel ${p}">${PAPEIS[p]}</span>`).join('');
         }
 
-        function render() {
-            const texto = busca.value.trim().toLowerCase();
-
-            const lista = pessoas.filter(p =>
-                (filtroPapel === 'todos' || p.papeis.includes(filtroPapel)) &&
-                (p.nome.toLowerCase().includes(texto) || p.email.toLowerCase().includes(texto))
-            );
-
-            corpo.innerHTML = lista.map(p => `
+        const tabela = tabelaPaginada({
+            corpo,
+            contador: document.getElementById('contador'),
+            vazio: document.getElementById('vazio'),
+            singular: 'pessoa',
+            plural: 'pessoas',
+            linha: p => `
                 <tr>
                     <td>
                         <div class="produto-cel">
@@ -127,16 +123,22 @@
                     </td>
                     <td>${tagsPapeis(p.papeis)}</td>
                     <td>${esc(p.cidade)}</td>
-                    <td>${p.pedidos}</td>
+                    <td>${esc(p.pedidos)}</td>
                     <td class="preco-cel">${moeda(p.gasto)}</td>
                     <td class="col-acoes">
                         <button class="btn-acao" data-id="${p.id}">Ver detalhes</button>
                     </td>
                 </tr>
-            `).join('');
+            `,
+        });
 
-            contador.textContent = lista.length + (lista.length === 1 ? ' pessoa' : ' pessoas');
-            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        function render(opcoes) {
+            const texto = busca.value.trim().toLowerCase();
+
+            tabela.mostrar(pessoas.filter(p =>
+                (filtroPapel === 'todos' || p.papeis.includes(filtroPapel)) &&
+                (p.nome.toLowerCase().includes(texto) || p.email.toLowerCase().includes(texto))
+            ), opcoes);
         }
 
         function abrirDetalhes(p) {
@@ -171,11 +173,7 @@
                 </div>
             `).join('');
 
-            modal.classList.add('aberto');
-        }
-
-        function fecharModal() {
-            modal.classList.remove('aberto');
+            modal.abrir();
         }
 
         corpo.addEventListener('click', e => {
@@ -185,13 +183,9 @@
             abrirDetalhes(pessoas.find(p => p.id === Number(btn.dataset.id)));
         });
 
-        document.querySelectorAll('.chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
-                chip.classList.add('ativo');
-                filtroPapel = chip.dataset.papel;
-                render();
-            });
+        chipsDeFiltro('papel', papel => {
+            filtroPapel = papel;
+            render();
         });
 
         document.getElementById('btn-funcionaria').addEventListener('click', e => {
@@ -207,24 +201,14 @@
             postar(`/painel/clientes/${p.id}/funcionaria`, { ativo })
                 .then(() => {
                     p.papeis = ativo ? [...p.papeis, 'funcionaria'] : p.papeis.filter(x => x !== 'funcionaria');
-                    render();
+                    render({ manterPosicao: true });
                     abrirDetalhes(p);
                 })
                 .catch(falhou)
                 .finally(() => btn.disabled = false);
         });
 
-        document.getElementById('btn-fechar').addEventListener('click', fecharModal);
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) fecharModal();
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') fecharModal();
-        });
-
-        busca.addEventListener('input', render);
+        busca.addEventListener('input', () => render());
 
         render();
     </script>

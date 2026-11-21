@@ -149,7 +149,7 @@
         let selecionada = chaveHoje;
 
         const calDias = document.getElementById('cal-dias');
-        const modal = document.getElementById('modal');
+        const modal = janela('modal', 'btn-cancelar');
 
         function eventosDoDia(dia) {
             return eventos
@@ -232,11 +232,7 @@
             document.getElementById('tipo').value = 'recebimento';
             document.getElementById('erro-titulo').style.display = 'none';
             document.getElementById('erro-data').style.display = 'none';
-            modal.classList.add('aberto');
-        }
-
-        function fecharModal() {
-            modal.classList.remove('aberto');
+            modal.abrir();
         }
 
         document.getElementById('btn-anterior').addEventListener('click', () => {
@@ -283,15 +279,6 @@
         });
 
         document.getElementById('btn-novo').addEventListener('click', abrirModal);
-        document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) fecharModal();
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') fecharModal();
-        });
 
         document.getElementById('form-evento').addEventListener('submit', e => {
             e.preventDefault();
@@ -317,7 +304,7 @@
                 mes = m - 1;
                 selecionada = evento.data;
 
-                fecharModal();
+                modal.fechar();
                 render();
             }).catch(falhou);
         });

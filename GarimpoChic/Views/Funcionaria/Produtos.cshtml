@@ -145,26 +145,22 @@
         let editandoId = null;
         let filtroStatus = 'todos';
 
-        const corpo = document.getElementById('corpo');
         const busca = document.getElementById('busca');
-        const contador = document.getElementById('contador');
-        const vazio = document.getElementById('vazio');
-        const modal = document.getElementById('modal');
         const form = document.getElementById('form-produto');
+        const corpo = document.getElementById('corpo');
+        const modal = janela('modal', 'btn-cancelar');
 
         function miniatura(p) {
             return p.foto ? `<img src="${esc(p.foto)}" alt="">` : (EMOJIS[p.categoria] || '✦');
         }
 
-        function render() {
-            const texto = busca.value.trim().toLowerCase();
-
-            const lista = produtos.filter(p =>
-                (filtroStatus === 'todos' || p.status === filtroStatus) &&
-                p.nome.toLowerCase().includes(texto)
-            );
-
-            corpo.innerHTML = lista.map(p => `
+        const tabela = tabelaPaginada({
+            corpo,
+            contador: document.getElementById('contador'),
+            vazio: document.getElementById('vazio'),
+            singular: 'peça',
+            plural: 'peças',
+            linha: p => `
                 <tr>
                     <td>
                         <div class="produto-cel">
@@ -183,10 +179,16 @@
                         <button class="btn-acao perigo" data-acao="excluir" data-id="${p.id}">Excluir</button>
                     </td>
                 </tr>
-            `).join('');
+            `,
+        });
 
-            contador.textContent = lista.length + (lista.length === 1 ? ' peça' : ' peças');
-            vazio.style.display = lista.length === 0 ? 'block' : 'none';
+        function render(opcoes) {
+            const texto = busca.value.trim().toLowerCase();
+
+            tabela.mostrar(produtos.filter(p =>
+                (filtroStatus === 'todos' || p.status === filtroStatus) &&
+                p.nome.toLowerCase().includes(texto)
+            ), opcoes);
         }
 
         function abrirModal(produto) {
@@ -210,23 +212,10 @@
             document.getElementById('erro-nome').style.display = 'none';
             document.getElementById('erro-preco').style.display = 'none';
 
-            modal.classList.add('aberto');
-        }
-
-        function fecharModal() {
-            modal.classList.remove('aberto');
+            modal.abrir();
         }
 
         document.getElementById('btn-novo').addEventListener('click', () => abrirModal(null));
-        document.getElementById('btn-cancelar').addEventListener('click', fecharModal);
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) fecharModal();
-        });
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') fecharModal();
-        });
 
         form.addEventListener('submit', e => {
             e.preventDefault();
@@ -251,8 +240,8 @@
                     } else {
                         produtos.unshift(salvo);
                     }
-                    fecharModal();
-                    render();
+                    modal.fechar();
+                    render({ manterPosicao: true });
                 })
                 .catch(falhou)
                 .finally(() => botao.disabled = false);
@@ -273,22 +262,18 @@
                 postar('/painel/produtos/' + id + '/excluir')
                     .then(() => {
                         produtos = produtos.filter(p => p.id !== id);
-                        render();
+                        render({ manterPosicao: true });
                     })
                     .catch(falhou);
             }
         });
 
-        document.querySelectorAll('.chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.chip').forEach(c => c.classList.remove('ativo'));
-                chip.classList.add('ativo');
-                filtroStatus = chip.dataset.status;
-                render();
-            });
+        chipsDeFiltro('status', status => {
+            filtroStatus = status;
+            render();
         });
 
-        busca.addEventListener('input', render);
+        busca.addEventListener('input', () => render());
 
         render();
     </script>

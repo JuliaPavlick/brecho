@@ -62,28 +62,23 @@ public class FuncionariaController(BrechoContext db) : Controller
         aviso,
     };
 
-    // Carrega a peça com os ids das fotos, sem trazer as imagens em si
-    Task<Produto?> BuscarProduto(int id) =>
-        db.Produtos.Include(p => p.Vendedora)
-            .Select(p => new Produto
-            {
-                Id = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
-                Status = p.Status, Vendedora = p.Vendedora, CriadoEm = p.CriadoEm,
-                Fotos = p.Fotos.Select(f => new ProdutoFoto { Id = f.Id }).ToList(),
-            })
-            .FirstOrDefaultAsync(p => p.Id == id);
+    // Peças para as telas do painel: só os ids das fotos (sem as imagens) e só o nome da vendedora
+    // (a conta inteira faria o CPF ser decifrado em cada linha, à toa)
+    static IQueryable<Produto> ParaPainel(IQueryable<Produto> q) =>
+        q.Select(p => new Produto
+        {
+            Id = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
+            Status = p.Status, CriadoEm = p.CriadoEm,
+            Vendedora = p.Vendedora == null ? null : new Usuario { Nome = p.Vendedora.Nome },
+            Fotos = p.Fotos.Select(f => new ProdutoFoto { Id = f.Id }).ToList(),
+        });
+
+    Task<Produto?> BuscarProduto(int id) => ParaPainel(db.Produtos.Where(p => p.Id == id)).FirstOrDefaultAsync();
 
     [HttpGet("produtos")]
     public async Task<IActionResult> Produtos()
     {
-        var produtos = await db.Produtos.Include(p => p.Vendedora)
-            .OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)
-            .Select(p => new Produto
-            {
-                Id = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
-                Status = p.Status, Vendedora = p.Vendedora,
-                Fotos = p.Fotos.Select(f => new ProdutoFoto { Id = f.Id }).ToList(),
-            })
+        var produtos = await ParaPainel(db.Produtos.OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id))
             .ToListAsync();
 
         return View(produtos.Select(p => ProdutoJson(p)).ToList());
@@ -184,15 +179,9 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpGet("lote")]
     public async Task<IActionResult> Lote([FromServices] Gemini gemini)
     {
-        var rascunhos = await db.Produtos
+        var rascunhos = await ParaPainel(db.Produtos
             .Where(p => p.Status == StatusProduto.Avaliacao && p.VendedoraId == null)
-            .OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id)
-            .Select(p => new Produto
-            {
-                Id = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
-                Status = p.Status, CriadoEm = p.CriadoEm,
-                Fotos = p.Fotos.Select(f => new ProdutoFoto { Id = f.Id }).ToList(),
-            })
+            .OrderByDescending(p => p.CriadoEm).ThenByDescending(p => p.Id))
             .ToListAsync();
 
         ViewData["GeminiLigado"] = gemini.Configurado;
@@ -258,16 +247,27 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpGet("pedidos")]
     public async Task<IActionResult> Pedidos()
     {
-        var pedidos = await db.Pedidos.Include(p => p.Itens).Include(p => p.Cliente)
-            .OrderByDescending(p => p.Data).ToListAsync();
+        var pedidos = await db.Pedidos.AsNoTracking()
+            .OrderByDescending(p => p.Data)
+            .Select(p => new
+            {
+                p.Id,
+                Cliente = p.Cliente!.Nome,
+                p.Cliente.Telefone,
+                p.Cliente.Email,
+                p.Data,
+                p.Status,
+                Itens = p.Itens.Select(i => new { i.Nome, i.Preco }).ToList(),
+            })
+            .ToListAsync();
 
         return View(pedidos.Select(p => new
         {
             id = p.Id,
-            cliente = p.Cliente?.Nome ?? "—",
+            cliente = string.IsNullOrEmpty(p.Cliente) ? "—" : p.Cliente,
             // A loja combina pagamento e entrega com a cliente: o contato fica à mão no detalhe do pedido
-            telefone = p.Cliente?.Telefone ?? "",
-            email = p.Cliente?.Email ?? "",
+            telefone = p.Telefone ?? "",
+            email = p.Email ?? "",
             data = Formato.Data(p.Data),
             status = p.Status,
             itens = p.Itens.Select(i => new { nome = i.Nome, preco = i.Preco }),
@@ -499,15 +499,26 @@ public class FuncionariaController(BrechoContext db) : Controller
     [HttpGet("clientes")]
     public async Task<IActionResult> Clientes()
     {
-        var pessoas = await db.Usuarios.Where(u => u.ExcluidaEm == null).OrderBy(u => u.Nome).ToListAsync();
-        var pedidos = await db.Pedidos.Include(p => p.Itens).ToListAsync();
+        var pessoas = await db.Usuarios.AsNoTracking().Where(u => u.ExcluidaEm == null).OrderBy(u => u.Nome).ToListAsync();
+
+        // Por pessoa: quantos pedidos e quanto gastou. Só os números necessários saem do banco
+        // (a soma é feita aqui porque o SQLite do desenvolvimento não soma decimal)
+        var pedidosPorPessoa = await db.Pedidos.GroupBy(p => p.ClienteId)
+            .Select(g => new { g.Key, Total = g.Count() })
+            .ToDictionaryAsync(g => g.Key, g => g.Total);
+        var gastoPorPessoa = (await db.PedidoItens
+                .Where(i => i.Pedido!.Status != StatusPedido.Cancelado)
+                .Select(i => new { i.Pedido!.ClienteId, i.Preco })
+                .ToListAsync())
+            .GroupBy(i => i.ClienteId)
+            .ToDictionary(g => g.Key, g => g.Sum(i => i.Preco));
+
         var enviadas = await db.Produtos.Where(p => p.VendedoraId != null)
             .GroupBy(p => p.VendedoraId).Select(g => new { g.Key, Total = g.Count() })
             .ToDictionaryAsync(g => g.Key!.Value, g => g.Total);
 
         return View(pessoas.Select(u =>
         {
-            var meus = pedidos.Where(p => p.ClienteId == u.Id).ToList();
             var papeis = new List<string> { "cliente" };
             if (u.EhVendedora) papeis.Add("vendedora");
             if (u.EhFuncionaria) papeis.Add("funcionaria");
@@ -523,8 +534,8 @@ public class FuncionariaController(BrechoContext db) : Controller
                 cidade = u.Cidade ?? "—",
                 desde = Formato.Data(u.CriadoEm),
                 papeis,
-                pedidos = meus.Count,
-                gasto = meus.Where(p => p.Status != StatusPedido.Cancelado).Sum(p => p.Total),
+                pedidos = pedidosPorPessoa.GetValueOrDefault(u.Id),
+                gasto = gastoPorPessoa.GetValueOrDefault(u.Id),
                 pecasEnviadas = enviadas.GetValueOrDefault(u.Id),
             };
         }).ToList());

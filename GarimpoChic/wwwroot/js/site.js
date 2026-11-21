@@ -413,3 +413,69 @@ document.addEventListener('DOMContentLoaded', () => {
         new MutationObserver(() => sincronizar(chip)).observe(chip, { attributes: true, attributeFilter: ['class'] });
     });
 });
+
+// ---------- Peças das telas do painel (Produtos, Pedidos, Clientes, Calendário) ----------
+
+// Janela (.modal-fundo): abre com .abrir(); fecha pelos botões indicados, clicando fora ou com Esc
+function janela(id, ...botoesFechar) {
+    const fundo = document.getElementById(id);
+    const fechar = () => fundo.classList.remove('aberto');
+
+    botoesFechar.forEach(b => document.getElementById(b).addEventListener('click', fechar));
+    fundo.addEventListener('click', e => {
+        if (e.target === fundo) fechar();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && fundo.classList.contains('aberto')) fechar();
+    });
+
+    return { abrir: () => fundo.classList.add('aberto'), fechar };
+}
+
+// Chips de filtro: marca o escolhido e avisa com o valor do atributo data-<campo> (ex.: data-status)
+function chipsDeFiltro(campo, aoEscolher) {
+    const chips = document.querySelectorAll('.chip');
+    chips.forEach(chip => chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('ativo'));
+        chip.classList.add('ativo');
+        aoEscolher(chip.dataset[campo]);
+    }));
+}
+
+// Tabela que mostra a lista aos poucos: as primeiras linhas e um botão "Mostrar mais".
+// A busca e os filtros continuam valendo para a lista inteira; só o desenho é dividido.
+function tabelaPaginada({ corpo, contador, vazio, linha, singular, plural, porPagina = 50 }) {
+    let lista = [];
+    let limite = porPagina;
+
+    const mais = document.createElement('button');
+    mais.type = 'button';
+    mais.className = 'btn-secundario btn-mais';
+    (corpo.closest('.tabela-wrap') || corpo).insertAdjacentElement('afterend', mais);
+    mais.addEventListener('click', () => {
+        limite += porPagina;
+        desenhar();
+    });
+
+    function desenhar() {
+        const visiveis = lista.slice(0, limite);
+        corpo.innerHTML = visiveis.map(linha).join('');
+
+        const total = lista.length + ' ' + (lista.length === 1 ? singular : plural);
+        contador.textContent = visiveis.length < lista.length ? `${total} • mostrando ${visiveis.length}` : total;
+        vazio.style.display = lista.length === 0 ? 'block' : 'none';
+
+        const restantes = lista.length - visiveis.length;
+        mais.hidden = restantes <= 0;
+        mais.textContent = `Mostrar mais (${restantes} ${restantes === 1 ? 'restante' : 'restantes'})`;
+    }
+
+    return {
+        // Busca ou filtro novo volta para o começo; depois de salvar algo, a tela fica onde estava
+        mostrar(novaLista, { manterPosicao = false } = {}) {
+            lista = novaLista;
+            if (!manterPosicao) limite = porPagina;
+            desenhar();
+        },
+    };
+}
