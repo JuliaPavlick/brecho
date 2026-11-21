@@ -70,6 +70,7 @@
         <h3 id="det-titulo"></h3>
         <p class="det-sub" id="det-sub"></p>
         <p class="det-sub" id="det-contato"></p>
+        <p class="det-sub" id="det-entrega"></p>
 
         <div id="det-itens"></div>
 
@@ -155,6 +156,7 @@
             if (pedido.email)
                 contato.push(`<a href="mailto:${esc(pedido.email)}">${esc(pedido.email)}</a>`);
             document.getElementById('det-contato').innerHTML = contato.length ? contato.join(' • ') : 'Sem contato cadastrado';
+            document.getElementById('det-entrega').textContent = 'Entrega: ' + pedido.entrega;
 
             document.getElementById('det-itens').innerHTML = pedido.itens.map(i => `
                 <div class="det-item">

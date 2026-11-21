@@ -22,7 +22,7 @@ public class ComissaoTests
         using var cliente = site.Navegador();
         await cliente.Entrar(SiteDeTeste.CpfMariana);
         await cliente.Fetch($"/sacola/{(await site.Produto("Casaco de Lã")).Id}");
-        await cliente.Enviar("/sacola/finalizar");
+        await cliente.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
         return await site.Banco(db => db.Pedidos.Include(p => p.Itens).OrderByDescending(p => p.Id).FirstAsync());
     }
 
@@ -55,7 +55,7 @@ public class ComissaoTests
         using var cliente = site.Navegador();
         await cliente.Entrar(SiteDeTeste.CpfMariana);
         await cliente.Fetch($"/sacola/{(await site.Produto("Bolsa Retrô")).Id}");
-        await cliente.Enviar("/sacola/finalizar");
+        await cliente.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
 
         var item = await site.Banco(db => db.PedidoItens.OrderByDescending(i => i.Id).FirstAsync());
 

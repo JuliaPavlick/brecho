@@ -77,6 +77,10 @@ Para o nome, a categoria, a descrição e o preço virem preenchidos, crie uma c
 
 No plano gratuito não há cobrança enquanto o faturamento não for ativado na conta do Google: quando o limite acaba, o Google só recusa os pedidos, e a tela espera e tenta de novo. No plano gratuito o Google pode usar as fotos enviadas para melhorar os produtos dele (só fotos das peças são enviadas).
 
+## Entrega
+
+Ao finalizar a compra, a cliente escolhe **Retirar na loja** ou **Receber em casa** (com CEP, rua, número, complemento, bairro, cidade e UF). O frete, como o pagamento, é combinado com a loja. O endereço fica guardado no pedido, aparece em **Minhas compras**, no detalhe do pedido no painel e no e-mail de confirmação, e a próxima compra já vem com o último endereço usado. Ele entra no "Baixar meus dados" e é apagado quando a pessoa exclui a conta.
+
 ## Comissão das vendedoras
 
 A vendedora externa recebe um percentual do preço de cada peça dela que foi vendida. O padrão é **50%**, e a funcionária muda em **Financeiro → Comissões das vendedoras**.

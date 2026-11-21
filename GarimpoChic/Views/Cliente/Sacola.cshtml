@@ -6,11 +6,16 @@
 
     var disponiveis = Model.Where(p => p.Disponivel).ToList();
     var total = disponiveis.Sum(p => p.Preco);
+
+    // Escolha de entrega: a da última compra, ou o que a pessoa digitou antes de um erro
+    var e = (EntregaForm)ViewData["Entrega"]!;
+    var envio = e.Entrega == TipoEntrega.Envio;
 }
 
 @section Estilos {
     <link rel="stylesheet" href="~/css/explorar.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/compras.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/perfil.css" asp-append-version="true">
 }
 
 <main class="conteudo">
@@ -76,8 +81,77 @@
 
         @if (disponiveis.Count > 0)
         {
-            <form action="/sacola/finalizar" method="post" asp-antiforgery="true" class="finalizar"
+            <form action="/sacola/finalizar" method="post" asp-antiforgery="true" class="finalizar" id="form-finalizar" novalidate
                 data-confirmar="Finalizar a compra de @disponiveis.Count @(disponiveis.Count == 1 ? "peça" : "peças") por @Formato.Moeda(total)?">
+
+                <fieldset class="entrega">
+                    <legend>Como você quer receber?</legend>
+
+                    @if (ViewData["ErroEntrega"] is string erroEntrega)
+                    {
+                        <div class="alerta-erro" role="alert">@erroEntrega</div>
+                    }
+
+                    <label class="opcao-entrega">
+                        <input type="radio" name="Entrega" value="@TipoEntrega.Retirada" checked="@(!envio)">
+                        <span><strong>Retirar na loja</strong> — a loja combina com você o dia e o horário</span>
+                    </label>
+                    <label class="opcao-entrega">
+                        <input type="radio" name="Entrega" value="@TipoEntrega.Envio" checked="@envio">
+                        <span><strong>Receber em casa</strong> — o frete é combinado com a loja</span>
+                    </label>
+
+                    <div id="campos-endereco" hidden="@(!envio)">
+                        <div class="linha-campos">
+                            <div class="campo">
+                                <label for="cep">CEP</label>
+                                <input type="text" inputmode="numeric" id="cep" name="Cep" maxlength="9" placeholder="00000-000"
+                                    autocomplete="postal-code" value="@e.Cep">
+                                <span class="erro-campo" id="erro-cep">Informe um CEP com 8 números.</span>
+                            </div>
+                            <div class="campo">
+                                <label for="estado">Estado</label>
+                                <select id="estado" name="Estado" autocomplete="address-level1">
+                                    <option value="">—</option>
+                                    @foreach (var uf in Formato.Ufs)
+                                    {
+                                        <option value="@uf" selected="@(uf == e.Estado)">@uf</option>
+                                    }
+                                </select>
+                                <span class="erro-campo" id="erro-estado">Escolha o estado.</span>
+                            </div>
+                        </div>
+                        <div class="campo">
+                            <label for="endereco">Rua</label>
+                            <input type="text" id="endereco" name="Endereco" maxlength="120" autocomplete="address-line1" value="@e.Endereco">
+                            <span class="erro-campo" id="erro-endereco">Informe a rua.</span>
+                        </div>
+                        <div class="linha-campos">
+                            <div class="campo">
+                                <label for="numero">Número</label>
+                                <input type="text" id="numero" name="Numero" maxlength="20" value="@e.Numero">
+                                <span class="erro-campo" id="erro-numero">Informe o número (ou "s/n").</span>
+                            </div>
+                            <div class="campo">
+                                <label for="complemento">Complemento (opcional)</label>
+                                <input type="text" id="complemento" name="Complemento" maxlength="60" autocomplete="address-line2" value="@e.Complemento">
+                            </div>
+                        </div>
+                        <div class="linha-campos">
+                            <div class="campo">
+                                <label for="bairro">Bairro</label>
+                                <input type="text" id="bairro" name="Bairro" maxlength="60" value="@e.Bairro">
+                                <span class="erro-campo" id="erro-bairro">Informe o bairro.</span>
+                            </div>
+                            <div class="campo">
+                                <label for="cidade">Cidade</label>
+                                <input type="text" id="cidade" name="Cidade" maxlength="80" autocomplete="address-level2" value="@e.Cidade">
+                                <span class="erro-campo" id="erro-cidade">Informe a cidade.</span>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
                 <p>Ao finalizar, a loja recebe o seu pedido e entra em contato para combinar o pagamento e a entrega.</p>
                 <button type="submit" class="btn-sacola ativo">Finalizar compra</button>
             </form>
@@ -85,3 +159,39 @@
     }
 
 </main>
+
+@section Scripts {
+    <script>
+        const formFinalizar = document.getElementById('form-finalizar');
+        if (formFinalizar) {
+            const campos = document.getElementById('campos-endereco');
+            const cep = document.getElementById('cep');
+            const ehEnvio = () => formFinalizar.querySelector('input[name="Entrega"]:checked')?.value === 'envio';
+
+            // O endereço só aparece para "Receber em casa"
+            formFinalizar.querySelectorAll('input[name="Entrega"]').forEach(r =>
+                r.addEventListener('change', () => campos.hidden = !ehEnvio()));
+
+            // CEP no formato 00000-000 enquanto digita
+            cep.addEventListener('input', () => {
+                const d = cep.value.replace(/\D/g, '').slice(0, 8);
+                cep.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+            });
+
+            // Registrado no próprio formulário: roda antes da pergunta "Finalizar a compra...?" do site.js
+            formFinalizar.addEventListener('submit', e => {
+                if (!ehEnvio()) return;
+                const preenchido = id => document.getElementById(id).value.trim() !== '';
+                const ok = [
+                    mostrarErro('erro-cep', cep.value.replace(/\D/g, '').length === 8),
+                    mostrarErro('erro-estado', preenchido('estado')),
+                    mostrarErro('erro-endereco', preenchido('endereco')),
+                    mostrarErro('erro-numero', preenchido('numero')),
+                    mostrarErro('erro-bairro', preenchido('bairro')),
+                    mostrarErro('erro-cidade', preenchido('cidade')),
+                ].every(Boolean);
+                if (!ok) e.preventDefault();
+            });
+        }
+    </script>
+}

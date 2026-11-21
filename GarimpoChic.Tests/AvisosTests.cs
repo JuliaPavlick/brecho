@@ -22,7 +22,7 @@ public class AvisosTests
         using var cliente = site.Navegador();
         await cliente.Entrar(SiteDeTeste.CpfMariana);
         await cliente.Fetch($"/sacola/{(await site.Produto(peca)).Id}");
-        await cliente.Enviar("/sacola/finalizar");
+        await cliente.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
         return await site.Banco(db => db.Pedidos.OrderByDescending(p => p.Id).FirstAsync());
     }
 

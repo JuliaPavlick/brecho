@@ -25,7 +25,7 @@ public class DadosDaLojaTests
         await funcionaria.Entrar(SiteDeTeste.CpfJulia);
         var bolsa = await site.Produto("Bolsa Retrô");
         await cliente.Fetch($"/sacola/{bolsa.Id}");
-        await cliente.Enviar("/sacola/finalizar");
+        await cliente.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
 
         var r = await funcionaria.Fetch($"/painel/produtos/{bolsa.Id}/excluir");
 

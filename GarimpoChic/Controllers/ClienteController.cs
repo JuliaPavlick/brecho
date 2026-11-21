@@ -150,10 +150,39 @@ public class ClienteController(BrechoContext db) : Controller
     // ---------- Sacola ----------
 
     [HttpGet("/sacola")]
-    public async Task<IActionResult> Sacola()
+    public Task<IActionResult> Sacola() => TelaSacola(null, null);
+
+    // A entrega vem preenchida com a da última compra (ou com a cidade do perfil); com erro, com o que foi digitado
+    async Task<IActionResult> TelaSacola(EntregaForm? digitado, string? erro)
     {
+        if (digitado == null)
+        {
+            var ultimo = await db.Pedidos.AsNoTracking()
+                .Where(p => p.ClienteId == Eu.Id && p.Entrega != null)
+                .OrderByDescending(p => p.Data).FirstOrDefaultAsync();
+            digitado = ultimo?.Entrega == TipoEntrega.Envio
+                ? new EntregaForm(ultimo.Entrega, ultimo.Cep, ultimo.Endereco, ultimo.NumeroEndereco, ultimo.Complemento, ultimo.Bairro, ultimo.Cidade, ultimo.Estado)
+                : new EntregaForm(ultimo?.Entrega ?? TipoEntrega.Retirada, null, null, null, null, null, Eu.Cidade, Eu.Estado);
+        }
+
+        ViewData["Entrega"] = digitado;
+        ViewData["ErroEntrega"] = erro;
         var ids = db.Sacola.Where(s => s.UsuarioId == Eu.Id).Select(s => s.ProdutoId);
-        return View(await Cards(db.Produtos.Where(p => ids.Contains(p.Id))).ToListAsync());
+        return View("Sacola", await Cards(db.Produtos.Where(p => ids.Contains(p.Id))).ToListAsync());
+    }
+
+    // Confere a escolha de entrega; devolve o motivo quando falta algo
+    static string? ProblemaNaEntrega(EntregaForm f)
+    {
+        if (!TipoEntrega.Nomes.ContainsKey(f.Entrega ?? "")) return "Escolha como você quer receber o pedido.";
+        if (f.Entrega != TipoEntrega.Envio) return null;
+
+        if (Formato.SoDigitos(f.Cep).Length != 8) return "Informe um CEP válido, com 8 números.";
+        if (string.IsNullOrWhiteSpace(f.Endereco) || string.IsNullOrWhiteSpace(f.Numero) || string.IsNullOrWhiteSpace(f.Bairro) ||
+            string.IsNullOrWhiteSpace(f.Cidade))
+            return "Preencha rua, número, bairro e cidade.";
+        if (!Formato.Ufs.Contains((f.Estado ?? "").Trim().ToUpper())) return "Escolha o estado (UF).";
+        return null;
     }
 
     // Coloca ou tira uma peça da sacola (botão dos cards)
@@ -197,8 +226,15 @@ public class ClienteController(BrechoContext db) : Controller
     // Transforma a sacola em pedido. Cada peça é única: ela só entra no pedido se ainda estiver
     // disponível no momento da compra, e passa a "vendido" na mesma operação.
     [HttpPost("/sacola/finalizar")]
-    public async Task<IActionResult> Finalizar()
+    // O parâmetro não pode se chamar "entrega": o campo "Entrega" do formulário viraria prefixo e o resto chegaria vazio
+    public async Task<IActionResult> Finalizar([FromForm] EntregaForm escolha)
     {
+        var entrega = escolha;
+        if (ProblemaNaEntrega(entrega) is string problema)
+            return await TelaSacola(entrega, problema);
+        var envio = entrega.Entrega == TipoEntrega.Envio;
+        string? Limpo(string? texto) => envio && !string.IsNullOrWhiteSpace(texto) ? texto.Trim() : null;
+
         var itens = await db.Sacola.Include(s => s.Produto)
             .Where(s => s.UsuarioId == Eu.Id).ToListAsync();
         var pecas = itens.Select(s => s.Produto!).Where(p => p.Status == StatusProduto.Disponivel).ToList();
@@ -228,6 +264,14 @@ public class ClienteController(BrechoContext db) : Controller
         var pedido = new Pedido
         {
             ClienteId = Eu.Id,
+            Entrega = entrega.Entrega,
+            Cep = envio ? Formato.Cep(entrega.Cep) : null,
+            Endereco = Limpo(entrega.Endereco),
+            NumeroEndereco = Limpo(entrega.Numero),
+            Complemento = Limpo(entrega.Complemento),
+            Bairro = Limpo(entrega.Bairro),
+            Cidade = Limpo(entrega.Cidade),
+            Estado = envio ? entrega.Estado!.Trim().ToUpper() : null,
             Itens = pecas.Select(p => new PedidoItem
             {
                 ProdutoId = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
@@ -281,7 +325,11 @@ public class ClienteController(BrechoContext db) : Controller
                 Eu.CriadoEm, Eu.AceitouPrivacidadeEm,
             },
             pedidos = await db.Pedidos.Where(p => p.ClienteId == Eu.Id).OrderBy(p => p.Data)
-                .Select(p => new { p.Id, p.Data, p.Status, itens = p.Itens.Select(i => new { i.Nome, i.Categoria, i.Preco }) })
+                .Select(p => new
+                {
+                    p.Id, p.Data, p.Status, p.Entrega, p.Cep, p.Endereco, p.NumeroEndereco, p.Complemento, p.Bairro, p.Cidade, p.Estado,
+                    itens = p.Itens.Select(i => new { i.Nome, i.Categoria, i.Preco }),
+                })
                 .ToListAsync(),
             favoritos = await db.Favoritos.Where(f => f.UsuarioId == Eu.Id)
                 .Select(f => new { f.Produto!.Nome, f.CriadoEm }).ToListAsync(),
@@ -325,6 +373,15 @@ public class ClienteController(BrechoContext db) : Controller
 
         await db.Favoritos.Where(f => f.UsuarioId == Eu.Id).ExecuteDeleteAsync();
         await db.Sacola.Where(s => s.UsuarioId == Eu.Id).ExecuteDeleteAsync();
+        // O endereço de entrega também é dado pessoal: os pedidos ficam, sem ele
+        await db.Pedidos.Where(p => p.ClienteId == Eu.Id).ExecuteUpdateAsync(s => s
+            .SetProperty(p => p.Cep, (string?)null)
+            .SetProperty(p => p.Endereco, (string?)null)
+            .SetProperty(p => p.NumeroEndereco, (string?)null)
+            .SetProperty(p => p.Complemento, (string?)null)
+            .SetProperty(p => p.Bairro, (string?)null)
+            .SetProperty(p => p.Cidade, (string?)null)
+            .SetProperty(p => p.Estado, (string?)null));
 
         Eu.Nome = "Conta excluída";
         Eu.Cpf = ""; // também apaga o resumo usado no login
@@ -455,6 +512,9 @@ public class ClienteController(BrechoContext db) : Controller
         return Redirect("/vender");
     }
 }
+
+public record EntregaForm(string? Entrega, string? Cep, string? Endereco, string? Numero, string? Complemento,
+    string? Bairro, string? Cidade, string? Estado);
 
 public record PerfilForm(string? Nome, string? Email, string? Telefone, string? Cidade, string? Estado);
 

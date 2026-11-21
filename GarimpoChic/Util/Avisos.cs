@@ -92,6 +92,7 @@ public class Avisos(FilaDeEmails fila, IConfiguration config, IHttpContextAccess
         <p>Recebemos seu pedido <strong>{H(pedido.Numero)}</strong>:</p>
         {ListaDeItens(pedido.Itens)}
         <p>Total: <strong>{H(Formato.Moeda(pedido.Total))}</strong></p>
+        <p>Entrega: {H(pedido.DescricaoEntrega)}</p>
         <p>A loja vai entrar em contato para combinar o pagamento e a entrega.</p>
         """,
         "Ver minhas compras", "/compras");

@@ -269,6 +269,7 @@ public class FuncionariaController(BrechoContext db) : Controller
                 p.Cliente.Email,
                 p.Data,
                 p.Status,
+                p.Entrega, p.Cep, p.Endereco, p.NumeroEndereco, p.Complemento, p.Bairro, p.Cidade, p.Estado,
                 Itens = p.Itens.Select(i => new { i.Nome, i.Preco }).ToList(),
             })
             .ToListAsync();
@@ -282,6 +283,12 @@ public class FuncionariaController(BrechoContext db) : Controller
             email = p.Email ?? "",
             data = Formato.Data(p.Data),
             status = p.Status,
+            // Monta o texto da entrega do mesmo jeito que o pedido (Pedido.DescricaoEntrega)
+            entrega = new Pedido
+            {
+                Entrega = p.Entrega, Cep = p.Cep, Endereco = p.Endereco, NumeroEndereco = p.NumeroEndereco, Complemento = p.Complemento,
+                Bairro = p.Bairro, Cidade = p.Cidade, Estado = p.Estado,
+            }.DescricaoEntrega,
             itens = p.Itens.Select(i => new { nome = i.Nome, preco = i.Preco }),
         }).ToList());
     }

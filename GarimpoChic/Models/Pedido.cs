@@ -16,6 +16,45 @@ public class Pedido
 
     public List<PedidoItem> Itens { get; set; } = [];
 
+    // Como a cliente quer receber (TipoEntrega). Pedidos de antes desta opção ficam vazios.
+    [MaxLength(20)]
+    public string? Entrega { get; set; }
+
+    // Endereço, só quando é para receber em casa. Fica copiado no pedido: mudar o perfil depois não muda o pedido.
+    [MaxLength(9)]
+    public string? Cep { get; set; }
+
+    [MaxLength(120)]
+    public string? Endereco { get; set; }
+
+    // Número da casa/prédio (Numero já é o número do pedido, ex.: "#0147")
+    [MaxLength(20)]
+    public string? NumeroEndereco { get; set; }
+
+    [MaxLength(60)]
+    public string? Complemento { get; set; }
+
+    [MaxLength(60)]
+    public string? Bairro { get; set; }
+
+    [MaxLength(80)]
+    public string? Cidade { get; set; }
+
+    [MaxLength(2)]
+    public string? Estado { get; set; }
+
+    // Ex.: "Rua das Flores, 120 (apto 3) — Centro, Joinville/SC — CEP 89201-000"
+    public string? EnderecoCompleto => Entrega == TipoEntrega.Envio
+        ? $"{Endereco}, {NumeroEndereco}{(string.IsNullOrWhiteSpace(Complemento) ? "" : $" ({Complemento})")} — {Bairro}, {Cidade}/{Estado} — CEP {Cep}"
+        : null;
+
+    public string DescricaoEntrega => Entrega switch
+    {
+        TipoEntrega.Envio => "Receber em casa: " + EnderecoCompleto,
+        TipoEntrega.Retirada => "Retirar na loja",
+        _ => "Combinar com a loja",
+    };
+
     public decimal Total => Itens.Sum(i => i.Preco);
 
     public string Numero => "#" + Id.ToString("0000");
@@ -53,6 +92,18 @@ public class PedidoItem
     public decimal ValorVendedora => PercentualVendedora is decimal pct ? Util.Comissao.Valor(Preco, pct) : 0;
 
     public string Emoji => Categorias.Emoji(Categoria);
+}
+
+public static class TipoEntrega
+{
+    public const string Retirada = "retirada";
+    public const string Envio = "envio";
+
+    public static readonly Dictionary<string, string> Nomes = new()
+    {
+        [Retirada] = "Retirar na loja",
+        [Envio] = "Receber em casa",
+    };
 }
 
 public static class StatusPedido

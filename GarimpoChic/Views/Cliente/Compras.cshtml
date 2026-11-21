@@ -46,6 +46,11 @@
                     <span class="status @pedido.Status">@StatusPedido.Nomes.GetValueOrDefault(pedido.Status)</span>
                 </div>
 
+                @if (pedido.Entrega != null)
+                {
+                    <p class="pedido-entrega">@pedido.DescricaoEntrega</p>
+                }
+
                 <div class="pedido-itens">
                     @foreach (var item in pedido.Itens)
                     {

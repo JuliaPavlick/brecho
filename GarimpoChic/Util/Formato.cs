@@ -45,6 +45,12 @@ public static class Formato
         "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO",
     ];
 
+    public static string Cep(string? texto)
+    {
+        var d = SoDigitos(texto);
+        return d.Length == 8 ? $"{d[..5]}-{d[5..]}" : d;
+    }
+
     public static string SoDigitos(string? texto) => new((texto ?? "").Where(char.IsDigit).ToArray());
 
     public static bool CpfValido(string? valor)

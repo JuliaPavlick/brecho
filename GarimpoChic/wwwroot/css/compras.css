@@ -134,3 +134,44 @@
         gap: 12px;
     }
 }
+/* Escolha da entrega na sacola */
+.entrega {
+    border: 1px solid #e6dcc3;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 0 0 16px;
+    background: #fffdf7;
+    text-align: left;
+}
+
+.entrega legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
+.opcao-entrega {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.opcao-entrega input {
+    margin-top: 3px;
+}
+
+#campos-endereco {
+    margin-top: 12px;
+}
+
+#campos-endereco[hidden] {
+    display: none;
+}
+
+/* Entrega escolhida, em "Minhas compras" */
+.pedido-entrega {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: #776843;
+}

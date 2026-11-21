@@ -204,7 +204,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('submit', e => {
     const form = e.target.closest('form[data-confirmar]');
-    if (form && !confirm(form.dataset.confirmar)) e.preventDefault();
+    if (form && !e.defaultPrevented && !confirm(form.dataset.confirmar)) e.preventDefault();
 });
 
 // No celular, cada linha das tabelas do painel vira um cartão (veja site.css).

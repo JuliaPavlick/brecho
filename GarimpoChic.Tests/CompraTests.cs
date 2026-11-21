@@ -42,7 +42,7 @@ public class CompraTests
         await nav.Fetch($"/sacola/{salto.Id}");
         var pedidosAntes = await site.Banco(db => db.Pedidos.CountAsync());
 
-        var r = await nav.Enviar("/sacola/finalizar");
+        var r = await nav.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
 
         Assert.Equal("/compras", r.Destino());
         Assert.Equal(pedidosAntes + 1, await site.Banco(db => db.Pedidos.CountAsync()));
@@ -67,9 +67,9 @@ public class CompraTests
         await mariana.Fetch($"/sacola/{bolsa.Id}");
         await ana.Fetch($"/sacola/{bolsa.Id}");
 
-        await ana.Enviar("/sacola/finalizar");
+        await ana.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
         var pedidosAntes = await site.Banco(db => db.Pedidos.CountAsync());
-        var r = await mariana.Enviar("/sacola/finalizar");
+        var r = await mariana.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
 
         Assert.Equal("/sacola", r.Destino());
         Assert.Equal(pedidosAntes, await site.Banco(db => db.Pedidos.CountAsync()));
@@ -119,7 +119,7 @@ public class CompraTests
         await funcionaria.Entrar(SiteDeTeste.CpfJulia);
         var bolsa = await site.Produto("Bolsa Retrô");
         await cliente.Fetch($"/sacola/{bolsa.Id}");
-        await cliente.Enviar("/sacola/finalizar");
+        await cliente.Enviar("/sacola/finalizar", new() { ["Entrega"] = "retirada" });
         var pedido = await site.Banco(db => db.Pedidos.OrderByDescending(p => p.Id).FirstAsync());
 
         var r = await funcionaria.Fetch($"/painel/pedidos/{pedido.Id}/status",
