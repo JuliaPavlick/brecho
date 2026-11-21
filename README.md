@@ -77,6 +77,15 @@ Para o nome, a categoria, a descrição e o preço virem preenchidos, crie uma c
 
 No plano gratuito não há cobrança enquanto o faturamento não for ativado na conta do Google: quando o limite acaba, o Google só recusa os pedidos, e a tela espera e tenta de novo. No plano gratuito o Google pode usar as fotos enviadas para melhorar os produtos dele (só fotos das peças são enviadas).
 
+## Comissão das vendedoras
+
+A vendedora externa recebe um percentual do preço de cada peça dela que foi vendida. O padrão é **50%**, e a funcionária muda em **Financeiro → Comissões das vendedoras**.
+
+- O valor só passa a ser devido quando o pedido é **entregue**; pedido cancelado não conta.
+- Cada venda guarda o percentual do dia: mudar o percentual vale só para as próximas vendas.
+- A tabela mostra, por vendedora, quanto ela tem a receber, quanto já foi pago (repasses) e o saldo. O botão **Pagar saldo** preenche o formulário de repasse com o valor devido.
+- A vendedora vê os próprios ganhos em **Vender → Meus ganhos**.
+
 ## Rotas
 
 | Página | Endereço |
@@ -126,4 +135,4 @@ As migrations são geradas para o Postgres. No desenvolvimento (SQLite), o banco
 ## Ainda não implementado
 
 - **Pagamento online:** finalizar a compra cria o pedido e marca as peças como vendidas, mas o pagamento é combinado direto com a loja.
-- **Repasse automático às vendedoras:** cada pagamento é registrado à mão em **Financeiro → Registrar repasse** (a vendedora vê os dela em **Vender**); ainda não há cálculo automático de comissão.
+- **Pagamento automático às vendedoras:** a loja calcula quanto deve a cada uma (veja "Comissão das vendedoras"), mas o pagamento em si (Pix, por exemplo) é feito fora do site e registrado à mão.

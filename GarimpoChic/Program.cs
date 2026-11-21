@@ -77,6 +77,7 @@ using (var scope = app.Services.CreateScope())
     if (apagadas > 0)
         app.Logger.LogWarning("{Qtd} chave(s) de login sem criptografia apagada(s); quem estava logado entra de novo.", apagadas);
     await DadosIniciais.PopularAsync(db, app.Configuration, app.Environment);
+    await Comissao.PreencherVendasAntigasAsync(db);
 }
 
 app.UseForwardedHeaders();

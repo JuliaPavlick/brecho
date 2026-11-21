@@ -123,7 +123,12 @@ public static class DadosIniciais
         foreach (var p in new[] { blusa, vestidoMidi, bolsa, oculos })
             db.Favoritos.Add(new Favorito { Usuario = julia, Produto = p });
 
-        PedidoItem Item(Produto p) => new() { Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco };
+        // Peça de vendedora fica ligada ao item: ao iniciar, a comissão dela é preenchida (Comissao.PreencherVendasAntigasAsync)
+        PedidoItem Item(Produto p) => new()
+        {
+            Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
+            Produto = p.Vendedora != null ? p : null,
+        };
 
         var pedidos = new List<Pedido>
         {

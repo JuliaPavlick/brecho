@@ -7,6 +7,8 @@
     var rel = (Relatorios)ViewData["Relatorios"]!;
     var mesAtual = Formato.Agora.ToString("MMMM", Formato.PtBr);
     var vendedoras = (System.Collections.IEnumerable)ViewData["Vendedoras"]!;
+    var extratos = (List<Comissao.Extrato>)ViewData["Extratos"]!;
+    var percentual = (decimal)ViewData["Percentual"]!;
 }
 
 @section Estilos {
@@ -72,6 +74,90 @@
 
     <partial name="_GraficoVendas" model="rel.Grafico()" />
 
+    <!-- COMISSOES DAS VENDEDORAS -->
+
+    <section class="painel painel-tabela" id="comissoes" aria-labelledby="titulo-comissoes">
+
+        <div class="cab-tabela">
+            <h3 id="titulo-comissoes">Comissões das vendedoras</h3>
+
+            <form class="form-percentual" id="form-percentual" novalidate>
+                <label for="percentual">Vendedora recebe</label>
+                <input type="number" id="percentual" min="1" max="100" step="0.5"
+                    value="@percentual.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                <span>% do preço</span>
+                <button type="submit" class="btn-secundario" id="btn-percentual">Salvar</button>
+            </form>
+        </div>
+
+        <p class="texto-backup">
+            Conta só as peças de pedidos <strong>entregues</strong>. Mudar o percentual vale para as próximas vendas;
+            as já feitas continuam com o percentual da época.
+        </p>
+
+        @if (extratos.Count == 0)
+        {
+            <p class="vazio" style="display:block">Nenhuma vendedora externa ainda ✦</p>
+        }
+        else
+        {
+            <div class="tabela-wrap">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Vendedora</th>
+                            <th>Peças entregues</th>
+                            <th class="col-valor">A receber</th>
+                            <th class="col-valor">Já pago</th>
+                            <th class="col-valor">Saldo</th>
+                            <th class="col-acoes">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in extratos)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@e.Nome</strong>
+                                    @if (e.Aguardando > 0)
+                                    {
+                                        <p class="nota-comissao">+ @Formato.Moeda(e.Aguardando) em pedidos ainda não entregues</p>
+                                    }
+                                </td>
+                                <td>@e.PecasEntregues</td>
+                                <td class="col-valor">@Formato.Moeda(e.Devido)</td>
+                                <td class="col-valor">@Formato.Moeda(e.Pago)</td>
+                                <td class="col-valor">
+                                    @if (e.Saldo > 0)
+                                    {
+                                        <strong class="saldo-devido">@Formato.Moeda(e.Saldo)</strong>
+                                    }
+                                    else if (e.Saldo < 0)
+                                    {
+                                        <span class="saldo-adiantado">@Formato.Moeda(-e.Saldo) pago a mais</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Em dia</span>
+                                    }
+                                </td>
+                                <td class="col-acoes">
+                                    @if (e.Saldo > 0)
+                                    {
+                                        <button type="button" class="btn-acao btn-pagar-saldo" data-vendedora="@e.VendedoraId"
+                                            data-valor="@e.Saldo.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                            aria-label="Pagar saldo de @e.Nome">Pagar saldo</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </section>
+
     <!-- REGISTRAR REPASSE -->
 
     <form class="painel form-repasse" id="form-repasse">
@@ -134,6 +220,29 @@
 @section Scripts {
     <script>
         const movimentacoes = @Json.Serialize(Model);
+
+        // Percentual das vendedoras
+        document.getElementById('form-percentual').addEventListener('submit', e => {
+            e.preventDefault();
+            const valor = document.getElementById('percentual').value;
+            if (!confirm(`Mudar para ${valor}%? Vale para as próximas vendas; as já feitas não mudam.`)) return;
+
+            const botao = document.getElementById('btn-percentual');
+            botao.disabled = true;
+            postar('/painel/financeiro/comissao', { percentual: valor })
+                .then(() => location.reload())
+                .catch(falhou)
+                .finally(() => botao.disabled = false);
+        });
+
+        // "Pagar saldo": preenche o formulário de repasse com a vendedora e o valor devido
+        document.querySelectorAll('.btn-pagar-saldo').forEach(btn => btn.addEventListener('click', () => {
+            document.getElementById('rep-vendedora').value = btn.dataset.vendedora;
+            document.getElementById('rep-valor').value = btn.dataset.valor;
+            const form = document.getElementById('form-repasse');
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('rep-valor').focus({ preventScroll: true });
+        }));
 
         document.getElementById('form-repasse').addEventListener('submit', e => {
             e.preventDefault();

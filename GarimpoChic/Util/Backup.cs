@@ -65,6 +65,7 @@ public static class Backup
         Gravar("pedido_itens.json", await db.PedidoItens.AsNoTracking().OrderBy(x => x.Id).ToListAsync());
         Gravar("eventos.json", await db.Eventos.AsNoTracking().OrderBy(x => x.Id).ToListAsync());
         Gravar("repasses.json", await db.Repasses.AsNoTracking().OrderBy(x => x.Id).ToListAsync());
+        Gravar("configuracoes.json", await db.Configuracoes.AsNoTracking().ToListAsync());
 
         // Fotos: primeiro a lista sem os bytes, depois cada uma num arquivo, uma de cada vez (economiza memória)
         var fotos = await db.ProdutoFotos.AsNoTracking().OrderBy(f => f.Id)
@@ -110,6 +111,7 @@ public static class Backup
         await db.Sacola.ExecuteDeleteAsync();
         await db.Repasses.ExecuteDeleteAsync();
         await db.Eventos.ExecuteDeleteAsync();
+        await db.Configuracoes.ExecuteDeleteAsync();
         await db.Usuarios.ExecuteDeleteAsync();
 
         async Task Inserir<T>(IEnumerable<T> linhas) where T : class
@@ -127,6 +129,8 @@ public static class Backup
         await Inserir(Ler<List<PedidoItem>>("pedido_itens.json"));
         await Inserir(Ler<List<Evento>>("eventos.json"));
         await Inserir(Ler<List<Repasse>>("repasses.json"));
+        if (zip.GetEntry("configuracoes.json") != null)
+            await Inserir(Ler<List<Configuracao>>("configuracoes.json"));
 
         foreach (var f in Ler<List<ProdutoFoto>>("fotos.json"))
         {

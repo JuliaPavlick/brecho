@@ -224,12 +224,16 @@ public class ClienteController(BrechoContext db) : Controller
             return Redirect("/sacola");
         }
 
+        var percentual = await Comissao.PercentualAsync(db);
         var pedido = new Pedido
         {
             ClienteId = Eu.Id,
             Itens = pecas.Select(p => new PedidoItem
             {
                 ProdutoId = p.Id, Nome = p.Nome, Descricao = p.Descricao, Categoria = p.Categoria, Preco = p.Preco,
+                // Peça de vendedora: o percentual de hoje fica guardado na venda (veja Util/Comissao.cs)
+                VendedoraId = p.VendedoraId,
+                PercentualVendedora = p.VendedoraId == null ? null : percentual,
             }).ToList(),
         };
         db.Pedidos.Add(pedido);
@@ -397,6 +401,8 @@ public class ClienteController(BrechoContext db) : Controller
     {
         ViewData["Repasses"] = await db.Repasses.Where(r => r.VendedoraId == Eu.Id)
             .OrderByDescending(r => r.Data).ToListAsync();
+        ViewData["Extrato"] = (await Comissao.ExtratosAsync(db, Eu.Id)).FirstOrDefault();
+        ViewData["Percentual"] = await Comissao.PercentualAsync(db);
         ViewData["Digitado"] = digitado;
         ViewData["Erro"] = erro;
         return View("Vender", await db.Produtos.Where(p => p.VendedoraId == Eu.Id)

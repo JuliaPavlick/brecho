@@ -43,6 +43,15 @@ public class PedidoItem
 
     public decimal Preco { get; set; }
 
+    // Peça de vendedora externa: quem é ela e o percentual combinado no dia da venda.
+    // Fica copiado aqui para que mudar o percentual depois não altere o que já foi vendido.
+    public int? VendedoraId { get; set; }
+
+    public decimal? PercentualVendedora { get; set; }
+
+    // Quanto a vendedora recebe por esta peça (zero se a peça é da própria loja)
+    public decimal ValorVendedora => PercentualVendedora is decimal pct ? Util.Comissao.Valor(Preco, pct) : 0;
+
     public string Emoji => Categorias.Emoji(Categoria);
 }
 

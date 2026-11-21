@@ -22,6 +22,22 @@ namespace GarimpoChic.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GarimpoChic.Models.Configuracao", b =>
+                {
+                    b.Property<string>("Chave")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("Valor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Chave");
+
+                    b.ToTable("Configuracoes");
+                });
+
             modelBuilder.Entity("GarimpoChic.Models.Evento", b =>
                 {
                     b.Property<int>("Id")
@@ -121,6 +137,10 @@ namespace GarimpoChic.Data.Migrations
                     b.Property<int>("PedidoId")
                         .HasColumnType("integer");
 
+                    b.Property<decimal?>("PercentualVendedora")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
                     b.Property<decimal>("Preco")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
@@ -128,11 +148,16 @@ namespace GarimpoChic.Data.Migrations
                     b.Property<int?>("ProdutoId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("VendedoraId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PedidoId");
 
                     b.HasIndex("ProdutoId");
+
+                    b.HasIndex("VendedoraId");
 
                     b.ToTable("PedidoItens");
                 });

@@ -157,15 +157,15 @@ public class FuncionariaController(BrechoContext db) : Controller
         var p = await db.Produtos.Include(x => x.Vendedora).FirstOrDefaultAsync(x => x.Id == id);
         if (p == null) return NotFound();
 
+        if (p.VendedoraId != null && p.Status != StatusProduto.Avaliacao)
+            return BadRequest(new { erro = $"Esta peça é de {p.Vendedora?.Nome ?? "uma vendedora"} e já está na loja. " +
+                "Excluir apagaria a peça da lista que a vendedora acompanha em \"Vender\". Para tirá-la da venda, mude o status." });
+
         var pedidoAtivo = await db.PedidoItens
             .Where(i => i.ProdutoId == id && (i.Pedido!.Status == StatusPedido.Preparo || i.Pedido.Status == StatusPedido.Caminho))
             .Select(i => (int?)i.PedidoId).FirstOrDefaultAsync();
         if (pedidoAtivo != null)
             return BadRequest(new { erro = $"Esta peça está no pedido #{pedidoAtivo:0000}, que ainda não foi entregue. Ela não pode ser excluída." });
-
-        if (p.VendedoraId != null && p.Status != StatusProduto.Avaliacao)
-            return BadRequest(new { erro = $"Esta peça é de {p.Vendedora?.Nome ?? "uma vendedora"} e já está na loja. " +
-                "Excluir apagaria a peça da lista que a vendedora acompanha em \"Vender\". Para tirá-la da venda, mude o status." });
 
         db.Produtos.Remove(p);
         await db.SaveChangesAsync();
@@ -367,6 +367,8 @@ public class FuncionariaController(BrechoContext db) : Controller
             .ToList();
 
         ViewData["Relatorios"] = rel;
+        ViewData["Extratos"] = await Comissao.ExtratosAsync(db);
+        ViewData["Percentual"] = await Comissao.PercentualAsync(db);
         ViewData["Vendedoras"] = await db.Usuarios
             .Where(u => u.EhVendedora && u.ExcluidaEm == null)
             .OrderBy(u => u.Nome)
@@ -399,6 +401,20 @@ public class FuncionariaController(BrechoContext db) : Controller
             Data = Formato.ParaUtc(data.ToDateTime(new TimeOnly(12, 0))),
         });
         await db.SaveChangesAsync();
+        return Ok();
+    }
+
+    public record PercentualForm(string? Percentual);
+
+    // Muda o percentual das vendedoras. Vale para as próximas vendas; as já feitas guardam o percentual da época.
+    [HttpPost("financeiro/comissao")]
+    public async Task<IActionResult> DefinirComissao([FromBody] PercentualForm? form)
+    {
+        var pct = Precos.Ler(form?.Percentual);
+        if (pct <= 0 || pct > 100)
+            return BadRequest(new { erro = "Informe um percentual entre 1 e 100." });
+
+        await Comissao.DefinirPercentualAsync(db, pct);
         return Ok();
     }
 

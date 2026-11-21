@@ -5,6 +5,9 @@
     ViewData["Menu"] = "vender";
     // Depois de um erro, os campos mostram o que a pessoa digitou
     var digitado = ViewData["Digitado"] as GarimpoChic.Controllers.VenderForm;
+    var extrato = ViewData["Extrato"] as Comissao.Extrato;
+    var percentual = (decimal)ViewData["Percentual"]!;
+    var percentualTexto = percentual.ToString("0.##", Formato.PtBr) + "%";
 }
 
 @section Estilos {
@@ -61,7 +64,7 @@
                 </div>
 
                 <div class="campo">
-                    <label for="preco">Preço sugerido (R$)</label>
+                    <label for="preco">Preço sugerido (R$) — você recebe @percentualTexto</label>
                     <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="0,00" value="@digitado?.Preco">
                     <span class="erro-campo" id="erro-preco">Informe um preço maior que zero.</span>
                 </div>
@@ -77,6 +80,41 @@
             </div>
 
         </form>
+
+        <!-- MEUS GANHOS -->
+
+        @if (extrato != null && (extrato.Devido > 0 || extrato.Aguardando > 0 || extrato.Pago > 0))
+        {
+            <div class="painel-form" id="meus-ganhos">
+                <h3>Meus ganhos</h3>
+                <p class="texto-backup">
+                    Você recebe @percentualTexto do preço de cada peça sua vendida, quando a cliente recebe o pedido.
+                    Peças suas já entregues: <strong>@extrato.PecasEntregues</strong>.
+                </p>
+
+                <div class="item">
+                    <div class="item-info">
+                        <h5>@(extrato.Saldo >= 0 ? Formato.Moeda(extrato.Saldo) : Formato.Moeda(0))</h5>
+                        <p>A receber da loja agora</p>
+                    </div>
+                </div>
+                @if (extrato.Aguardando > 0)
+                {
+                    <div class="item">
+                        <div class="item-info">
+                            <h5>@Formato.Moeda(extrato.Aguardando)</h5>
+                            <p>Em pedidos ainda não entregues</p>
+                        </div>
+                    </div>
+                }
+                <div class="item">
+                    <div class="item-info">
+                        <h5>@Formato.Moeda(extrato.Pago)</h5>
+                        <p>Já recebido da loja</p>
+                    </div>
+                </div>
+            </div>
+        }
 
         <!-- MINHAS PEÇAS -->
 

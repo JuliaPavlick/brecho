@@ -16,6 +16,7 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
     public DbSet<PedidoItem> PedidoItens => Set<PedidoItem>();
     public DbSet<Evento> Eventos => Set<Evento>();
     public DbSet<Repasse> Repasses => Set<Repasse>();
+    public DbSet<Configuracao> Configuracoes => Set<Configuracao>();
 
     // Chaves que assinam o cookie de login; ficam no banco para o login sobreviver a um novo deploy
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
@@ -59,6 +60,8 @@ public class BrechoContext(DbContextOptions<BrechoContext> options) : DbContext(
             .HasForeignKey(p => p.ClienteId);
 
         mb.Entity<PedidoItem>().Property(i => i.Preco).HasPrecision(10, 2);
+        mb.Entity<PedidoItem>().Property(i => i.PercentualVendedora).HasPrecision(5, 2);
+        mb.Entity<PedidoItem>().HasIndex(i => i.VendedoraId);
         mb.Entity<PedidoItem>()
             .HasOne(i => i.Produto).WithMany()
             .HasForeignKey(i => i.ProdutoId).OnDelete(DeleteBehavior.SetNull);

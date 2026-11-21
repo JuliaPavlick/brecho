@@ -50,6 +50,16 @@ public static class TipoEvento
     public static readonly string[] Todos = [Recebimento, Avaliacao, Colecao, Outro];
 }
 
+// Ajustes da loja guardados no banco (ex.: o percentual das vendedoras), um por chave
+public class Configuracao
+{
+    [Key, MaxLength(60)]
+    public string Chave { get; set; } = "";
+
+    [MaxLength(200)]
+    public string Valor { get; set; } = "";
+}
+
 // Valor pago às vendedoras externas pelas peças vendidas
 public class Repasse
 {
