@@ -81,7 +81,7 @@ public class PainelTests
 
         var (_, html) = await nav.Abrir("/painel/produtos");
         var casaco = DadosDaPagina(html, "produtos").EnumerateArray().Single(p => p.GetProperty("nome").GetString() == "Casaco de Lã");
-        var blusa = DadosDaPagina(html, "produtos").EnumerateArray().Single(p => p.GetProperty("nome").GetString() == "Blusa Vintage");
+        var blusa = DadosDaPagina(html, "produtos").EnumerateArray().Single(p => p.GetProperty("nome").GetString() == "Blusa Cropped");
 
         Assert.Equal("Ana Clara", casaco.GetProperty("vendedora").GetString());
         Assert.Equal(JsonValueKind.Null, blusa.GetProperty("vendedora").ValueKind);

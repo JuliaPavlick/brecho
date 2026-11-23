@@ -107,12 +107,12 @@ public static class DadosIniciais
         Produto Peca(string nome, string desc, string cat, decimal preco, string status = StatusProduto.Disponivel, Usuario? vendedora = null) =>
             new() { Nome = nome, Descricao = desc, Categoria = cat, Preco = preco, Status = status, Vendedora = vendedora };
 
-        var blusa = Peca("Blusa Vintage", "Peça exclusiva", "Roupas", 79.90m);
+        var blusa = Peca("Blusa Cropped","Peça exclusiva", "Roupas", 79.90m);
         var vestidoMidi = Peca("Vestido Midi Floral", "Tamanho M", "Vestidos", 139.90m);
         var bolsa = Peca("Bolsa Retrô", "Nova coleção", "Bolsas", 129.90m);
         var salto = Peca("Salto Clássico", "Última unidade", "Calçados", 159.90m);
         var casaco = Peca("Casaco de Lã", "Tamanho G", "Roupas", 189.90m, vendedora: ana);
-        var calca = Peca("Calça Jeans Reta", "Tamanho 38", "Roupas", 99.90m);
+        var calca = Peca("Calça Jeans Wide Leg","Tamanho 38", "Roupas", 99.90m);
         var chapeu = Peca("Chapéu Palha", "Peça exclusiva", "Acessórios", 49.90m);
         var oculos = Peca("Óculos Vintage", "Anos 80", "Acessórios", 59.90m);
         var vestidoPreto = Peca("Vestido Preto Clássico", "Tamanho P", "Vestidos", 119.90m);
